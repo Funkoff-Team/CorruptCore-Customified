@@ -28,6 +28,8 @@ class MusicBeatSubstate extends FlxSubState
 		//everyStep();
 		var oldStep:Int = curStep;
 
+		if(!persistentUpdate) MusicBeatState.timePassedOnState += elapsed;
+
 		updateCurStep();
 		curBeat = Math.floor(curStep / 4);
 

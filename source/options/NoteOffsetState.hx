@@ -1,5 +1,8 @@
 package options;
 
+#if desktop
+import Discord.DiscordClient;
+#end
 import flixel.util.FlxStringUtil;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -45,19 +48,23 @@ class NoteOffsetState extends MusicBeatState
 	override public function create()
 	{
 		// Cameras
-		camGame = new FlxCamera();
+		camGame = initFNFCamera();
+
 		camHUD = new FlxCamera();
 		camOther = new FlxCamera();
+
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
-		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camHUD);
-		FlxG.cameras.add(camOther);
+		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOther, false);
 
-		FlxCamera.defaultCameras = [camGame];
 		CustomFadeTransition.nextCamera = camOther;
 		FlxG.camera.scroll.set(120, 130);
+
+		#if desktop
+		DiscordClient.changePresence("Delay/Combo Offset Menu", null);
+		#end
 
 		persistentUpdate = true;
 		FlxG.sound.pause();

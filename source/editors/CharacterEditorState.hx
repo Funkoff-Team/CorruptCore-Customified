@@ -75,7 +75,6 @@ class CharacterEditorState extends MusicBeatState
 
 	private var camEditor:FlxCamera;
 	private var camHUD:FlxCamera;
-	private var camMenu:FlxCamera;
 
 	var grid:FlxSprite;
 	var gridVisible:Bool = false;
@@ -99,16 +98,11 @@ class CharacterEditorState extends MusicBeatState
 	override function create()
 	{
 		//FlxG.sound.playMusic(Paths.music('breakfast'), 0.5);
-		camEditor = new FlxCamera();
+		camEditor = initFNFCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
-		camMenu = new FlxCamera();
-		camMenu.bgColor.alpha = 0;
 
-		FlxG.cameras.reset(camEditor);
 		FlxG.cameras.add(camHUD, false);
-		FlxG.cameras.add(camMenu, false);
-		FlxG.cameras.setDefaultDrawTarget(camEditor, true);
 
 		grid = FlxGridOverlay.create(10, 10, FlxG.width * 4, FlxG.height * 4, true, 0x22FFFFFF, 0x55FFFFFF);
 		grid.screenCenter();
@@ -135,7 +129,7 @@ class CharacterEditorState extends MusicBeatState
 			onPixelBG = !onPixelBG;
 			reloadBGs();
 		});
-		changeBGbutton.cameras = [camMenu];
+		changeBGbutton.cameras = [camHUD];
 
 		loadChar(!daAnim.startsWith('bf'), false);
 
@@ -202,7 +196,7 @@ class CharacterEditorState extends MusicBeatState
 		];
 
 		UI_box = new FlxUITabMenu(null, tabs, true);
-		UI_box.cameras = [camMenu];
+		UI_box.cameras = [camHUD];
 
 		UI_box.resize(250, 120);
 		UI_box.x = FlxG.width - 275;
@@ -214,7 +208,7 @@ class CharacterEditorState extends MusicBeatState
 			{name: 'Animations', label: 'Animations'},
 		];
 		UI_characterbox = new FlxUITabMenu(null, tabs, true);
-		UI_characterbox.cameras = [camMenu];
+		UI_characterbox.cameras = [camHUD];
 
 		UI_characterbox.resize(350, 280);
 		UI_characterbox.x = UI_box.x - 100;
@@ -261,23 +255,23 @@ class CharacterEditorState extends MusicBeatState
 				playerYDifference = 220;
 			}
 
-			var bgSky:BGSprite = new BGSprite('weeb/weebSky', OFFSET_X - (playerXDifference / 2) - 300, 0 - playerYDifference, 0.1, 0.1);
+			var bgSky:BGSprite = new BGSprite('bgs/weeb/weebSky', OFFSET_X - (playerXDifference / 2) - 300, 0 - playerYDifference, 0.1, 0.1);
 			bgLayer.add(bgSky);
 			bgSky.antialiasing = false;
 
 			var repositionShit = -200 + OFFSET_X - playerXDifference;
 
-			var bgSchool:BGSprite = new BGSprite('weeb/weebSchool', repositionShit, -playerYDifference + 6, 0.6, 0.90);
+			var bgSchool:BGSprite = new BGSprite('bgs/weeb/weebSchool', repositionShit, -playerYDifference + 6, 0.6, 0.90);
 			bgLayer.add(bgSchool);
 			bgSchool.antialiasing = false;
 
-			var bgStreet:BGSprite = new BGSprite('weeb/weebStreet', repositionShit, -playerYDifference, 0.95, 0.95);
+			var bgStreet:BGSprite = new BGSprite('bgs/weeb/weebStreet', repositionShit, -playerYDifference, 0.95, 0.95);
 			bgLayer.add(bgStreet);
 			bgStreet.antialiasing = false;
 
 			var widShit = Std.int(bgSky.width * 6);
 			var bgTrees:FlxSprite = new FlxSprite(repositionShit - 380, -800 - playerYDifference);
-			bgTrees.frames = Paths.getPackerAtlas('weeb/weebTrees');
+			bgTrees.frames = Paths.getPackerAtlas('bgs/weeb/weebTrees');
 			bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
 			bgTrees.animation.play('treeLoop');
 			bgTrees.scrollFactor.set(0.85, 0.85);
@@ -1255,7 +1249,6 @@ class CharacterEditorState extends MusicBeatState
 			saveBackup();
 		}
 
-		MusicBeatState.camBeat = FlxG.camera;
 		if(char.animationsArray[curAnim] != null) {
 			textAnim.text = char.animationsArray[curAnim].anim;
 
@@ -1414,7 +1407,7 @@ class CharacterEditorState extends MusicBeatState
 				}
 			}
 		}
-		//camMenu.zoom = FlxG.camera.zoom;
+		//camHUD.zoom = FlxG.camera.zoom;
 		ghostChar.setPosition(char.x, char.y);
 		super.update(elapsed);
 	}

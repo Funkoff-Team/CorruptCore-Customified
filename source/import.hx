@@ -17,10 +17,13 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
 import shaders.flixel.FlxShader;
+
+import flxanimate.PsychFlxAnimate as FlxAnimate;
 
 // Android things (will be neccesary in the future)
 #if android
@@ -35,7 +38,16 @@ import android.os.Build.VERSION_CODES as AndroidVersionCode;
 import android.os.BatteryManager as AndroidBatteryManager;
 #end
 
+#if flxanimate
+import flxanimate.*;
+#end
+
+import states.*;
+import substates.*;
+import stages.*;
 import math.*;
+
+import stages.backend.BaseStage;
 
 // Windows API
 #if windows

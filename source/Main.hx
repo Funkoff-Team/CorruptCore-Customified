@@ -1,9 +1,13 @@
 package;
 
+#if desktop
+import Discord.DiscordClient;
+#end
 import flixel.graphics.FlxGraphic;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
+import flixel.input.keyboard.FlxKey;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
@@ -44,10 +48,11 @@ class Main extends Sprite
 	{
 		Lib.current.addChild(new Main());
 		#if cpp
-		cpp.NativeGc.enable(true);
-		#elseif hl
-		hl.Gc.enable(true);
-		#end
+        cpp.NativeGc.enable(true);
+        cpp.vm.Gc.run(true);
+        #elseif hl
+        hl.Gc.enable(true);
+        #end
 	}
 
 	public function new()
@@ -66,6 +71,17 @@ class Main extends Sprite
 		{
 			addEventListener(Event.ADDED_TO_STAGE, init);
 		}
+		
+		// was taken from doido engine
+		// thanks @nebulazorua, @crowplexus, @diogotvv
+		FlxG.stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, (e) ->
+		{
+			if (e.keyCode == FlxKey.F11)
+				FlxG.fullscreen = !FlxG.fullscreen;
+			
+			if (e.keyCode == FlxKey.ENTER && e.altKey)
+				e.stopImmediatePropagation();
+		}, false, 100);
 	}
 
 	private function init(?E:Event):Void
@@ -124,6 +140,8 @@ class Main extends Sprite
             if (fpsVar != null)
                 fpsVar.positionFPS(10, 3, Math.min(w / FlxG.width, h / FlxG.height));
 
+			resetSpriteCache(this);
+
             if (FlxG.cameras != null && FlxG.cameras.list != null) {
                 for (cam in FlxG.cameras.list) {
                     if (cam != null)
@@ -146,6 +164,10 @@ class Main extends Sprite
 	    FlxG.game.focusLostFramerate = #if mobile 30 #else 60 #end;
         FlxG.keys.preventDefaultKeys = [TAB];
 
+		#if desktop
+		DiscordClient.prepare();
+		#end
+
 		#if html5
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
@@ -154,8 +176,13 @@ class Main extends Sprite
 
 	private static function resetSpriteCache(sprite:Sprite):Void {
 		@:privateAccess {
-		    sprite.__cacheBitmap = null;
-			sprite.__cacheBitmapData = null;
+			if (sprite != null)
+			{
+		   		sprite.__cacheBitmapData = null;
+				sprite.__cacheBitmapData2 = null;
+				sprite.__cacheBitmapData3 = null;
+				sprite.__cacheBitmapColorTransform = null;
+			}
 		}
     }
 

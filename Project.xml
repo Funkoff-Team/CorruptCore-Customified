@@ -113,8 +113,9 @@
 	<haxelib name="faxe" if="switch"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> 
 	<!--<haxelib name="polymod"/>-->
-	<haxelib name="discord_rpc" if="desktop"/>
+	<haxelib name="hxdiscord_rpc" if="desktop"/>
 	<haxelib name="sl-windows-api" if="windows" />
+	<haxelib name="flxanimate" if="windows" />
 	<haxelib name="hxcpp-debug-server" if="desktop debug"/>
 
 	<haxelib name="hxcpp"/>	

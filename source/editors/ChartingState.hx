@@ -756,7 +756,7 @@ class ChartingState extends MusicBeatState
 
 		UI_box.addGroup(tab_group_song);
 
-		FlxG.camera.follow(camPos);
+		initFNFCamera().follow(camPos, LOCKON, 999);
 	}
 
 	var stepperBeats:FlxUINumericStepper;
@@ -2779,17 +2779,6 @@ class ChartingState extends MusicBeatState
 		updateWaveform();
 	}
 
-	function convertTimingsForBPMChange(oldBPM:Float, newBPM:Float, notes:Array<Dynamic>):Array<Dynamic> {
-		var ratio:Float = oldBPM / newBPM;
-		for (note in notes) {
-			note[0] *= ratio;
-			if (note[2] != null) { 
-				note[2] *= ratio;
-			}
-		}
-		return notes;
-	}	
-
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
 	{
 		if (_song.notes[sec] != null)
@@ -2945,9 +2934,7 @@ class ChartingState extends MusicBeatState
 		prevRenderedSustains.clear();
 	
 		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0) {
-			var oldBPM:Float = Conductor.bpm;
 			Conductor.changeBPM(_song.notes[curSec].bpm);
-			_song.notes[curSec].sectionNotes = convertTimingsForBPMChange(oldBPM, _song.notes[curSec].bpm, _song.notes[curSec].sectionNotes);
 		} else {
 			var daBPM:Float = _song.bpm;
 			for (i in 0...curSec) {
