@@ -55,6 +55,7 @@ class Song
 	public var splashSkin:String;
 	public var speed:Float = 1;
 	public var stage:String;
+	public var validScore:Bool = false;
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';
@@ -63,8 +64,13 @@ class Song
 	{
 		if(songJson.gfVersion == null)
 		{
-			songJson.gfVersion = songJson.player3;
-			songJson.player3 = null;
+			if (songJson.player3 != null) {
+				songJson.gfVersion = songJson.player3;
+				songJson.player3 = null;
+			} else if (songJson.gf != null) {
+				songJson.gfVersion = songJson.gf;
+				songJson.gf = null;
+			}
 		}
 
 		if(songJson.events == null)
@@ -91,10 +97,13 @@ class Song
 			}
 		}
 
-        // thank heavens that shadowmario added format variable to the new charts
+        // thank to heavens that shadowmario added format variable to the new charts
 		if (songJson.format != null)
 		{
 			var sectionsData:Array<SwagSection> = songJson.notes;
+
+			if (sectionsData == null) return;
+			
 			for (section in sectionsData)
 			{
 				for (note in section.sectionNotes)
@@ -150,12 +159,15 @@ class Song
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
 		var parsedJson:Dynamic = Json.parse(rawJson);
-		var swagShit:SwagSong;
-		if (parsedJson.format != null && parsedJson.format == "psych_v1")
+		var swagShit:SwagSong = null;
+		
+		if (parsedJson.format != null) {
 			swagShit = cast parsedJson;
-		else
+		} else if (parsedJson.song != null) {
 			swagShit = cast parsedJson.song;
-		if (parsedJson.validScore == null) swagShit.validScore = true;
+		} else {
+			swagShit = cast parsedJson;
+		}
 		return swagShit;
 	}
 }

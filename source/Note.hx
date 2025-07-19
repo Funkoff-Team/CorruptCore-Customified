@@ -21,6 +21,8 @@ class Note extends FlxSprite
 {
 	public var extraData:Map<String,Dynamic> = [];
 
+	public var rawData:Dynamic;
+
 	public var row:Int = 0;
 
 	public var strumTime:Float = 0;
@@ -167,12 +169,15 @@ class Note extends FlxSprite
 	{
 		super();
 
+		animation = new PsychAnimationController(this);
+
 		if (prevNote == null)
 			prevNote = this;
 
 		this.prevNote = prevNote;
 		isSustainNote = sustainNote;
 		this.inEditor = inEditor;
+		this.rawData = null;
 
 		x += (ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?

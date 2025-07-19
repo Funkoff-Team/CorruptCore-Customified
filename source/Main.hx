@@ -126,6 +126,8 @@ class Main extends Sprite
 
 		addChild(new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
+		pluginsLessGo();
+
 		#if !mobile
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
@@ -196,4 +198,9 @@ class Main extends Sprite
     public function getFPS():Float {
 	    return fpsVar.currentFPS;	
     }
+
+	private function pluginsLessGo()
+	{
+		plugins.HotReloadPlugin.init();
+	}
 }

@@ -6,13 +6,11 @@ import flixel.graphics.frames.FlxAtlasFrames;
 class BGSprite extends FlxSprite
 {
 	private var idleAnim:String;
-	public var isGore:Bool = false;
-
 	public function new(image:String, x:Float = 0, y:Float = 0, ?scrollX:Float = 1, ?scrollY:Float = 1, ?animArray:Array<String> = null, ?fps:Int = 24, ?loop:Bool = false) {
 		super(x, y);
 
 		if (animArray != null) {
-			frames = Paths.getSparrowAtlas(image, 'exe'); // fuck you shadow mario!! AAASGOUDGVASFUKLJASGVFKJ~
+			frames = Paths.getSparrowAtlas(image); // fuck you shadow mario!! AAASGOUDGVASFUKLJASGVFKJ~
 			for (i in 0...animArray.length) {
 				var anim:String = animArray[i];
 				animation.addByPrefix(anim, anim, fps, loop);
@@ -23,7 +21,7 @@ class BGSprite extends FlxSprite
 			}
 		} else {
 			if(image != null) {
-				loadGraphic(Paths.image(image, 'exe'));
+				loadGraphic(Paths.image(image));
 			}
 			active = false;
 		}

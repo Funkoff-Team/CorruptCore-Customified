@@ -109,12 +109,13 @@ class BaseStage extends FlxBasic
 	public function setStartCallback(myfn:Void->Void)
 	{
 		if(!onPlayState) return;
-		PlayState.instance.startCallback = myfn;
+		game.startCallback = myfn; 
 	}
+
 	public function setEndCallback(myfn:Void->Void)
 	{
 		if(!onPlayState) return;
-		PlayState.instance.endCallback = myfn;
+		game.endCallback = myfn; 
 	}
 
 	// overrides

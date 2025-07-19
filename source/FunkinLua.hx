@@ -32,6 +32,7 @@ import openfl.utils.Assets;
 import flixel.math.FlxMath;
 import flixel.util.FlxSave;
 import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.display.FlxBackdrop;
 import shaders.flixel.FlxShader;
 
 #if (!flash && sys)
@@ -1744,6 +1745,19 @@ class FunkinLua {
 			PlayState.instance.modchartSprites.set(tag, leSprite);
 			leSprite.active = true;
 		});
+
+		Lua_helper.add_callback(lua, "makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, repeatX:Bool = false, repeatY:Bool = false) {
+			tag = tag.replace('.', '');
+			resetSpriteTag(tag);
+		
+			var backdrop = new ModchartBackdrop(Paths.image(image), 1, 1, repeatX, repeatY);
+			backdrop.setPosition(x, y);
+			backdrop.antialiasing = ClientPrefs.globalAntialiasing;
+		
+			PlayState.instance.modchartBackdrops.set(tag, backdrop);
+			backdrop.active = true;
+		});	
+
 		Lua_helper.add_callback(lua, "makeAnimatedLuaSprite", function(tag:String, image:String, x:Float, y:Float, ?spriteType:String = "sparrow") {
 			tag = tag.replace('.', '');
 			resetSpriteTag(tag);
@@ -1817,41 +1831,16 @@ class FunkinLua {
 
 		Lua_helper.add_callback(lua, "playAnim", function(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
 		{
-			if(PlayState.instance.getLuaObject(obj, false) != null) {
-				var luaObj:FlxSprite = PlayState.instance.getLuaObject(obj,false);
-				if(luaObj.animation.getByName(name) != null)
-				{
-					luaObj.animation.play(name, forced, reverse, startFrame);
-					if(Std.isOfType(luaObj, ModchartSprite))
-					{
-						//convert luaObj to ModchartSprite
-						var obj:Dynamic = luaObj;
-						var luaObj:ModchartSprite = obj;
-
-						var daOffset = luaObj.animOffsets.get(name);
-						if (luaObj.animOffsets.exists(name))
-						{
-							luaObj.offset.set(daOffset[0], daOffset[1]);
-						}
-					}
-				}
+			var obj:Dynamic = getObjectDirectly(obj, false);
+			if(obj.playAnim != null)
+			{
+				obj.playAnim(name, forced, reverse, startFrame);
 				return true;
 			}
-
-			var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
-			if(spr != null) {
-				if(spr.animation.getByName(name) != null)
-				{
-					if(Std.isOfType(spr, Character))
-					{
-						//convert spr to Character
-						var obj:Dynamic = spr;
-						var spr:Character = obj;
-						spr.playAnim(name, forced, reverse, startFrame);
-					}
-					else
-						spr.animation.play(name, forced, reverse, startFrame);
-				}
+			else
+			{
+				if(obj.anim != null) obj.anim.play(name, forced, reverse, startFrame); //FlxAnimate
+				else obj.animation.play(name, forced, reverse, startFrame);
 				return true;
 			}
 			return false;
@@ -1869,6 +1858,70 @@ class FunkinLua {
 			}
 			return false;
 		});
+
+		//FlxAnimate Funcs
+		#if flxanimate
+		Lua_helper.add_callback(lua, "makeFlxAnimateSprite", function(tag:String, ?x:Float = 0, ?y:Float = 0, ?loadFolder:String = null) {
+			tag = tag.replace('.', '');
+			var lastSprite = PlayState.instance.variables.get(tag);
+			if(lastSprite != null)
+			{
+				lastSprite.kill();
+				PlayState.instance.remove(lastSprite);
+				lastSprite.destroy();
+			}
+
+			var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
+			if(loadFolder != null) Paths.loadAnimateAtlas(mySprite, loadFolder);
+			PlayState.instance.variables.set(tag, mySprite);
+			mySprite.active = true;
+		});
+
+		Lua_helper.add_callback(lua, "loadAnimateAtlas", function(tag:String, folderOrImg:Dynamic, ?spriteJson:Dynamic = null, ?animationJson:Dynamic = null) {
+			var spr:FlxAnimate = PlayState.instance.variables.get(tag);
+			if(spr != null) Paths.loadAnimateAtlas(spr, folderOrImg, spriteJson, animationJson);
+		});
+		
+		Lua_helper.add_callback(lua, "addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+		{
+			var obj:Dynamic = PlayState.instance.variables.get(tag);
+			if(cast (obj, FlxAnimate) == null) return false;
+
+			obj.anim.addBySymbol(name, symbol, framerate, loop, matX, matY);
+			if(obj.anim.lastPlayedAnim == null)
+			{
+				if(obj.playAnim != null) obj.playAnim(name, true); //is ModchartAnimateSprite
+				else obj.animation.play(name, true);
+			}
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "addAnimationBySymbolIndices", function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+		{
+			var obj:Dynamic = PlayState.instance.variables.get(tag);
+			if(cast (obj, FlxAnimate) == null) return false;
+
+			if(indices == null)
+				indices = [0];
+			else if(Std.isOfType(indices, String))
+			{
+				var strIndices:Array<String> = cast (indices, String).trim().split(',');
+				var myIndices:Array<Int> = [];
+				for (i in 0...strIndices.length) {
+					myIndices.push(Std.parseInt(strIndices[i]));
+				}
+				indices = myIndices;
+			}
+
+			obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop, matX, matY);
+			if(obj.anim.lastPlayedAnim == null)
+			{
+				if(obj.playAnim != null) obj.playAnim(name, true); //is ModchartAnimateSprite
+				else obj.animation.play(name, true);
+			}
+			return true;
+		});
+		#end
 
 		Lua_helper.add_callback(lua, "setScrollFactor", function(obj:String, scrollX:Float, scrollY:Float) {
 			if(PlayState.instance.getLuaObject(obj,false)!=null) {
@@ -1911,6 +1964,39 @@ class FunkinLua {
 				}
 			}
 		});
+
+		Lua_helper.add_callback(lua, "addLuaBackdrop", function(tag:String, front:Bool = false) {
+			if (!PlayState.instance.modchartBackdrops.exists(tag)) return;
+		
+			final backdrop = PlayState.instance.modchartBackdrops.get(tag);
+			if (backdrop == null) return;
+		
+			if (!Reflect.hasField(backdrop, "wasAdded")) {
+				Reflect.setProperty(backdrop, "wasAdded", false);
+			}
+		
+			if (!Reflect.field(backdrop, "wasAdded")) {
+				if (front) {
+					getInstance().add(backdrop);
+				} else {
+					if (PlayState.instance.isDead) {
+						GameOverSubstate.instance.insert(
+							GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend),
+							backdrop
+						);
+					} else {
+						var position:Int = PlayState.instance.members.indexOf(PlayState.instance.gfGroup);
+						if (PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup) < position)
+							position = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
+						if (PlayState.instance.members.indexOf(PlayState.instance.dadGroup) < position)
+							position = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
+						PlayState.instance.insert(position, backdrop);
+					}
+				}
+				Reflect.setProperty(backdrop, "wasAdded", true);
+			}
+		});
+
 		Lua_helper.add_callback(lua, "setGraphicSize", function(obj:String, x:Int, y:Int = 0, updateHitbox:Bool = true) {
 			if(PlayState.instance.getLuaObject(obj)!=null) {
 				var shit:FlxSprite = PlayState.instance.getLuaObject(obj);
@@ -3314,6 +3400,46 @@ class ModchartSprite extends FlxSprite
 	}
 }
 
+class ModchartBackdrop extends FlxBackdrop {
+	public var wasAdded:Bool = false;
+	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
+
+	public function new(graphic:Dynamic, ?x:Float = 0, ?y:Float = 0, repeatX:Bool = true, repeatY:Bool = true) {
+		super(x, y);
+
+		if (graphic != null) {
+			loadGraphic(graphic, repeatX, repeatY);
+		}
+
+		antialiasing = ClientPrefs.globalAntialiasing;
+	}
+}
+
+#if flxanimate
+class ModchartAnimateSprite extends FlxAnimate
+{
+	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
+	public function new(?x:Float = 0, ?y:Float = 0, ?path:String, ?settings:FlxAnimate.Settings)
+	{
+		super(x, y, path, settings);
+		antialiasing = ClientPrefs.globalAntialiasing;
+	}
+
+	public function playAnim(name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
+	{
+		anim.play(name, forced, reverse, startFrame);
+		
+		var daOffset = animOffsets.get(name);
+		if (animOffsets.exists(name)) offset.set(daOffset[0], daOffset[1]);
+	}
+
+	public function addOffset(name:String, x:Float, y:Float)
+	{
+		animOffsets.set(name, [x, y]);
+	}
+}
+#end
+
 class ModchartText extends FlxText
 {
 	public var wasAdded:Bool = false;
@@ -3428,6 +3554,9 @@ class HScript
             interp.variables.set('Song', Song);
             interp.variables.set('HealthIcon', HealthIcon);
             interp.variables.set('PlayerSettings', PlayerSettings);
+			#if flxanimate
+			interp.variables.set('FlxAnimate', FlxAnimate);
+			#end
             /*interp.variables.set('ModManager', modchart.ModManager);
             interp.variables.set('Modifier', modchart.Modifier);
 	    	interp.variables.set('Modcharts', Modcharts);*/

@@ -153,7 +153,7 @@ class MainMenuState extends MusicBeatState
 
 		super.create();
 
-		FlxG.camera.follow(camFollow, null, 9);
+		FlxG.camera.follow(camFollow, null, 0.6);
 	}
 
 	#if ACHIEVEMENTS_ALLOWED

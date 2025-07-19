@@ -3,7 +3,6 @@ package editors;
 #if desktop
 import Discord.DiscordClient;
 #end
-import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -915,13 +914,38 @@ class CharacterEditorState extends MusicBeatState
 		if(char.animation.curAnim != null) {
 			lastAnim = char.animation.curAnim.name;
 		}
-		var anims:Array<AnimArray> = char.animationsArray.copy();
-		if(Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
-			char.frames = AtlasFrameMaker.construct(char.imageFile);
-		} else if(Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
-			char.frames = Paths.getPackerAtlas(char.imageFile);
-		} else {
-			char.frames = Paths.getSparrowAtlas(char.imageFile);
+		
+		// Fuck old frames
+		char.frames = null;
+		ghostChar.frames = null;
+		
+		// Animation.sex
+		var animJsonPath = Paths.getPath('images/' + char.imageFile + '/Animation.json', TEXT);
+		if(FileSystem.exists(animJsonPath))
+		{
+			// animate sex loading
+			char.atlas = new FlxAnimate();
+			char.atlas.showPivot = false;
+			Paths.loadAnimateAtlas(char.atlas, char.imageFile);
+			char.isAnimateAtlas = true;
+			
+			ghostChar.atlas = new FlxAnimate();
+			ghostChar.atlas.showPivot = false;
+			Paths.loadAnimateAtlas(ghostChar.atlas, char.imageFile);
+			ghostChar.isAnimateAtlas = true;
+		}
+		else
+		{
+			// If animate sex isnt found use normal atlases
+			char.isAnimateAtlas = false;
+			ghostChar.isAnimateAtlas = false;
+			
+			if(Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
+				char.frames = Paths.getPackerAtlas(char.imageFile);
+			} else {
+				char.frames = Paths.getSparrowAtlas(char.imageFile);
+			}
+			ghostChar.frames = char.frames;
 		}
 
 		if(char.animationsArray != null && char.animationsArray.length > 0) {
@@ -929,16 +953,52 @@ class CharacterEditorState extends MusicBeatState
 				var animAnim:String = '' + anim.anim;
 				var animName:String = '' + anim.name;
 				var animFps:Int = anim.fps;
-				var animLoop:Bool = !!anim.loop; //Bruh
+				var animLoop:Bool = !!anim.loop;
 				var animIndices:Array<Int> = anim.indices;
-				if(animIndices != null && animIndices.length > 0) {
-					char.animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+				
+				if(char.isAnimateAtlas) {
+					if(animIndices != null && animIndices.length > 0) {
+						char.atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
+					} else {
+						char.atlas.anim.addBySymbol(animAnim, animName, animFps, animLoop);
+					}
 				} else {
-					char.animation.addByPrefix(animAnim, animName, animFps, animLoop);
+					if(animIndices != null && animIndices.length > 0) {
+						char.animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+					} else {
+						char.animation.addByPrefix(animAnim, animName, animFps, animLoop);
+					}
 				}
 			}
-		} else {
+		} else if(!char.isAnimateAtlas) {
 			char.quickAnimAdd('idle', 'BF idle dance');
+		}
+
+		// Same for ghosts
+		if(ghostChar.animationsArray != null && ghostChar.animationsArray.length > 0) {
+			for (anim in ghostChar.animationsArray) {
+				var animAnim:String = '' + anim.anim;
+				var animName:String = '' + anim.name;
+				var animFps:Int = anim.fps;
+				var animLoop:Bool = !!anim.loop;
+				var animIndices:Array<Int> = anim.indices;
+				
+				if(ghostChar.isAnimateAtlas) {
+					if(animIndices != null && animIndices.length > 0) {
+						ghostChar.atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
+					} else {
+						ghostChar.atlas.anim.addBySymbol(animAnim, animName, animFps, animLoop);
+					}
+				} else {
+					if(animIndices != null && animIndices.length > 0) {
+						ghostChar.animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+					} else {
+						ghostChar.animation.addByPrefix(animAnim, animName, animFps, animLoop);
+					}
+				}
+			}
+		} else if(!ghostChar.isAnimateAtlas) {
+			ghostChar.quickAnimAdd('idle', 'BF idle dance');
 		}
 
 		if(lastAnim != '') {

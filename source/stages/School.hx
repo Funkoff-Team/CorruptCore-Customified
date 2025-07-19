@@ -114,8 +114,8 @@ class School extends BaseStage
 		if (!OpenFlAssets.exists(file))
 		#end
 		{
-			startCountdown();
-			return;
+			doof = null;
+        	return;
 		}
 
 		doof = new DialogueBox(false, CoolUtil.coolTextFile(file));
@@ -131,7 +131,7 @@ class School extends BaseStage
 		inCutscene = true;
 		var black:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
 		black.scrollFactor.set();
-		if(songName == 'senpai') add(black);
+		if(songName.toLowerCase() == 'senpai') add(black);
 
 		new FlxTimer().start(0.3, function(tmr:FlxTimer)
 		{

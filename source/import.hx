@@ -23,8 +23,6 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
 import shaders.flixel.FlxShader;
 
-import flxanimate.PsychFlxAnimate as FlxAnimate;
-
 // Android things (will be neccesary in the future)
 #if android
 import android.content.Context as AndroidContext;
@@ -40,6 +38,7 @@ import android.os.BatteryManager as AndroidBatteryManager;
 
 #if flxanimate
 import flxanimate.*;
+import flxanimate.PsychFlxAnimate as FlxAnimate;
 #end
 
 import states.*;
@@ -48,6 +47,7 @@ import stages.*;
 import math.*;
 
 import stages.backend.BaseStage;
+import flixel.animation.PsychAnimationController;
 
 // Windows API
 #if windows

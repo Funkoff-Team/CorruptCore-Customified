@@ -64,11 +64,11 @@ class Tank extends BaseStage
 
 		foregroundSprites = new FlxTypedGroup<BGSprite>();
 		foregroundSprites.add(new BGSprite('bgs/tankman/tank0', -500, 650, 1.7, 1.5, ['fg']));
-		if(!ClientPrefs.lowQuality) foregroundSprites.add(new BGSprite('tank1', -300, 750, 2, 0.2, ['fg']));
+		if(!ClientPrefs.lowQuality) foregroundSprites.add(new BGSprite('bgs/tankman/tank1', -300, 750, 2, 0.2, ['fg']));
 		foregroundSprites.add(new BGSprite('bgs/tankman/tank2', 450, 940, 1.5, 1.5, ['foreground']));
-		if(!ClientPrefs.lowQuality) foregroundSprites.add(new BGSprite('tank4', 1300, 900, 1.5, 1.5, ['fg']));
+		if(!ClientPrefs.lowQuality) foregroundSprites.add(new BGSprite('bgs/tankman/tank4', 1300, 900, 1.5, 1.5, ['fg']));
 		foregroundSprites.add(new BGSprite('bgs/tankman/tank5', 1620, 700, 1.5, 1.5, ['fg']));
-		if(!ClientPrefs.lowQuality) foregroundSprites.add(new BGSprite('tank3', 1300, 1200, 3.5, 2.5, ['fg']));
+		if(!ClientPrefs.lowQuality) foregroundSprites.add(new BGSprite('bgs/tankman/tank3', 1300, 1200, 3.5, 2.5, ['fg']));
 
 		// Default GFs
 		if(songName == 'stress') setDefaultGF('pico-speaker');
