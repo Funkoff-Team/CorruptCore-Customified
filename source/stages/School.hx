@@ -2,7 +2,8 @@ package stages;
 
 import stages.objects.*;
 import substates.GameOverSubstate;
-import DialogueBox;
+
+import stages.objects.DialogueBox;
 
 import openfl.utils.Assets as OpenFlAssets;
 

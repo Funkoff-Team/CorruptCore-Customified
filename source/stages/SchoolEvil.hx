@@ -3,7 +3,7 @@ package stages;
 import flixel.addons.effects.FlxTrail;
 import stages.objects.*;
 import substates.GameOverSubstate;
-import DialogueBox;
+import stages.objects.DialogueBox;
 import openfl.utils.Assets as OpenFlAssets;
 
 class SchoolEvil extends BaseStage

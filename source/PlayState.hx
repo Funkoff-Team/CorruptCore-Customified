@@ -56,9 +56,10 @@ import flixel.animation.FlxAnimationController;
 import animateatlas.AtlasFrameMaker;
 import Achievements;
 import StageData;
-import FunkinLua;
 import DialogueBoxPsych;
 import Conductor.Rating;
+
+import scripting.FunkinLua;
 
 import shaders.*;
 import shaders.WiggleEffect.WiggleEffectType;
@@ -2182,6 +2183,12 @@ class PlayState extends MusicBeatState
 							var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
 							if(!daNote.mustPress) strumGroup = opponentStrums;
 
+							var strum:StrumNote = null;
+							if (daNote.noteData >= 0 && daNote.noteData < strumGroup.length)
+								strum = strumGroup.members[daNote.noteData];
+
+							if (strum == null) return; // Skip this note if the strum is missing
+
 							var strumX:Float = strumGroup.members[daNote.noteData].x;
 							var strumY:Float = strumGroup.members[daNote.noteData].y;
 							var strumAngle:Float = strumGroup.members[daNote.noteData].angle;
@@ -3615,8 +3622,10 @@ class PlayState extends MusicBeatState
 				if(note.gfNote)
 				{
 					if(gf != null)
-						char = gf;
-
+					{
+						gf.playAnim(animToPlay, true);
+						gf.holdTimer = 0;
+					}
 				}
 				else if(char.animTimer <= 0 && !char.voicelining)
 				{

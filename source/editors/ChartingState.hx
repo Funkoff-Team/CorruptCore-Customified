@@ -315,7 +315,7 @@ class ChartingState extends MusicBeatState
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		leftIcon = new HealthIcon('bf');
-		rightIcon = new HealthIcon('chotix');
+		rightIcon = new HealthIcon('dad');
 		rightIcon.flipX = true;
 
 		eventIcon.scrollFactor.set(1, 1);
@@ -1119,30 +1119,15 @@ class ChartingState extends MusicBeatState
 			displayNameList[i] = i + '. ' + displayNameList[i];
 		}
 
-		noteTypeDropDown = new FlxUIDropDownMenuCustom(10, 105, FlxUIDropDownMenuCustom.makeStrIdLabelArray(displayNameList, true), function(character:String)
+		noteTypeDropDown = new FlxUIDropDownMenuCustom(10, 105, FlxUIDropDownMenuCustom.makeStrIdLabelArray(displayNameList, true), function(type:String)
 		{
-			currentType = Std.parseInt(character);
+			currentType = Std.parseInt(type);
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
 				curSelectedNote[3] = noteTypeIntMap.get(currentType);
 				updateGrid();
 			}
 		});
 		blockPressWhileScrolling.push(noteTypeDropDown);
-
-		noteTypeDropDown.callback = function(type:String) {
-			var typeName = noteTypeIntMap.get(Std.parseInt(type));
-			if (selectedNotes.length > 0) {
-				for (note in selectedNotes) {
-					if (note.noteData > -1) {
-						note.rawData[3] = typeName;
-					}
-				}
-				updateGrid();
-			} else if (curSelectedNote != null && curSelectedNote[1] > -1) {
-				curSelectedNote[3] = typeName;
-				updateGrid();
-			}
-		};
 
 		strumTimeInputText.callback = function(text, _) {
 			var newTime = Std.parseFloat(text);
@@ -3668,12 +3653,12 @@ class ChartingState extends MusicBeatState
 
 		if(noteData > -1)
 		{
-			var noteTypeValue = noteTypeIntMap.get(daType);
+			var noteTypeValue = noteTypeIntMap.exists(daType) ? noteTypeIntMap.get(daType) : "";
 			_song.notes[curSec].sectionNotes.push([
 				noteStrum, 
 				noteData, 
 				noteSus, 
-				noteTypeValue != null ? noteTypeValue : ""
+				noteTypeValue
 			]);
 			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
 		}
