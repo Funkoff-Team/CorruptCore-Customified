@@ -4,6 +4,7 @@ import flixel.FlxG;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
+import states.backend.Achievements;
 import Controls;
 
 class ClientPrefs {

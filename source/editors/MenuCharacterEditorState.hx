@@ -20,7 +20,6 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.ui.FlxButton;
-import MenuCharacter;
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -29,6 +28,8 @@ import haxe.Json;
 #if sys
 import sys.io.File;
 #end
+
+import states.objects.MenuCharacter;
 
 using StringTools;
 

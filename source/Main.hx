@@ -138,7 +138,7 @@ class Main extends Sprite
 		}
 		#end
 
-		FlxG.signals.gameResized.add(function (w, h) {
+		FlxG.signals.gameResized.add((w, h) -> {
             if (fpsVar != null)
                 fpsVar.positionFPS(10, 3, Math.min(w / FlxG.width, h / FlxG.height));
 
@@ -191,7 +191,7 @@ class Main extends Sprite
     #if (cpp || hl)
     private static function onError(message:Dynamic):Void
     {
-            throw Std.string(message);
+        throw Std.string(message);
     }
     #end
 	

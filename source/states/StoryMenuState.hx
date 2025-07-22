@@ -15,9 +15,12 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
-import lime.net.curl.CURLCode;
 import flixel.graphics.FlxGraphic;
+import lime.net.curl.CURLCode;
+
 import WeekData;
+import states.objects.MenuItem;
+import states.objects.MenuCharacter;
 
 using StringTools;
 

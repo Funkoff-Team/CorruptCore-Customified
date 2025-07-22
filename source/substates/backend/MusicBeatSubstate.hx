@@ -1,4 +1,4 @@
-package;
+package substates.backend;
 
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;

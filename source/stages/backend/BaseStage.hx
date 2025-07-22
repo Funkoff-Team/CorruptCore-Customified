@@ -3,7 +3,6 @@ package stages.backend;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
-import MusicBeatState;
 
 import Note.EventNote;
 import Character;

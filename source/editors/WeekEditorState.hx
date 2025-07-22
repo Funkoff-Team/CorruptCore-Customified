@@ -31,7 +31,10 @@ import haxe.Json;
 import sys.io.File;
 import sys.FileSystem;
 #end
+
 import WeekData;
+import states.objects.MenuItem;
+import states.objects.MenuCharacter;
 
 using StringTools;
 

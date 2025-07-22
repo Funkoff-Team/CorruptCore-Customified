@@ -13,7 +13,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
 import flixel.FlxSubState;
-import Achievements;
+
+import states.backend.Achievements;
 
 using StringTools;
 

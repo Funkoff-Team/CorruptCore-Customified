@@ -47,6 +47,10 @@ import stages.*;
 import math.*;
 
 import stages.backend.BaseStage;
+
+import states.backend.MusicBeatState;
+import substates.backend.MusicBeatSubstate;
+
 import flixel.animation.PsychAnimationController;
 
 // Windows API

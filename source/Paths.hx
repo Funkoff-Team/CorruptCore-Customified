@@ -1,7 +1,6 @@
 package;
 
 import flixel.system.FlxAssets;
-import animateatlas.AtlasFrameMaker;
 import flixel.math.FlxPoint;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import openfl.geom.Rectangle;

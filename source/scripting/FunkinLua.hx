@@ -8,7 +8,6 @@ import llua.State;
 import llua.Convert;
 #end
 
-import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
 import flixel.addons.effects.FlxTrail;
 import flixel.input.keyboard.FlxKey;
@@ -3053,11 +3052,11 @@ class FunkinLua {
 	{
 		switch(spriteType.toLowerCase().trim())
 		{
-			case "texture" | "textureatlas" | "tex":
+			/*case "texture" | "textureatlas" | "tex":
 				spr.frames = AtlasFrameMaker.construct(image);
 
 			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
-				spr.frames = AtlasFrameMaker.construct(image, null, true);
+				spr.frames = AtlasFrameMaker.construct(image, null, true);*/
 
 			case "packer" | "packeratlas" | "pac":
 				spr.frames = Paths.getPackerAtlas(image);
@@ -3532,7 +3531,7 @@ class HScript
             interp.variables.set('FlxEase', FlxEase);
             interp.variables.set('FlxMath', flixel.math.FlxMath);
             interp.variables.set('FlxGroup', flixel.group.FlxGroup);
-            interp.variables.set('FlxSound', #if (flixel >= '5.3.0') flixel.sound.FlxSound #else flixel.sound.FlxSound #end);
+            interp.variables.set('FlxSound', #if (flixel >= '5.3.0') flixel.sound.FlxSound #else flixel.system.FlxSound #end);
 	        //Fuck, this is abstract
             interp.variables.set('FlxColor', setFlxColorVars());
             interp.variables.set('FlxPoint', {

@@ -269,7 +269,20 @@ class Character extends FlxSprite
 		{
 			quickAnimAdd('idle', 'BF idle dance');
 		}
-		// trace('Loaded file to character ' + curCharacter);
+		
+		if (isChibiChar) {
+			scale.set(scale.x / 3, scale.y / 3);
+			updateHitbox();
+			origin.set();
+
+			x -= width * .5;
+			y -= height;
+
+			for (anim in animOffsets.keys()) {
+				animOffsets[anim][0] *= scale.x;
+				animOffsets[anim][1] *= scale.y;
+			}
+		}
 
 		#if flxanimate
 		if (isAnimateAtlas)
@@ -290,20 +303,6 @@ class Character extends FlxSprite
 				skipDance = true;
 				loadMappedAnims();
 				playAnim("shoot1");
-		}
-
-		if (isChibiChar) {
-			scale.set(scale.x / 3, scale.y / 3);
-			updateHitbox();
-			origin.set();
-
-			x -= width * .5;
-			y -= height;
-
-			for (anim in animOffsets.keys()) {
-				animOffsets[anim][0] *= scale.x;
-				animOffsets[anim][1] *= scale.y;
-			}
 		}
 	}
 

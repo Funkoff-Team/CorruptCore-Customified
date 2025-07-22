@@ -2091,7 +2091,7 @@ class ChartingState extends MusicBeatState
 					);
 					
 					for (note in selectedNotes) {
-						note.color = note.noteData == -1 ? FlxColor.CYAN : FlxColor.WHITE;
+						note.color = FlxColor.WHITE;
 					}
 					selectedNotes = [];
 					
@@ -2110,7 +2110,7 @@ class ChartingState extends MusicBeatState
 				else
 				{
 					for (note in selectedNotes) {
-						note.color = note.noteData == -1 ? FlxColor.CYAN : FlxColor.WHITE;
+						note.color = FlxColor.WHITE;
 					}
 					selectedNotes = [];
 				}
@@ -2528,10 +2528,16 @@ class ChartingState extends MusicBeatState
 				var noteDataToCheck:Int = note.noteData;
 				if (noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
 		
-				if (curSelectedNote[0] == note.strumTime && ((curSelectedNote[2] == null && noteDataToCheck < 0) || (curSelectedNote[2] != null && curSelectedNote[1] == noteDataToCheck))) {
+				if (selectedNotes.contains(note)) {
+					note.color = FlxColor.BLUE;
+				}
+				else if (curSelectedNote != null && note.rawData == curSelectedNote) {
 					colorSine += elapsed;
 					var colorVal:Float = 0.7 + Math.sin(Math.PI * colorSine) * 0.3;
 					note.color = FlxColor.fromRGBFloat(colorVal, colorVal, colorVal, 0.999);
+				}
+				else {
+					note.color = FlxColor.WHITE;
 				}
 			}
 
@@ -2561,16 +2567,19 @@ class ChartingState extends MusicBeatState
 						var isPlayerNote = note.mustPress;
 						var anims = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 						var animToPlay = anims[data];
+						var shouldPlayAnim = !(note.ignoreNote || note.noAnimation);
 						
-						if (isPlayerNote) {
-							if (player.animation.getByName(animToPlay) != null) {
-								player.playAnim(animToPlay, true);
-								player.holdTimer = 0;
-							}
-						} else {
-							if (opponent.animation.getByName(animToPlay) != null) {
-								opponent.playAnim(animToPlay, true);
-								opponent.holdTimer = 0;
+						if (shouldPlayAnim) {
+							if (isPlayerNote) {
+								if (player.animation.getByName(animToPlay) != null) {
+									player.playAnim(animToPlay, true);
+									player.holdTimer = 0;
+								}
+							} else {
+								if (opponent.animation.getByName(animToPlay) != null) {
+									opponent.playAnim(animToPlay, true);
+									opponent.holdTimer = 0;
+								}
 							}
 						}
 					}
@@ -3238,7 +3247,7 @@ class ChartingState extends MusicBeatState
 			if (selectedNotes.contains(note)) {
 				note.color = FlxColor.BLUE;
 			} else {
-				note.color = note.noteData == -1 ? FlxColor.CYAN : FlxColor.WHITE;
+				note.color = FlxColor.WHITE;
 			}
 		});
 	
@@ -3338,6 +3347,21 @@ class ChartingState extends MusicBeatState
 				nextRenderedNotes.add(note);
 			}
 		}
+
+		// PREV EVENTS
+		var beats:Float = getSectionBeats(-1); 
+		if(curSec > 0) {
+			for (i in _song.events)
+			{
+				var note:Note = setupNoteData(i, false, true);
+				note.alpha = 0.6;
+				prevRenderedNotes.add(note);
+				if (note.sustainLength > 0)
+				{
+					prevRenderedSustains.add(setupSusNote(note, beats));
+				}
+			}
+		}
 	}
 
 	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool, isPrevSection:Bool = false):Note
@@ -3401,41 +3425,64 @@ class ChartingState extends MusicBeatState
 		return note;
 	}
 
-	function updateNoteData(oldNote:Note, newNote:Note):Void
+	private function updateNoteData(oldNote:Note, newNote:Note):Void
 	{
-		if (oldNote.noteData > -1) // notes
+		if (oldNote.rawData != null)
 		{
-			for (section in _song.notes)
+			oldNote.rawData[0] = newNote.strumTime;
+			oldNote.rawData[1] = newNote.noteData;
+			oldNote.rawData[2] = newNote.sustainLength;
+			
+			if (oldNote.noteData > -1) // for namal nutes
 			{
-				for (noteData in section.sectionNotes)
-				{
-					if (noteData[0] == oldNote.strumTime && noteData[1] == oldNote.noteData)
-					{
-						noteData[0] = newNote.strumTime;
-						noteData[1] = newNote.noteData;
-						noteData[2] = newNote.sustainLength;
-						noteData[3] = newNote.noteType;
+				if (oldNote.rawData.length > 3) {
+					oldNote.rawData[3] = newNote.noteType;
+				} else if (newNote.noteType != null && newNote.noteType.length > 0) {
+					oldNote.rawData.push(newNote.noteType);
+				}
+			}
+			else // for events
+			{
+				if (oldNote.rawData.length > 1 && oldNote.rawData[1].length > 0) {
+					oldNote.rawData[1][0][0] = newNote.eventName;
+					oldNote.rawData[1][0][1] = newNote.eventVal1;
+					oldNote.rawData[1][0][2] = newNote.eventVal2;
+				}
+			}
+		}
+		else
+		{
+			if (oldNote.noteData > -1) {
+				for (section in _song.notes) {
+					for (noteData in section.sectionNotes) {
+						if (noteData[0] == oldNote.strumTime && noteData[1] == oldNote.noteData) {
+							noteData[0] = newNote.strumTime;
+							noteData[1] = newNote.noteData;
+							noteData[2] = newNote.sustainLength;
+							if (noteData.length > 3) {
+								noteData[3] = newNote.noteType;
+							} else if (newNote.noteType != null) {
+								noteData.push(newNote.noteType);
+							}
+							return;
+						}
+					}
+				}
+			} else {
+				for (event in _song.events) {
+					if (event[0] == oldNote.strumTime) {
+						if (event[1].length > 0) {
+							event[1][0][0] = newNote.eventName;
+							event[1][0][1] = newNote.eventVal1;
+							event[1][0][2] = newNote.eventVal2;
+						}
 						return;
 					}
 				}
 			}
 		}
-		else // events
-		{
-			for (event in _song.events)
-			{
-				if (event[0] == oldNote.strumTime)
-				{
-					if (event[1].length > 0) {
-						event[1][0][0] = newNote.eventName;
-						event[1][0][1] = newNote.eventVal1;
-						event[1][0][2] = newNote.eventVal2;
-					}
-					return;
-				}
-			}
-		}
 	}
+
 
 	function getEventName(names:Array<Dynamic>):String
 	{
@@ -3494,7 +3541,7 @@ class ChartingState extends MusicBeatState
 		{
 			if (selectedNotes.contains(note))
 			{
-				note.color = note.noteData == -1 ? FlxColor.CYAN : FlxColor.WHITE;
+				note.color = FlxColor.WHITE;
 				selectedNotes.remove(note);
 			}
 			else
@@ -3559,46 +3606,45 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
-	function _deleteSingleNote(note:Note):Void
+	private function _deleteSingleNote(note:Note):Void
 	{
-		var noteDataToCheck:Int = note.noteData;
-		if (noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) {
-			noteDataToCheck += 4;
-		}
-
 		saveToUndo();
-
-		if (note.noteData > -1) // Normal Notes
+		
+		if (note.rawData != null)
 		{
-			for (i in _song.notes[curSec].sectionNotes)
-			{
-				if (i[0] == note.strumTime && i[1] == noteDataToCheck)
-				{
-					if (i == curSelectedNote) curSelectedNote = null;
-					_song.notes[curSec].sectionNotes.remove(i);
-					break;
-				}
-			}
-		}
-		else // Events
-		{
-			for (i in _song.events)
-			{
-				if (i[0] == note.strumTime)
-				{
-					if (i == curSelectedNote)
-					{
-						curSelectedNote = null;
-						changeEventSelected();
+			if (note.noteData > -1) {
+				for (section in _song.notes) {
+					if (section.sectionNotes.contains(note.rawData)) {
+						section.sectionNotes.remove(note.rawData);
+						break;
 					}
-					_song.events.remove(i);
-					break;
+				}
+			} else {
+				_song.events.remove(note.rawData);
+			}
+		}
+		else
+		{
+			var noteDataToCheck = note.noteData;
+			if (note.noteData > -1) {
+				for (section in _song.notes) {
+					for (i in 0...section.sectionNotes.length) {
+						var noteData = section.sectionNotes[i];
+						if (noteData[0] == note.strumTime && noteData[1] == noteDataToCheck) {
+							section.sectionNotes.remove(noteData);
+							return;
+						}
+					}
+				}
+			} else {
+				for (i in 0..._song.events.length) {
+					if (_song.events[i][0] == note.strumTime) {
+						_song.events.remove(_song.events[i]);
+						return;
+					}
 				}
 			}
 		}
-
-		// Обновляем цвет удаленной ноты
-		note.color = FlxColor.WHITE;
 	}
 
 	public function doANoteThing(cs, d, style){
@@ -3839,40 +3885,33 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
-	function copySingleNote(note:Note):Void
+	private function copySingleNote(note:Note):Void
 	{
-		var noteData:Array<Dynamic> = getNoteData(note);
-		
+		var noteData = getNoteData(note);
 		if (noteData != null) clipboardNotes.push(noteData);
 	}
 
-	function getNoteData(note:Note):Array<Dynamic>
+	private function getNoteData(note:Note):Array<Dynamic>
 	{
-		if (note.noteData > -1) // Normal Note
-		{
-			var notePos = note.noteData;
-			if (note.mustPress != _song.notes[curSec].mustHitSection) {
-				notePos = (note.noteData + 4) % 8;
-			}
-			
+		if (note.rawData != null) {
+			return note.rawData.copy();
+		}
+		
+		if (note.noteData > -1) {
 			return [
 				note.strumTime,
-				notePos,
+				note.noteData,
 				note.sustainLength,
 				note.noteType != null ? note.noteType : ""
 			];
-		}
-		else // Event
-		{
+		} else {
 			return [
 				note.strumTime,
-				[
-					[
-						note.eventName,
-						note.eventVal1 != null ? note.eventVal1 : "",
-						note.eventVal2 != null ? note.eventVal2 : ""
-					]
-				]
+				[[
+					note.eventName,
+					note.eventVal1 != null ? note.eventVal1 : "",
+					note.eventVal2 != null ? note.eventVal2 : ""
+				]]
 			];
 		}
 	}
@@ -4218,7 +4257,7 @@ class NotePropertiesSubstate extends MusicBeatSubstate
 			dataLabel.scrollFactor.set();
             add(dataLabel);
             
-            noteDataStepper = new FlxUINumericStepper(panel.x + 120, panel.y + yOffset, 1, note.noteData, 0, 7, 0);
+			noteDataStepper = new FlxUINumericStepper(panel.x + 120, panel.y + yOffset, 1, note.noteData, 0, 7, 0);
 			noteDataStepper.scrollFactor.set();
             add(noteDataStepper);
             yOffset += 30;
@@ -4292,8 +4331,6 @@ class NotePropertiesSubstate extends MusicBeatSubstate
 			value2Input.scrollFactor.set();
             add(value2Input);
 
-			add(eventDropdown);
-
 			var currentEventIndex = -1;
 			for (i in 0...eventStuff.length)
 			{
@@ -4324,6 +4361,8 @@ class NotePropertiesSubstate extends MusicBeatSubstate
         }
         
         yOffset += 40;
+
+		if (note.noteData == -1) yOffset += 80;
         
         var saveButton = new FlxButton(panel.x + 50, panel.y + yOffset, "Save", () -> {
             saveChanges();
@@ -4335,6 +4374,8 @@ class NotePropertiesSubstate extends MusicBeatSubstate
             close();
         });
         add(cancelButton);
+
+		add(eventDropdown);
         
         cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
     }
@@ -4346,8 +4387,11 @@ class NotePropertiesSubstate extends MusicBeatSubstate
         
         if (note.noteData > -1) //Nomal note
         {
+			var newData = Std.int(noteDataStepper.value);
+        	if (note.noteData > 3) newData += 4;
+        
             updatedNote.strumTime = strumTimeStepper.value;
-            updatedNote.noteData = Std.int(noteDataStepper.value);
+            updatedNote.noteData = newData;
             updatedNote.sustainLength = sustainStepper.value;
             updatedNote.noteType = typeInput.text;
         }
