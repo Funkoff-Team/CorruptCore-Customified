@@ -23,6 +23,7 @@ class ClientPrefs {
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
 	public static var cacheOnGPU:Bool = #if !switch false #else true #end;
+	public static var noBordersScreen:Bool = #if mobile false #else true #end;
 	public static var adaptiveCache:Bool = false;
 	public static var noteOffset:Int = 0;
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
@@ -112,6 +113,7 @@ class ClientPrefs {
 		FlxG.save.data.camZooms = camZooms;
 		FlxG.save.data.noteOffset = noteOffset;
 		FlxG.save.data.cacheOnGPU = cacheOnGPU;
+		FlxG.save.data.noBordersScreen = noBordersScreen;
 		FlxG.save.data.adaptiveCache = adaptiveCache;
 		FlxG.save.data.hideHud = hideHud;
 		FlxG.save.data.arrowHSV = arrowHSV;
@@ -218,6 +220,9 @@ class ClientPrefs {
 		}
 		if(FlxG.save.data.cacheOnGPU != null) {
 			cacheOnGPU = FlxG.save.data.cacheOnGPU;
+		}
+		if (FlxG.save.data.noBordersScreen != null) {
+			noBordersScreen = FlxG.save.data.noBordersScreen;
 		}
 		if(FlxG.save.data.adaptiveCache != null) {
 			adaptiveCache = FlxG.save.data.adaptiveCache;

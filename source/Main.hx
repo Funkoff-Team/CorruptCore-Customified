@@ -128,6 +128,8 @@ class Main extends Sprite
 
 		pluginsLessGo();
 
+		FlxG.scaleMode = new flixel.FlxScaleMode();
+
 		#if !mobile
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
