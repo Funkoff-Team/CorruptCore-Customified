@@ -50,6 +50,29 @@ class MiscSettingsSubState extends BaseOptionsMenu
 		    false);
 		addOption(option);
 
+		var option:Option = new Option('Colorblind Mode:',
+			"What type of colorblind are you?",
+			'colorBlindMode',
+			'string',
+			'None',
+			['None', 'Deutranopia', 'Protanopia', 'Tritanopia', 'Protanomaly', 'Deuteranomaly', 'Tritanomaly', 'Rod monochromacy', 'Cone monochromacy']);
+		addOption(option);
+		option.onChange = onChangeColorBlind;
+
+		var option:Option = new Option('Colorblind Intensity:',
+			'How intense should the colorblind filter be?',
+			'colorBlindIntensity',
+			'percent',
+			1);
+		addOption(option);
+		option.onChange = onChangeColorBlind;
+
 		super();
+	}
+
+	function onChangeColorBlind()
+	{
+		var index = ['Deutranopia', 'Protanopia', 'Tritanopia', 'Protanomaly', 'Deuteranomaly', 'Tritanomaly', 'Rod monochromacy', 'Cone monochromacy'].indexOf(ClientPrefs.colorBlindMode);
+		Main.updateColorblindFilter(index, ClientPrefs.colorBlindIntensity);
 	}
 }

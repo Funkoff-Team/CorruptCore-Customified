@@ -14,6 +14,7 @@ import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
+import openfl.filters.ColorMatrixFilter;
 
 //crash handler stuff
 #if CRASH_HANDLER
@@ -41,6 +42,9 @@ class Main extends Sprite
 	};
 
 	public static var fpsVar:FPS;
+
+	public static var colorblindMode:Int = -1;
+	public static var colorblindIntensity:Float = 1.0;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -200,6 +204,94 @@ class Main extends Sprite
     public function getFPS():Float {
 	    return fpsVar.currentFPS;	
     }
+
+	public static function applyColorblindFilterToCamera(camera:FlxCamera, type:Int, intensity:Float = 1) {
+		trace(camera);
+		camera.filters = [];
+		if (type == -1) return;
+
+		var matrixShit = getColorblindMatrix(type, intensity);
+		var filter = new ColorMatrixFilter(matrixShit);
+		camera.filters = [filter];
+	}
+
+	private static function getColorblindMatrix(type:Int, intensity:Float):Array<Float> {
+		var matrixShit:Array<Float> = [];
+		switch (type) {
+			case 0: // Deuteranopia
+				matrixShit = [
+					0.625, 0.375, 0, 0, 0,
+					0.700, 0.300, 0, 0, 0,
+					0,     0.300, 0.700, 0, 0,
+					0, 0, 0, 1, 0];
+					
+			case 1: // Protanopia
+				matrixShit = [
+					0.567, 0.433, 0, 0, 0,
+					0.558, 0.442, 0, 0, 0,
+					0,     0.242, 0.758, 0, 0,
+					0, 0, 0, 1, 0];
+					
+			case 2: // Tritanopia
+				matrixShit = [
+					0.950, 0.050, 0, 0, 0,
+					0,     0.433, 0.567, 0, 0,
+					0,     0.475, 0.525, 0, 0,
+					0, 0, 0, 1, 0];
+			
+			case 3: // Protanomaly
+				matrixShit = [
+					0.817, 0.183, 0, 0, 0,
+					0.333, 0.667, 0, 0, 0,
+					0,     0.125, 0.875, 0, 0,
+					0, 0, 0, 1, 0];
+					
+			case 4: // Deuteranomaly
+				matrixShit = [
+					0.800, 0.200, 0, 0, 0,
+					0.258, 0.742, 0, 0, 0,
+					0,     0.142, 0.858, 0, 0,
+					0, 0, 0, 1, 0];
+					
+			case 5: // Tritanomaly
+				matrixShit = [
+					0.967, 0.033, 0, 0, 0,
+					0,     0.733, 0.267, 0, 0,
+					0,     0.183, 0.817, 0, 0,
+					0, 0, 0, 1, 0];
+			
+			case 6: // Rod monochromacy
+				matrixShit = [
+					0.2126, 0.7152, 0.0722, 0, 0,
+					0.2126, 0.7152, 0.0722, 0, 0,
+					0.2126, 0.7152, 0.0722, 0, 0,
+					0,      0,      0,      1, 0];
+					
+			case 7: // Cone monochromacy
+				matrixShit = [
+					0.299, 0.587, 0.114, 0, 0,
+					0.299, 0.587, 0.114, 0, 0,
+					0.299, 0.587, 0.114, 0, 0,
+					0,     0,     0,     1, 0];
+		}
+
+		if (intensity < 1) {
+			var identity = [1,0,0,0,0, 0,1,0,0,0, 0,0,1,0,0, 0,0,0,1,0];
+			for (i in 0...matrixShit.length) {
+				matrixShit[i] = matrixShit[i] * intensity + identity[i] * (1 - intensity);
+			}
+		}
+		return matrixShit;
+	}
+
+	public static function updateColorblindFilter(type:Int = -1, intensity:Float = 1) {
+		colorblindMode = type;
+		colorblindIntensity = intensity;
+		
+		for (camera in FlxG.cameras.list) {
+			applyColorblindFilterToCamera(camera, type, intensity);
+		}
+	}
 
 	private function pluginsLessGo()
 	{

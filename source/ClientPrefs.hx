@@ -36,7 +36,9 @@ class ClientPrefs {
 	public static var hitsoundVolume:Float = 0;
 	public static var pauseMusic:String = 'Tea Time';
 	public static var checkForUpdates:Bool = true;
-	public static var comboStacking = true;
+	public static var comboStacking:Bool = true;
+	public static var colorBlindMode:String = 'None';
+	public static var colorBlindIntensity:Float = 1;
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
 		'scrolltype' => 'multiplicative', 
@@ -137,6 +139,9 @@ class ClientPrefs {
 		FlxG.save.data.pauseMusic = pauseMusic;
 		FlxG.save.data.checkForUpdates = checkForUpdates;
 		FlxG.save.data.comboStacking = comboStacking;
+
+		FlxG.save.data.colorBlindMode = colorBlindMode;
+		FlxG.save.data.colorBlindIntensity = colorBlindIntensity;
 	
 		FlxG.save.flush();
 
@@ -282,6 +287,11 @@ class ClientPrefs {
 		}
 		if (FlxG.save.data.comboStacking != null)
 			comboStacking = FlxG.save.data.comboStacking;
+
+		if (FlxG.save.data.colorBlindMode != null)
+			colorBlindMode = FlxG.save.data.colorBlindMode;
+		if (FlxG.save.data.colorBlindIntensity != null)
+			colorBlindIntensity = FlxG.save.data.colorBlindIntensity;
 
 		var save:FlxSave = new FlxSave();
 		save.bind('fnf-CC-settings', 'justinX');

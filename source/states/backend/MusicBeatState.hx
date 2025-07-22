@@ -41,6 +41,13 @@ class MusicBeatState extends FlxUIState
 		super.create();
 
 		CustomFadeTransition.nextCamera = FlxG.camera;
+
+		var colorBlindType = ClientPrefs.colorBlindMode;
+		var intensity = ClientPrefs.colorBlindIntensity;
+		var index = ['None', 'Deutranopia', 'Protanopia', 'Tritanopia', 'Protanomaly', 'Deuteranomaly', 'Tritanomaly', 'Rod monochromacy', 'Cone monochromacy'].indexOf(colorBlindType);
+		if (index == -1) index = -1;
+		Main.updateColorblindFilter(index, intensity);
+
 		if(!skip) {
 			openSubState(new CustomFadeTransition(0.7, true));
 		}
@@ -55,6 +62,10 @@ class MusicBeatState extends FlxUIState
 		FlxG.cameras.setDefaultDrawTarget(camera, true);
 		_fnfCameraInitialized = true;
 		//trace('initialized psych camera ' + Sys.cpuTime());
+		/*if (Main.colorblindMode != -1) {
+			Main.applyColorblindFilterToCamera(camera, Main.colorblindMode, Main.colorblindIntensity);
+		}*/
+
 		return camera;
 	}
 
