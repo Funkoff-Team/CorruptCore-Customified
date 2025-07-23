@@ -46,7 +46,7 @@ class MusicBeatState extends FlxUIState
 		var intensity = ClientPrefs.colorBlindIntensity;
 		var index = ['None', 'Deutranopia', 'Protanopia', 'Tritanopia', 'Protanomaly', 'Deuteranomaly', 'Tritanomaly', 'Rod monochromacy', 'Cone monochromacy'].indexOf(colorBlindType);
 		if (index == -1) index = -1;
-		Main.updateColorblindFilter(index, intensity);
+		Main.updateColorblindFilter(index - 1, intensity);
 
 		if(!skip) {
 			openSubState(new CustomFadeTransition(0.7, true));

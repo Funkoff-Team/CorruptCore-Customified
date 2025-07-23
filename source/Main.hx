@@ -206,7 +206,6 @@ class Main extends Sprite
     }
 
 	public static function applyColorblindFilterToCamera(camera:FlxCamera, type:Int, intensity:Float = 1) {
-		trace(camera);
 		camera.filters = [];
 		if (type == -1) return;
 
@@ -291,6 +290,21 @@ class Main extends Sprite
 		for (camera in FlxG.cameras.list) {
 			applyColorblindFilterToCamera(camera, type, intensity);
 		}
+		
+		ClientPrefs.colorBlindMode = switch (type) {
+			case -1: 'None';
+			case 0: 'Deutranopia';
+			case 1: 'Protanopia';
+			case 2: 'Tritanopia';
+			case 3: 'Protanomaly';
+			case 4: 'Deuteranomaly';
+			case 5: 'Tritanomaly';
+			case 6: 'Rod monochromacy';
+			case 7: 'Cone monochromacy';
+			default: 'None';
+		};
+		ClientPrefs.colorBlindIntensity = intensity;
+		ClientPrefs.saveSettings();
 	}
 
 	private function pluginsLessGo()
