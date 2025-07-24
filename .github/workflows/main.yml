@@ -35,21 +35,28 @@ jobs:
           sudo apt-get install libvlccore-dev
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null
-          haxelib install lime
-          haxelib install openfl
-          haxelib --never install flixel
-          haxelib run lime setup flixel
+          haxelib install flixel 5.8.0
+          haxelib set flixel 5.8.0 --quiet
+          haxelib git lime https://github.com/GreenColdTea/lime-9.0.0
+          haxelib install openfl 9.4.1
+          haxelib set openfl 9.4.1
           haxelib run lime setup
-          haxelib install flixel-tools
-          haxelib install flixel-ui
-          haxelib install flixel-addons
+          haxelib install flixel-tools 1.5.1
+          haxelib install flixel-ui 2.6.3
+          haxelib install flixel-addons 3.2.3
           haxelib install tjson
           haxelib install hxjsonast
-          haxelib install hxCodec
-          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
-          haxelib install hscript
-          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
-          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib install hxvlc
+          haxelib install hscript 2.4.0
+          haxelib set flixel 5.8.0 --never --quiet
+          haxelib set flixel-tools 1.5.1
+          haxelib set flixel-ui 2.6.3
+          haxelib set flixel-addons 3.2.3
+          haxelib set hscript 2.4.0
+          haxelib install hxdiscord_rpc 1.2.4
+          haxelib set hxdiscord_rpc 1.2.4
+          haxelib git flxanimate https://github.com/Psych-Slice/FlxAnimate.git 18091dfeb629ba2805a5f3e10f5de80433080359
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
           haxelib install hxcpp-debug-server
           haxelib list
       - name: Create Version Tag
@@ -76,21 +83,29 @@ jobs:
         run: |
           haxelib setup C:/haxelib
           haxelib install hxcpp > nul
-          haxelib install lime
-          haxelib install openfl
-          haxelib --never install flixel
-          haxelib run lime setup flixel
+          haxelib install flixel 5.8.0
+          haxelib set flixel 5.8.0 --quiet
+          haxelib git lime https://github.com/GreenColdTea/lime-9.0.0
+          haxelib install openfl 9.4.1
+          haxelib set openfl 9.4.1
           haxelib run lime setup
-          haxelib install flixel-tools
-          haxelib install flixel-ui
-          haxelib install flixel-addons
+          haxelib install flixel-tools 1.5.1
+          haxelib install flixel-ui 2.6.3
+          haxelib install flixel-addons 3.2.3
           haxelib install tjson
           haxelib install hxjsonast
-          haxelib install hxCodec
-          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
-          haxelib install hscript
-          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
-          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib install hxvlc
+          haxelib install hscript 2.4.0
+          haxelib set flixel 5.8.0 --never --quiet
+          haxelib set flixel-tools 1.5.1
+          haxelib set flixel-ui 2.6.3
+          haxelib set flixel-addons 3.2.3
+          haxelib set hscript 2.4.0
+          haxelib install hxdiscord_rpc 1.2.4
+          haxelib set hxdiscord_rpc 1.2.4
+          haxelib git sl-windows-api https://github.com/GreenColdTea/windows-api-improved.git
+          haxelib git flxanimate https://github.com/Psych-Slice/FlxAnimate.git 18091dfeb629ba2805a5f3e10f5de80433080359
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
           haxelib install hxcpp-debug-server
           haxelib list
         shell: cmd
@@ -118,21 +133,29 @@ jobs:
         run: |
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null
-          haxelib install lime
-          haxelib install openfl
-          haxelib --never install flixel
-          haxelib run lime setup flixel
+          haxelib install hxcpp > /dev/null
+          haxelib install flixel 5.8.0
+          haxelib set flixel 5.8.0 --never --quiet
+          haxelib git lime https://github.com/GreenColdTea/lime-9.0.0
+          haxelib install openfl 9.4.1
+          haxelib set openfl 9.4.1
           haxelib run lime setup
-          haxelib install flixel-tools
-          haxelib install flixel-ui
-          haxelib install flixel-addons
+          haxelib install flixel-tools 1.5.1
+          haxelib install flixel-ui 2.6.3
+          haxelib install flixel-addons 3.2.3
           haxelib install tjson
           haxelib install hxjsonast
-          haxelib install hxCodec
-          haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
-          haxelib install hscript
-          haxelib git hscript-ex https://github.com/ianharrigan/hscript-ex
-          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+          haxelib install hxvlc
+          haxelib install hscript 2.4.0
+          haxelib set flixel 5.8.0 --never --quiet
+          haxelib set flixel-tools 1.5.1
+          haxelib set flixel-ui 2.6.3
+          haxelib set flixel-addons 3.2.3
+          haxelib set hscript 2.4.0
+          haxelib install hxdiscord_rpc 1.2.4
+          haxelib set hxdiscord_rpc 1.2.4
+          haxelib git flxanimate https://github.com/Psych-Slice/FlxAnimate.git 18091dfeb629ba2805a5f3e10f5de80433080359
+          haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
           haxelib install hxcpp-debug-server
           haxelib list
       - name: Create Version Tag
