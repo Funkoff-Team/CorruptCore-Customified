@@ -647,11 +647,11 @@ class TitleState extends MusicBeatState
 					#end
 				case 8:
 					addMoreText('newgrounds', -40);
-					ngSpr.visible = true;
+					if (credGroup != null) ngSpr.visible = true;
 				// credTextShit.text += '\nNewgrounds';
 				case 9:
 					deleteCoolText();
-					ngSpr.visible = false;
+					if (credGroup != null) ngSpr.visible = false;
 				// credTextShit.visible = false;
 
 				// credTextShit.text = 'Shoutouts Tom Fulp';
@@ -711,7 +711,7 @@ class TitleState extends MusicBeatState
 
 					default: //Go back to normal ugly ass boring GF
 						remove(credGroup);
-						ngSpr.visible = false;
+						remove(ngSpr);
 						FlxG.camera.flash(FlxColor.WHITE, 2);
 						skippedIntro = true;
 						playJingle = false;
@@ -727,7 +727,7 @@ class TitleState extends MusicBeatState
 					new FlxTimer().start(3.2, function(tmr:FlxTimer)
 					{
 						remove(credGroup);
-						ngSpr.visible = false;
+						remove(ngSpr);
 						FlxG.camera.flash(FlxColor.WHITE, 0.6);
 						transitioning = false;
 					});
@@ -735,7 +735,7 @@ class TitleState extends MusicBeatState
 				else
 				{
 					remove(credGroup);
-					ngSpr.visible = false;
+					remove(ngSpr);
 					FlxG.camera.flash(FlxColor.WHITE, 3);
 					sound.onComplete = function() {
 						FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
@@ -748,7 +748,7 @@ class TitleState extends MusicBeatState
 			else //Default! Edit this one!!
 			{
 				remove(credGroup);
-				ngSpr.visible = false;
+				remove(ngSpr);
 				FlxG.camera.flash(FlxColor.WHITE, 3.4);
 
 				var easteregg:String = FlxG.save.data.psychDevsEasterEgg;
