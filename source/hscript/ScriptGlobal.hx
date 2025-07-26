@@ -7,10 +7,11 @@ class ScriptGlobal {
 	public static var globalScriptActive:Bool = false;
 	
 	public static function addGlobalScript() {
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/states/')];
-		foldersToCheck.insert(0, Paths.mods('scripts/states/'));
-		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/scripts/states/'));
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')#if MODS_ALLOWED , Paths.mods('scripts/') #end];
+		#if MODS_ALLOWED
+		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/scripts/'));
 		for(mod in Paths.getGlobalMods()) foldersToCheck.insert(0, Paths.mods(mod + '/scripts/states/'));
+		#end
 		
 		for (folder in foldersToCheck)
 		{

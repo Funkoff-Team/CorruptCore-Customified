@@ -8,6 +8,8 @@ import flixel.FlxG;
 import flixel.util.FlxColor;
 
 import game.scripting.FunkinLua;
+import game.backend.utils.CoolUtil;
+import game.PlayState;
 
 #if LUA_ALLOWED
 import llua.Lua;
@@ -54,10 +56,10 @@ class HScript implements HscriptInterface {
 		//FNF Classes
         "Paths" => game.Paths,
         "Conductor" => game.backend.Conductor,
-        "PlayState" => game.PlayState,
+        "PlayState" => PlayState,
         "Boyfriend" => game.objects.Boyfriend,
         "Character" => game.objects.Character,
-		"CoolUtil"	=> game.backend.utils.CoolUtil,
+		"CoolUtil"	=> CoolUtil,
         "ClientPrefs" => game.backend.ClientPrefs,
 
 		#if SCRIPTABLE_STATES
@@ -85,9 +87,9 @@ class HScript implements HscriptInterface {
 		#if flxanimate "FlxAnimate" => FlxAnimate, #end
 
 		//Extras with abstracts/enums
-		"FlxPoint" => game.backend.utils.CoolUtil.getMacroAbstractClass("flixel.math.FlxPoint"),
-		"FlxAxes" => game.backend.utils.CoolUtil.getMacroAbstractClass("flixel.util.FlxAxes"),
-		"FlxColor" => game.backend.utils.CoolUtil.getMacroAbstractClass("flixel.util.FlxColor")
+		"FlxPoint" => CoolUtil.getMacroAbstractClass("flixel.math.FlxPoint"),
+		"FlxAxes" => CoolUtil.getMacroAbstractClass("flixel.util.FlxAxes"),
+		"FlxColor" => CoolUtil.getMacroAbstractClass("flixel.util.FlxColor")
     ];
 	public static var staticVariables:Map<String, Dynamic> = [];
 
