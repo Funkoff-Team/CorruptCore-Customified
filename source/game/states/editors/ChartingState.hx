@@ -54,7 +54,6 @@ import game.backend.Section.SwagSection;
 import game.backend.Song.SwagSong;
 
 import game.objects.AttachedSprite;
-import game.objects.Boyfriend;
 import game.objects.Character;
 import game.objects.Character.CharacterFile;
 import game.objects.FlxUIDropDownMenuCustom;
@@ -270,7 +269,7 @@ class ChartingState extends MusicBeatState
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
 
-	var player:Boyfriend;
+	var player:Character;
 	var opponent:Character;
 	var showCharacters:Bool = false;
 
@@ -401,6 +400,14 @@ class ChartingState extends MusicBeatState
 		dummyArrow = new FlxSprite().makeGraphic(GRID_SIZE, GRID_SIZE);
 		add(dummyArrow);
 
+		opponent = new Character(675, 450, "dad", false, true);
+		opponent.scrollFactor.set();
+		add(opponent);
+
+		player = new Character(950, 575, "bf", true, true);
+		player.scrollFactor.set();
+		add(player);
+
 		var tabs = [
 			{name: "Song", label: 'Song'},
 			{name: "Section", label: 'Section'},
@@ -433,14 +440,6 @@ class ChartingState extends MusicBeatState
 		add(nextRenderedNotes);
 		add(prevRenderedSustains);
 		add(prevRenderedNotes);
-
-		opponent = new Character(675, 450, "dad", false, true);
-		opponent.scrollFactor.set();
-		add(opponent);
-
-		player = new Boyfriend(950, 575, "bf", true);
-		player.scrollFactor.set();
-		add(player);
 
 		if(lastSong != currentSongName) {
 			changeSection();
@@ -1102,7 +1101,7 @@ class ChartingState extends MusicBeatState
 			if(FileSystem.exists(directory)) {
 				for (file in FileSystem.readDirectory(directory)) {
 					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.lua')) {
+					if (!FileSystem.isDirectory(path) && (file.endsWith('.lua') || file.endsWith('.hx'))) {
 						var fileToCheck:String = file.substr(0, file.length - 4);
 						if(!noteTypeMap.exists(fileToCheck)) {
 							displayNameList.push(fileToCheck);
@@ -2630,7 +2629,7 @@ class ChartingState extends MusicBeatState
 		switch(char) {
 			case 'player':
 				remove(player);
-				player = new Boyfriend(750, 435, _song.player1, true);
+				player = new Character(750, 435, _song.player1, true);
 				player.scrollFactor.set();
 				add(player);
 				player.visible = showCharacters;

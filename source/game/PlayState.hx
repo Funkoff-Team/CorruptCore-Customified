@@ -62,7 +62,6 @@ import game.backend.Song.SwagSong;
 import game.backend.StageData;
 
 import game.objects.AttachedSprite;
-import game.objects.Boyfriend;
 import game.objects.Character;
 import game.objects.DialogueBoxPsych;
 import game.objects.HealthIcon;
@@ -118,7 +117,7 @@ class PlayState extends MusicBeatState
 	private var isCameraOnForcedPos:Bool = false;
 
 	#if (haxe >= "4.0.0")
-	public var boyfriendMap:Map<String, Boyfriend> = new Map();
+	public var boyfriendMap:Map<String, Character> = new Map();
 	public var dadMap:Map<String, Character> = new Map();
 	public var gfMap:Map<String, Character> = new Map();
 	public var variables:Map<String, Dynamic> = new Map();
@@ -130,7 +129,7 @@ class PlayState extends MusicBeatState
 	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	#else
-	public var boyfriendMap:Map<String, Boyfriend> = new Map<String, Boyfriend>();
+	public var boyfriendMap:Map<String, Character> = new Map<String, Character>();
 	public var dadMap:Map<String, Character> = new Map<String, Character>();
 	public var gfMap:Map<String, Character> = new Map<String, Character>();
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -176,7 +175,7 @@ class PlayState extends MusicBeatState
 
 	public var dad:Character = null;
 	public var gf:Character = null;
-	public var boyfriend:Boyfriend = null;
+	public var boyfriend:Character = null;
 
 	public var notes:FlxTypedGroup<Note>;
 	public var unspawnNotes:Array<Note> = [];
@@ -554,48 +553,32 @@ class PlayState extends MusicBeatState
 		#end
 
 		// STAGE SCRIPTS
-		#if (MODS_ALLOWED && LUA_ALLOWED)
+		#if LUA_ALLOWED
 		startLuasOnFolder('stages/' + curStage + '.lua');
 		#if HSCRIPT_ALLOWED
 		startHScriptOnFolder('stages/' + curStage + '.hx');
 		#end
 		#end
 
-		var gfVersion:String = SONG.gfVersion;
-		if(gfVersion == null || gfVersion.length < 1)
-		{
-			switch (curStage)
-			{
-				default:
-					gfVersion = 'gf';
-			}
-
-			switch(Paths.formatToSongPath(SONG.song))
-			{
-				case 'stress':
-					gfVersion = 'pico-speaker';
-			}
-			SONG.gfVersion = gfVersion; //Fix for the Chart Editor
-		}
-
 		if (!stageData.hide_girlfriend)
 		{
-			gf = new Character(0, 0, gfVersion);
+			if(SONG.gfVersion == null || SONG.gfVersion.length < 1) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
+			gf = new Character(0, 0, SONG.gfVersion);
 			startCharacterPos(gf);
 			gf.scrollFactor.set(0.95, 0.95);
 			gfGroup.add(gf);
-			startCharacterLua(gf.curCharacter);
+			startCharacterScripts(gf.curCharacter);
 		}
 
 		dad = new Character(0, 0, SONG.player2);
 		startCharacterPos(dad, true);
 		dadGroup.add(dad);
-		startCharacterLua(dad.curCharacter);
+		startCharacterScripts(dad.curCharacter);
 
-		boyfriend = new Boyfriend(0, 0, SONG.player1);
+		boyfriend = new Character(0, 0, SONG.player1, true);
 		startCharacterPos(boyfriend);
 		boyfriendGroup.add(boyfriend);
-		startCharacterLua(boyfriend.curCharacter);
+		startCharacterScripts(boyfriend.curCharacter);
 
 		var camPos:FlxPoint = FlxPoint.get(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
@@ -777,9 +760,9 @@ class PlayState extends MusicBeatState
 		// cameras = [FlxG.cameras.list[1]];
 		startingSong = true;
 		
-		#if LUA_ALLOWED
 		for (notetype in noteTypeMap.keys())
 		{
+			#if LUA_ALLOWED
 			for (notetype in noteTypeMap.keys())
 			{
 				startLuasOnFolder('custom_notetypes/' + notetype + '.lua');
@@ -788,6 +771,8 @@ class PlayState extends MusicBeatState
 			{
 				startLuasOnFolder('custom_events/' + event + '.lua');
 			}
+			#end
+
 			#if HSCRIPT_ALLOWED
 			for (notetype in noteTypeMap.keys())
 			{
@@ -801,7 +786,7 @@ class PlayState extends MusicBeatState
 		}
 		for (event in eventPushedMap.keys())
 		{
-			#if MODS_ALLOWED
+			#if (LUA_ALLOWED && MODS_ALLOWED)
 			var luaToLoad:String = Paths.modFolders('custom_events/' + event + '.lua');
 			if(FileSystem.exists(luaToLoad))
 			{
@@ -815,15 +800,36 @@ class PlayState extends MusicBeatState
 					luaArray.push(new FunkinLua(luaToLoad));
 				}
 			}
-			#elseif sys
+			#elseif LUA_ALLOWED
 			var luaToLoad:String = Paths.getPreloadPath('custom_events/' + event + '.lua');
 			if(OpenFlAssets.exists(luaToLoad))
 			{
 				luaArray.push(new FunkinLua(luaToLoad));
 			}
 			#end
+
+			#if (HSCRIPT_ALLOWED && MODS_ALLOWED)
+			var hxToLoad:String = Paths.modFolders('custom_events/' + event + '.hx');
+			if(FileSystem.exists(hxToLoad))
+			{
+				hscriptArray.push(new HScript(hxToLoad));
+			}
+			else
+			{
+				hxToLoad = Paths.getPreloadPath('custom_events/' + event + '.hx');
+				if(FileSystem.exists(hxToLoad))
+				{
+					hscriptArray.push(new HScript(hxToLoad));
+				}
+			}
+			#elseif HSCRIPT_ALLOWED
+			var hxToLoad:String = Paths.getPreloadPath('custom_events/' + event + '.hx');
+			if(OpenFlAssets.exists(hxToLoad))
+			{
+				hscriptArray.push(new HScript(hxToLoad));
+			}
+			#end
 		}
-		#end
 		noteTypeMap.clear();
 		noteTypeMap = null;
 		eventPushedMap.clear();
@@ -973,7 +979,7 @@ class PlayState extends MusicBeatState
 			return true;
 		}
 
-		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('shaders/') #if MODS_ALLOWED , Paths.mods('shaders/')#end];
 		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/shaders/'));
 
@@ -1079,12 +1085,12 @@ class PlayState extends MusicBeatState
 		switch(type) {
 			case 0:
 				if(!boyfriendMap.exists(newCharacter)) {
-					var newBoyfriend:Boyfriend = new Boyfriend(0, 0, newCharacter);
+					var newBoyfriend:Character = new Character(0, 0, newCharacter, true);
 					boyfriendMap.set(newCharacter, newBoyfriend);
 					boyfriendGroup.add(newBoyfriend);
 					startCharacterPos(newBoyfriend);
 					newBoyfriend.alpha = 0.00001;
-					startCharacterLua(newBoyfriend.curCharacter);
+					startCharacterScripts(newBoyfriend.curCharacter);
 				}
 
 			case 1:
@@ -1094,7 +1100,7 @@ class PlayState extends MusicBeatState
 					dadGroup.add(newDad);
 					startCharacterPos(newDad, true);
 					newDad.alpha = 0.00001;
-					startCharacterLua(newDad.curCharacter);
+					startCharacterScripts(newDad.curCharacter);
 				}
 
 			case 2:
@@ -1105,12 +1111,12 @@ class PlayState extends MusicBeatState
 					gfGroup.add(newGf);
 					startCharacterPos(newGf);
 					newGf.alpha = 0.00001;
-					startCharacterLua(newGf.curCharacter);
+					startCharacterScripts(newGf.curCharacter);
 				}
 		}
 	}
 
-	function startCharacterLua(name:String)
+	function startCharacterScripts(name:String)
 	{
 		#if LUA_ALLOWED
 		var doPush:Bool = false;
@@ -1141,9 +1147,37 @@ class PlayState extends MusicBeatState
 			luaArray.push(new FunkinLua(luaFile));
 		}
 		#end
+
+		#if HSCRIPT_ALLOWED
+		var doPush:Bool = false;
+		var hxFile:String = 'characters/' + name + '.hx';
+		#if MODS_ALLOWED
+		var replacePath:String = Paths.modFolders(hxFile);
+		if(FileSystem.exists(replacePath))
+		{
+			hxFile = replacePath;
+			doPush = true;
+		}
+		else
+		#end
+		{
+			hxFile = Paths.getPreloadPath(hxFile);
+			if(FileSystem.exists(hxFile))
+				doPush = true;
+		}
+
+		if(doPush)
+		{
+			for (script in hscriptArray)
+			{
+				if(script.scriptName == hxFile) return;
+			}
+			hscriptArray.push(new HScript(hxFile));
+		}
+		#end
 	}
 
-	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
+	public function getLuaObject(tag:String, text:Bool = true):FlxSprite {
 		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
 		if(modchartBackdrops.exists(tag)) return modchartBackdrops.get(tag);
 		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
@@ -1176,15 +1210,6 @@ class PlayState extends MusicBeatState
 
 		var video:MP4Handler = new MP4Handler();
 		video.smoothing = true;
-		#if mobile
-		video.onFormatSetup.add(function():Void
-		{
-			if (video != null)
-			{
-				FlxG.scaleMode = new MobileScaleMode();
-			}
-		});
-		#end
 		video.load(filepath);
 		video.play();
 		video.onEndReached.add(() -> {
@@ -3929,7 +3954,7 @@ class PlayState extends MusicBeatState
 		}
 		#elseif sys
 		var hscriptToLoad:String = Paths.getPreloadPath(hscriptFile);
-		if(OpenFlAssets.exists(hscriptToLoad))
+		if(FileSystem.exists(hscriptToLoad))
 		{
 			hscriptArray.push(new HScript(hscriptToLoad));
 			return true;

@@ -57,7 +57,6 @@ class HScript implements HscriptInterface {
         "Paths" => game.Paths,
         "Conductor" => game.backend.Conductor,
         "PlayState" => PlayState,
-        "Boyfriend" => game.objects.Boyfriend,
         "Character" => game.objects.Character,
 		"CoolUtil"	=> CoolUtil,
         "ClientPrefs" => game.backend.ClientPrefs,

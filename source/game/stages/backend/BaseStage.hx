@@ -7,6 +7,8 @@ import flixel.FlxSubState;
 import game.objects.Note.EventNote;
 import game.objects.Character;
 
+import game.PlayState;
+
 enum Countdown
 {
 	THREE;
@@ -123,7 +125,7 @@ class BaseStage extends FlxBasic
 	function moveCameraSection() if(onPlayState) moveCameraSection();
 	function moveCamera(isDad:Bool) if(onPlayState) moveCamera(isDad);
 	inline private function get_paused() return game.paused;
-	inline private function get_songName() return game.backend.SongName;
+	inline private function get_songName() return game.songName;
 	inline private function get_isStoryMode() return PlayState.isStoryMode;
 	inline private function get_seenCutscene() return PlayState.seenCutscene;
 	inline private function get_inCutscene() return game.inCutscene;
