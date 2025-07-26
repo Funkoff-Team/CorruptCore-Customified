@@ -43,13 +43,22 @@
 
 	<classpath name="source" />
 	
-	<!-- PSYCH ENGINE CUSTOMIZATION -->
+	<!-- CC ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
-	<define name="LUA_ALLOWED" if="desktop" />
+	<define name="LUA_ALLOWED" if="cpp" />
+	<define name="HSCRIPT_ALLOWED" if="cpp"/>
 	<define name="ACHIEVEMENTS_ALLOWED" if="officialBuild" />
 	<define name="VIDEOS_ALLOWED" if="desktop || mobile" />
 	<define name="TITLE_SCREEN_EASTER_EGG" if="officialBuild" /> <!-- DELETE THE if="officialBuild" for enabling this on an unofficial build -->
 	<define name="CRASH_HANDLER" unless="debug" />
+
+	<section if="HSCRIPT_ALLOWED">
+		<define name="SCRIPTABLE_STATES" /> <!-- Adds haxe scripting support to the menus (need to enable HSCRIPT_ALLOWED)! -->
+		<define name="GLOBAL_SCRIPTS" /> <!-- Adds global menu scripts, which always run until the modpack is disabled-->
+		<define name="CUSTOM_CLASSES" /> <!-- Allows for custom classes using HScript. Increases loading times though-->
+	</section>
+
+	<define name="NDLL_ALLOWED" /> <!-- Allows for ndll support-->
 
 	<assets path="assets/preload" rename="assets" exclude="*.ogg" if="web"/>
 	<assets path="assets/preload" rename="assets" exclude="*.mp3"  unless="web"/>
@@ -98,6 +107,7 @@
 		NOT USING A DIRECT THING TO THE ASSET!!!
 	-->
 	<assets path="assets/fonts" embed='true'/>
+	<assets path="assets/embed/music" rename="assets/music" embed='true'/>
 	<assets path="assets/embed/sounds" rename="assets/sounds" embed='true'/>
 	<!-- _______________________________ Libraries ______________________________ -->
 
@@ -109,18 +119,18 @@
 	<!--In case you want to use the addons package-->
 	<haxelib name="flixel-addons" version="3.2.3"/>
 	<haxelib name="tjson" />
-	<haxelib name="hscript"/>
-	<define name="hscriptPos"/>
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	<haxelib name="faxe" if="switch"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> 
 	<haxelib name="hxdiscord_rpc" if="desktop"/>
 	<haxelib name="sl-windows-api" if="windows" />
-	<haxelib name="flxanimate" />
+	<haxelib name="faxe" if="switch"/>
 	<haxelib name="hxcpp-debug-server" if="desktop debug"/>
 
+	<haxedef name="hscriptPos" />
+
+	<haxelib name="flxanimate" />
 	<haxelib name="hxcpp"/>	
 
 	<!-- Disable Discord IO Thread -->

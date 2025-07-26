@@ -1,11 +1,11 @@
 #if !macro
-import Paths;
+import game.Paths;
 
 //Flixel
 #if (flixel >= '5.3.0')
 import flixel.sound.FlxSound;
 #else
-import flixel.sound.FlxSound;
+import flixel.system.FlxSound;
 #end
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -21,7 +21,8 @@ import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
-import shaders.flixel.FlxShader;
+
+import game.shaders.flixel.FlxShader;
 
 // Android things (will be neccesary in the future)
 #if android
@@ -41,20 +42,30 @@ import flxanimate.*;
 import flxanimate.PsychFlxAnimate as FlxAnimate;
 #end
 
-import states.*;
-import substates.*;
-import stages.*;
+import game.*;
+import game.backend.*;
+import game.backend.utils.*;
+import game.states.*;
+import game.states.options.*;
+import game.substates.*;
+import game.substates.options.*;
+import game.stages.*;
 import math.*;
 
-import stages.backend.BaseStage;
+import game.objects.Alphabet;
+import game.objects.AttachedSprite;
+import game.objects.CustomFadeTransition;
+import game.objects.BGSprite;
 
-import states.backend.MusicBeatState;
-import substates.backend.MusicBeatSubstate;
+import game.stages.backend.BaseStage;
+
+import game.states.backend.MusicBeatState;
+import game.substates.backend.MusicBeatSubstate;
 
 import flixel.animation.PsychAnimationController;
 
 // Windows API
-#if windows
+#if (cpp && windows)
 import winapi.*;
 #end
 
@@ -63,7 +74,7 @@ import winapi.*;
 import mobile.*;
 #end
 
-import shaders.*;
+import game.shaders.*;
 
 #if sys
 import sys.*;

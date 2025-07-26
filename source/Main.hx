@@ -1,12 +1,13 @@
 package;
 
 #if desktop
-import Discord.DiscordClient;
+import api.Discord.DiscordClient;
 #end
 import flixel.graphics.FlxGraphic;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
+import flixel.FlxCamera;
 import flixel.input.keyboard.FlxKey;
 import openfl.Assets;
 import openfl.Lib;
@@ -15,9 +16,11 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import openfl.filters.ColorMatrixFilter;
+import openfl.events.UncaughtErrorEvent;
+import openfl.errors.Error;
 
 //crash handler stuff
-#if CRASH_HANDLER
+#if !CRASH_HANDLER
 import CrashHandler;
 #end
 
@@ -34,7 +37,7 @@ class Main extends Sprite
 	public static final game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
-		initialState: TitleState, // initial game state
+		initialState: Init, // initial game state
         zoom: -1, // If -1, zoom is automatically calculated to fit the window dimensions.
 		framerate: 60, // default framerate
 		skipSplash: true, // if the default flixel splash screen should be skipped
@@ -43,11 +46,11 @@ class Main extends Sprite
 
 	public static var fpsVar:FPS;
 
+	//for colorblind mode
 	public static var colorblindMode:Int = -1;
 	public static var colorblindIntensity:Float = 1.0;
 
-	// You can pretty much ignore everything from here on - your code should go in your states.
-
+	// You can pretty much ignore everything from here on - your code should go in your game.states.
 	public static function main():Void
 	{
 		Lib.current.addChild(new Main());
@@ -63,9 +66,11 @@ class Main extends Sprite
 	{
 		super();
 
-		#if CRASH_HANDLER
+		#if !CRASH_HANDLER
 	    CrashHandler.init();
-	    #end
+	    #else
+		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onUncaughtError);
+		#end
 
 		if (stage != null)
 		{
@@ -128,7 +133,11 @@ class Main extends Sprite
 	
 		ClientPrefs.loadDefaultKeys();
 
-		addChild(new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		#if CRASH_HANDLER
+		addChild(new FunkinGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		#else
+		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		#end
 
 		pluginsLessGo();
 
@@ -168,18 +177,9 @@ class Main extends Sprite
 		}
 		#end
 
-        FlxG.fixedTimestep = false;
-	    FlxG.game.focusLostFramerate = #if mobile 30 #else 60 #end;
-        FlxG.keys.preventDefaultKeys = [TAB];
-
-		#if desktop
+		/*#if desktop
 		DiscordClient.prepare();
-		#end
-
-		#if html5
-		FlxG.autoPause = false;
-		FlxG.mouse.visible = false;
-		#end
+		#end*/
 	}
 
 	private static function resetSpriteCache(sprite:Sprite):Void {
@@ -203,6 +203,32 @@ class Main extends Sprite
 	
     public function getFPS():Float {
 	    return fpsVar.currentFPS;	
+    }
+
+	private function onUncaughtError(e:UncaughtErrorEvent):Void
+    {
+        e.preventDefault();
+        handleCrash(e.error);
+    }
+
+	public static function handleCrash(e:Dynamic):Void
+    {
+        var emsg:String = "";
+		for (stackItem in haxe.CallStack.exceptionStack(true))
+		{
+			switch (stackItem)
+			{
+				case FilePos(s, file, line, column):
+					emsg += file + " (line " + line + ")\n";
+				default:
+					Sys.println(stackItem);
+					trace(stackItem);
+			}
+		}
+		
+		final crashReport = 'Error caught: ' + e.message + '\nLines:\n' + emsg;
+		
+		FlxG.switchState(new game.states.CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
     }
 
 	public static function applyColorblindFilterToCamera(camera:FlxCamera, type:Int, intensity:Float = 1) {
@@ -312,3 +338,107 @@ class Main extends Sprite
 		plugins.HotReloadPlugin.init();
 	}
 }
+
+#if CRASH_HANDLER
+//Big thanks for NVE
+class FunkinGame extends FlxGame
+{
+	private static function crashGame()
+	{
+		null
+		.draw();
+	}
+	
+	/**
+	 * Used to instantiate the guts of the flixel game object once we have a valid reference to the root.
+	 */
+	override function create(_):Void
+	{
+		try
+		{
+			_skipSplash = true;
+			super.create(_);
+		}
+		catch (e)
+		{
+			onCrash(e);
+		}
+	}
+	
+	override function onFocus(_):Void
+	{
+		try
+		{
+			super.onFocus(_);
+		}
+		catch (e)
+		{
+			onCrash(e);
+		}
+	}
+	
+	override function onFocusLost(_):Void
+	{
+		try
+		{
+			super.onFocusLost(_);
+		}
+		catch (e)
+		{
+			onCrash(e);
+		}
+	}
+	
+	/**
+	 * Handles the `onEnterFrame` call and figures out how many updates and draw calls to do.
+	 */
+	override function onEnterFrame(_):Void
+	{
+		try
+		{
+			super.onEnterFrame(_);
+		}
+		catch (e)
+		{
+			onCrash(e);
+		}
+	}
+	
+	/**
+	 * This function is called by `step()` and updates the actual game state.
+	 * May be called multiple times per "frame" or draw call.
+	 */
+	override function update():Void
+	{
+		#if debug if (FlxG.keys.justPressed.F9) crashGame(); #end
+		try
+		{
+			super.update();
+		}
+		catch (e)
+		{
+			onCrash(e);
+		}
+	}
+	
+	/**
+	 * Goes through the game state and draws all the game objects and special effects.
+	 */
+	override function draw():Void
+	{
+		try
+		{
+			super.draw();
+		}
+		catch (e)
+		{
+			onCrash(e);
+		}
+	}
+
+	private final function onCrash(e:haxe.Exception):Void
+    {
+        Main.handleCrash(e);
+    }
+}
+#end

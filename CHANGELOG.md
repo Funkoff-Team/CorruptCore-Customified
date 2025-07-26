@@ -130,7 +130,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Scores to the freeplay menu
 - A few new intro boot messages.
-- Lightning effect in Spooky stages
+- Lightning effect in Spooky game.stages
 - Campaign scores, can now compete on scoreboards for campaign!
 - Can now change difficulties in Freeplay mode
 
