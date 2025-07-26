@@ -9,6 +9,8 @@ haxelib install tjson --quiet
 haxelib install hxjsonast --quiet
 haxelib set flixel 5.8.0 --never --quiet
 haxelib git lime https://github.com/GreenColdTea/lime-9.0.0
+haxelib install format
+haxelib install hxp
 haxelib set openfl 9.4.1
 haxelib install hxcpp --quiet
 haxelib install hxvlc --quiet --skip-dependencies
