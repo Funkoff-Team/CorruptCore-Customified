@@ -306,10 +306,12 @@ class MusicBeatState extends FlxUIState
 		var filesPushed = [];
 		for (folder in Paths.getStateScripts(state))
 		{
+			trace(folder);
 			if(FileSystem.exists(folder))
 			{
 				for (file in FileSystem.readDirectory(folder))
 				{
+					trace(file);
 					#if HSCRIPT_ALLOWED
 					if (file.endsWith('.hx') && !filesPushed.contains(file)) {
 						menuScriptArray.push(new HScript(folder + file));

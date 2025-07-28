@@ -48,6 +48,7 @@ class HScript implements HscriptInterface {
         "FlxTween" => flixel.tweens.FlxTween,
         "FlxEase" => flixel.tweens.FlxEase,
         "FlxText" => flixel.text.FlxText,
+
 		#if sys
         "File" => sys.io.File,
         "FileSystem" => sys.FileSystem,
@@ -60,6 +61,10 @@ class HScript implements HscriptInterface {
         "Character" => game.objects.Character,
 		"CoolUtil"	=> CoolUtil,
         "ClientPrefs" => game.backend.ClientPrefs,
+		"BGSprite" => BGSprite,
+		#if VIDEOS_ALLOWED
+		"FunkinVideoSprite" => game.objects.FunkinVideoSprite,
+		#end
 
 		#if SCRIPTABLE_STATES
 		"HScriptState" => game.scripting.HScriptState,
@@ -67,6 +72,14 @@ class HScript implements HscriptInterface {
 		"MusicBeatState" => MusicBeatState,
 		"MusicBeatSubstate" => MusicBeatSubstate,
 		#end
+
+		"PauseSubState"	 => game.substates.PauseSubState,
+		"FreeplayState"	 => game.states.FreeplayState,
+		"MainMenuState"	 => game.states.MainMenuState,
+		"StoryMenuState"	=> game.states.StoryMenuState,
+		"TitleState"		=> game.states.TitleState,
+		"OptionsState"		   => game.states.options.OptionsState,
+		"Alphabet"		  => game.objects.Alphabet,
 
 		//Extras
 		"Json" => haxe.Json,
@@ -77,6 +90,8 @@ class HScript implements HscriptInterface {
 		"FlxGroup" => flixel.group.FlxGroup,
 		"FlxTypedGroup" => flixel.group.FlxGroup.FlxTypedGroup,
 		"FlxSpriteGroup" => flixel.group.FlxSpriteGroup,
+		"FlxBackdrop" => flixel.addons.display.FlxBackdrop,
+		"FlxTiledSprite" => flixel.addons.display.FlxTiledSprite,
 		#if (!flash) 
 		"FlxRuntimeShader" => flixel.addons.display.FlxRuntimeShader, 
 		"ErrorRuntimeShader" => game.backend.ErrorShader.ErrorRuntimeShader,
@@ -224,7 +239,7 @@ class HScript implements HscriptInterface {
 		interp.variables.set("app", {
 			title: openfl.Lib.application.meta["name"],
 			file: openfl.Lib.application.meta["file"],
-			version: MainMenuState.ccEngineVersion,
+			version: Application.current.meta.get('version'),
 			dimensions: {width: 1280, height: 720}
 		});
 

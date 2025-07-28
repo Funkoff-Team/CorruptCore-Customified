@@ -45,6 +45,8 @@ import sys.io.File;
 
 import Type.ValueType;
 
+import game.PlayState;
+
 import game.backend.Controls;
 import game.objects.Character;
 import game.objects.DialogueBoxPsych;
@@ -87,7 +89,7 @@ class FunkinLua {
 
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	
-	public function new(script:String #if HSCRIPT_ALLOWED, ?isString:Bool = false #end) {
+	public function new(script:String, ?isString:Bool = false) {
 		#if LUA_ALLOWED
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -141,7 +143,9 @@ class FunkinLua {
 			this.modFolder = myFolder[1];
 		#end
 
+		#if HSCRIPT_ALLOWED
 		initHaxeModule();
+		#end
 
 		#if HSCRIPT_ALLOWED trace((isString ? 'lua string loaded succesfully' : 'lua file loaded succesfully: $script'));
 		#else trace('lua file loaded succesfully: $script'); #end
@@ -197,7 +201,7 @@ class FunkinLua {
 		set('rating', 0);
 		set('ratingName', '');
 		set('ratingFC', '');
-		set('version', MainMenuState.ccEngineVersion.trim());
+		set('version', Application.current.meta.get('version'));
 
 		set('inGameOver', false);
 		set('mustHitSection', false);
@@ -2326,11 +2330,21 @@ class FunkinLua {
 			return false;
 
 			#else
-			if(PlayState.instance.endingSong) {
-				PlayState.instance.endSong();
+			return true;
+			#end
+		});
+
+		Lua_helper.add_callback(lua, "startVideo", function(videoFile:String) {
+			#if VIDEOS_ALLOWED
+			if(FileSystem.exists(Paths.video(videoFile))) {
+				PlayState.instance.playVideo(videoFile);
+				return true;
 			} else {
-				PlayState.instance.startCountdown();
+				luaTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
 			}
+			return false;
+
+			#else
 			return true;
 			#end
 		});
@@ -3589,16 +3603,29 @@ class HScript
 		'FlxTimer' => flixel.util.FlxTimer,
 		'FlxTween' => flixel.tweens.FlxTween,
 		'FlxEase' => flixel.tweens.FlxEase,
+		"FlxMath" => flixel.math.FlxMath,
+		"FlxGroup" => flixel.group.FlxGroup,
+		"FlxTypedGroup" => flixel.group.FlxGroup.FlxTypedGroup,
+		"FlxSpriteGroup" => flixel.group.FlxSpriteGroup,
+		"FlxBackdrop" => flixel.addons.display.FlxBackdrop,
+		"FlxTiledSprite" => flixel.addons.display.FlxTiledSprite,
 
 		'PlayState' => PlayState,
 		'game' => PlayState.instance,
 		
 		'Paths' => Paths,
-		'Conductor' => Conductor,
-		'ClientPrefs' => ClientPrefs,
+		'Conductor' => game.backend.Conductor,
+		'ClientPrefs' => game.backend.ClientPrefs,
+		"BGSprite" => BGSprite,
+
+		#if VIDEOS_ALLOWED
+		"FunkinVideoSprite" => game.objects.FunkinVideoSprite,
+		#end
+
+		#if flxanimate "FlxAnimate" => FlxAnimate, #end
 		
 		'Character' => Character,
-		'Alphabet' => Alphabet,
+		'Alphabet' => game.objects.Alphabet,
 		'CustomSubstate' => CustomSubstate,
 		#if (!flash && sys) 'FlxRuntimeShader' => flixel.addons.display.FlxRuntimeShader, #end
 		'ShaderFilter' => openfl.filters.ShaderFilter,

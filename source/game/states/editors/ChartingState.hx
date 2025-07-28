@@ -40,10 +40,13 @@ import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
+
 import lime.media.AudioBuffer;
 import lime.utils.Assets;
+
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
+import openfl.events.MouseEvent;
 import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.Assets as OpenFlAssets;
@@ -107,6 +110,8 @@ class ChartingState extends MusicBeatState
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
+		['Play Sound', "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"],
+		['Play Video', "Value 1: Video file name"],
 		["Lyrics", "Lyrics!!!\nValue 1: Text and optionally, colour\n(To specify colour, seperate it by a --)\nValue 2: Duration, in seconds.\nDuration defaults to text length multiplied by 0.5"],
 		['Set Property', "Value 1: Variable name\nValue 2: New value"]
 	]; for mods*/
@@ -127,6 +132,8 @@ class ChartingState extends MusicBeatState
 		['Alt Idle Animation', "Sets a specified suffix after the idle animation name.\nYou can use this to trigger 'idle-alt' if you set\nValue 2 to -alt\n\nValue 1: Character to set (Dad, BF or GF)\nValue 2: New suffix (Leave it blank to disable)"],
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
+		['Play Sound', "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"],
+		['Play Video', "Value 1: Video file name/URl"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
 		["Lyrics", "Lyrics!!!\nValue 1: Text and optionally, colour\n(To specify colour, seperate it by a --)\nValue 2: Duration, in seconds.\nDuration defaults to text length multiplied by 0.5"],
 		['Set Property', "Value 1: Variable name\nValue 2: New value"]
@@ -3371,6 +3378,7 @@ class ChartingState extends MusicBeatState
 		var daSus:Dynamic = i[2];
 
 		var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, null, true);
+		if(note.noteData < 0) daSus == null;
 		if(daSus != null) { //Common note
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 			{
@@ -3381,7 +3389,7 @@ class ChartingState extends MusicBeatState
 				i.remove(i[3]);
 			}
 			note.sustainLength = daSus;
-			note.noteType = i[3] != null ? i[3] : "";
+			note.noteType = i[3];
 		} else { //Event note
 			note.loadGraphic(Paths.image('eventArrow'));
 			note.eventName = getEventName(i[1]);
@@ -4097,21 +4105,26 @@ class ChartingTipsSubstate extends MusicBeatSubstate
 		add(bg);
 
 		var text:String = 
-			"F2 - Show/hide characters\n" +
+			"F2 - Toggle characters visibility\n" +
 			"W/S or Mouse Wheel - Change playback position\n" +
 			"A/D - Go to previous/next section\n" +
 			"Left/Right - Change quantization\n" +
 			"Up/Down - Change playback position with quantization\n" +
 			"[ / ] - Change playback speed (SHIFT for faster change)\n" +
 			"ALT + [ / ] - Reset playback speed\n" +
-			"SHIFT - Move faster (4x)\n" +
-			"CTRL + click - Select note/event\n" +
-			"Ctrl + Z - Undo\n" +
-			"Ctrl + Y - Redo\n" +
+			"SHIFT - Move faster (4x speed)\n" +
+			"CTRL + click - Select/deselect notes\n" +
+			"CTRL + C - Copy selected notes\n" +
+			"CTRL + V - Paste copied notes\n" +
+			"CTRL + Z - Undo\n" +
+			"CTRL + Y - Redo\n" +
 			"Z/X - Zoom in/out\n" +
 			"ENTER - Play chart\n" +
 			"Q/E - Decrease/increase note length\n" +
-			"SPACE - Pause/resume playback";
+			"SPACE - Pause/resume playback\n" +
+			"TAB - Cycle through UI tabs\n" +
+			"BACKSPACE - Return to editor menu\n" +
+			"RIGHT CLICK - Open context menu";
 
 		var tipTextArray:Array<String> = text.split('\n');
 		var grpTexts:FlxTypedGroup<FlxText> = new FlxTypedGroup<FlxText>();
@@ -4151,54 +4164,103 @@ class ChartingTipsSubstate extends MusicBeatSubstate
 
 class ContextMenu extends MusicBeatSubstate
 {
-    public function new(x:Float, y:Float, note:Note, deleteCallback:Note->Void, copyCallback:Note->Void, pasteCallback:Void->Void)
-    {
-        super();
-        
-        var bg:FlxSprite = new FlxSprite().makeGraphic(100, 130, FlxColor.BLACK);
-		bg.scrollFactor.set();
-        bg.alpha = 0.8;
-        bg.x = x;
-        bg.y = y;
-        add(bg);
-        
-        var deleteBtn = new FlxButton(x + 10, y + 10, "Delete", () -> {
-            deleteCallback(note);
-            close();
-        });
-        
-        var copyBtn = new FlxButton(x + 10, y + 40, "Copy", () -> {
-            copyCallback(note);
-            close();
-        });
-        
-        var pasteBtn = new FlxButton(x + 10, y + 70, "Paste", () -> {
-            pasteCallback();
-            close();
-        });
-        
-        var propertiesBtn = new FlxButton(x + 10, y + 100, "Properties", () -> {
-            openNoteProperties(note);
-            close();
-        });
-        
-        add(deleteBtn);
-        add(copyBtn);
-        add(pasteBtn);
-        add(propertiesBtn);
-        
-        cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-    }
-    
-    function openNoteProperties(note:Note):Void
+	var bg:FlxSprite;
+	var menuBg:FlxSprite;
+	var buttons:Array<FlxButton> = [];
+
+	public function new(x:Float, y:Float, note:Note, deleteCallback:Note->Void, copyCallback:Note->Void, pasteCallback:Void->Void)
 	{
+		super();
+		
+		closeCallback = function() {
+			close();
+		};
+		
+		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.TRANSPARENT);
+		bg.scrollFactor.set();
+		bg.alpha = 0.0001;
+		bg.setPosition(0, 0);
+		add(bg);
+		
+		menuBg = new FlxSprite(x, y).makeGraphic(100, 130, FlxColor.BLACK);
+		menuBg.alpha = 0.8;
+		menuBg.scrollFactor.set();
+		add(menuBg);
+		
+		var buttonY = y + 10;
+		createButton("Delete", x + 10, buttonY, function() {
+			deleteCallback(note);
+			closeMenu();
+		});
+		
+		buttonY += 30;
+		createButton("Copy", x + 10, buttonY, function() {
+			copyCallback(note);
+			closeMenu();
+		});
+		
+		buttonY += 30;
+		createButton("Paste", x + 10, buttonY, function() {
+			pasteCallback();
+			closeMenu();
+		});
+		
+		//note properties removed for event notes due to critical error
+		if (note.noteData > -1) {
+			buttonY += 30;
+			createButton("Properties", x + 10, buttonY, function() {
+				openNoteProperties(note);
+			});
+		}
+		
+		var buttonCount = note.noteData > -1 ? 4 : 3;
+		menuBg.makeGraphic(100, 10 + buttonCount * 30, FlxColor.BLACK);
+		
+		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+	}
+
+	function createButton(label:String, x:Float, y:Float, onClick:Void->Void)
+	{
+		var button = new FlxButton(x, y, label, onClick);
+		button.scrollFactor.set();
+		button.updateHitbox();
+		add(button);
+		buttons.push(button);
+		return button;
+	}
+
+	function closeMenu():Void
+	{
+		if (closeCallback != null) closeCallback();
+	}
+
+	function openNoteProperties(note:Note):Void
+	{
+		var parent:ChartingState = cast FlxG.state.subState._parentState;
 		@:privateAccess {
-			var parent:ChartingState = cast FlxG.state.subState._parentState;
-			parent.openSubState(new NotePropertiesSubstate(note, function(updatedNote:Note) {
+			openSubState(new NotePropertiesSubstate(note, function(updatedNote:Note) {
 				parent.saveToUndo();
 				parent.updateNoteData(note, updatedNote);
 				parent.updateGrid();
+				closeSubState();
 			}, parent.eventStuff));
+		}
+	}
+	
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		
+		if (FlxG.mouse.justPressed) {
+			var mousePoint = FlxG.mouse.getScreenPosition(camera);
+			
+			if (!menuBg.getScreenBounds(null, camera).containsPoint(mousePoint)) {
+				closeMenu();
+			}
+		}
+		
+		if (FlxG.keys.justPressed.ESCAPE) {
+			closeMenu();
 		}
 	}
 }

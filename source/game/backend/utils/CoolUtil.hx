@@ -84,7 +84,7 @@ class CoolUtil
 	public static dynamic function getHScriptPreprocessors() {
 		var preprocessors:Map<String, Dynamic> = game.backend.macros.MacroUtil.defines;
 		preprocessors.set("CC_ENGINE", true);
-		preprocessors.set("CC_ENGINE_VER", MainMenuState.ccEngineVersion);
+		preprocessors.set("CC_ENGINE_VER", Application.current.meta.get('version'));
 		preprocessors.set("BUILD_TARGET", getBuildTarget());
 		preprocessors.set("INITIAL_STATE", Type.getClassName(Type.getClass(FlxG.state)));
 

@@ -421,7 +421,7 @@ class Character extends FlxSprite
 		else
 		{
 			atlas?.anim?.play(AnimName, Force, Reversed, Frame);
-			//atlas?.update(0);
+			atlas?.update(0);
 		}
 
 		_lastPlayedAnimation = AnimName;

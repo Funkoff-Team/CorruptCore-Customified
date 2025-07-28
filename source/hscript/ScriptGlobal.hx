@@ -95,6 +95,18 @@ class ScriptGlobal {
 		if(globalScript != null && globalScriptActive) return globalScript.call(callback, args);
 		return null;
 	}
+
+	public static function switchState(stateName:String, ?params:Array<Dynamic> = null) {
+		if(globalScript != null && globalScriptActive) {
+			globalScript.call("switchState", [stateName, params]);
+		}
+	}
+
+	public static function resetState(?params:Array<Dynamic> = null) {
+		if(globalScript != null && globalScriptActive) {
+			globalScript.call("resetState", [params]);
+		}
+	}
 	
 	public static function destroyModScript() {
 		if(globalScript != null && globalScriptActive) {

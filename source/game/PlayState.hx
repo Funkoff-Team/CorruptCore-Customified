@@ -29,6 +29,7 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxBar;
+import flixel.util.FlxAxes;
 import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
@@ -69,6 +70,10 @@ import game.objects.Note;
 import game.objects.Note.EventNote;
 import game.objects.NoteSplash;
 import game.objects.StrumNote;
+
+#if VIDEOS_ALLOWED
+import game.objects.FunkinVideoSprite;
+#end
 
 import game.shaders.*;
 import game.shaders.WiggleEffect.WiggleEffectType;
@@ -288,6 +293,11 @@ class PlayState extends MusicBeatState
 	//Hscript stuff
 	#if HSCRIPT_ALLOWED
 	public var hscriptArray:Array<HScript> = [];
+	#end
+
+	//VideoSprite stuff
+	#if VIDEOS_ALLOWED
+	var video:FunkinVideoSprite;
 	#end
 
 	// Debug buttons
@@ -1208,21 +1218,74 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
-		var video:MP4Handler = new MP4Handler();
-		video.smoothing = true;
-		video.load(filepath);
-		video.play();
-		video.onEndReached.add(() -> {
-			callOnScripts('onVideoCompleted', [name]);
-			video.dispose();
-			startAndEnd();
-			return;
+		video = new FunkinVideoSprite(0, 0, true);
+		video.antialiasing = ClientPrefs.globalAntialiasing;
+		video.cameras = [camOther];
+		add(video);
+
+		video.onFormat(() -> {
+			video.setGraphicSize(0, FlxG.height);
+			video.updateHitbox();
+			video.screenCenter(FlxAxes.X);
 		});
-		FlxG.addChildBelowMouse(video);
+
+		video.onEnd(() -> {
+			callOnScripts('onVideoCompleted', [name]);
+			video.destroy();
+			video = null;
+			startAndEnd();
+		});
+
+		if (video.load(filepath)) {
+			video.delayAndStart();
+		} else {
+			FlxG.log.warn('Failed to load video: $name');
+			startAndEnd();
+		}
 		#else
 		FlxG.log.warn('Platform not supported!');
 		startAndEnd();
-		return;
+		#end
+	}
+
+	//same as above but for mid part songs
+	public function playVideo(name:String)
+	{
+		#if VIDEOS_ALLOWED
+		inCutscene = true;
+
+		var filepath = (name.startsWith("https://") ? name : Paths.video(name));
+		
+		if(#if MODS_ALLOWED !FileSystem.exists(filepath) #else !OpenFlAssets.exists(filepath) #end && !name.startsWith("https://")) {
+			FlxG.log.warn('Couldnt find video file: $name');
+			trace('Couldnt find video file: $name');
+			return;
+		}
+
+		video = new FunkinVideoSprite(0, 0, true);
+		video.antialiasing = ClientPrefs.globalAntialiasing;
+		video.cameras = [camOther];
+		add(video);
+
+		video.onFormat(() -> {
+			video.setGraphicSize(0, FlxG.height);
+			video.updateHitbox();
+			video.screenCenter(FlxAxes.X);
+		});
+
+		video.onEnd(() -> {
+			video.destroy();
+			video = null;
+		});
+
+		if (video.load(filepath)) {
+			video.delayAndStart();
+		} else {
+			FlxG.log.warn('Failed to load video: $name');
+			trace('Failed to load video: $name');
+		}
+		#else
+		FlxG.log.warn('Platform not supported!');
 		#end
 	}
 
@@ -1341,18 +1404,7 @@ class PlayState extends MusicBeatState
 
 			startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
 			{
-				if (gf != null && tmr.loopsLeft % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
-				{
-					gf.dance();
-				}
-				if (tmr.loopsLeft % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
-				{
-					boyfriend.dance();
-				}
-				if (tmr.loopsLeft % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
-				{
-					dad.dance();
-				}
+				characterBopper(tmr.loopsLeft);
 
 				var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 				introAssets.set('default', ['ready', 'set', 'go']);
@@ -1729,8 +1781,8 @@ class PlayState extends MusicBeatState
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = game.states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 
-				var idx = swagNote.gfNote?2:gottaHitNote?0:1;
-				if (noteRows[idx][swagNote.row]==null)
+				var idx = swagNote.gfNote ? 2 : gottaHitNote ? 0 : 1;
+				if (noteRows[idx][swagNote.row] == null)
 					noteRows[idx][swagNote.row]=[];
 
 				noteRows[idx][swagNote.row].push(swagNote);
@@ -1916,6 +1968,12 @@ class PlayState extends MusicBeatState
 	override function openSubState(SubState:FlxSubState) {
 		stagesFunc(function(stage:BaseStage) stage.openSubState(SubState));
     	if (paused) {
+			#if VIDEOS_ALLOWED
+			if (video != null && video.bitmap != null) {
+				video.bitmap.pause();
+			}
+			#end
+
         	FlxG.sound.music?.pause();
         	vocals?.pause();
 			opponentVocals?.pause();
@@ -1936,6 +1994,10 @@ class PlayState extends MusicBeatState
 			if (FlxG.sound.music != null && !startingSong && canResync)
 			{
 				resyncVocals();
+			}
+
+			if (video != null && video.bitmap != null) {
+				video.bitmap.resume();
 			}
 
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = true);
@@ -2205,8 +2267,8 @@ class PlayState extends MusicBeatState
 			{
 				if(!cpuControlled) {
 					keyShit();
-				} else if(boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss')) {
-					boyfriend.dance();
+				} else {
+					playerDance();
 				}
 
 				if(notes.length > 0)
@@ -2722,6 +2784,10 @@ class PlayState extends MusicBeatState
 					if (Math.isNaN(volume)) volume = 1.0;
 				}
 				FlxG.sound.play(Paths.sound(value1), volume);
+
+			case 'Play Video':
+				var videoName:String = value1;
+				playVideo(videoName);
 		}
 		stagesFunc(function(stage:BaseStage) stage.eventCalled(eventName, value1, value2));
 		callOnScripts('onEvent', [eventName, value1, value2]);
@@ -3369,10 +3435,8 @@ class PlayState extends MusicBeatState
 				}
 				#end
 			}
-			else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
-			{
-				boyfriend.dance();
-				//boyfriend.animation.curAnim.finish();
+			else {
+				playerDance();
 			}
 		}
 
@@ -3835,18 +3899,7 @@ class PlayState extends MusicBeatState
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
 
-		if (gf != null && curBeat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
-		{
-			gf.dance();
-		}
-		if (curBeat % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
-		{
-			boyfriend.dance();
-		}
-		if (curBeat % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
-		{
-			dad.dance();
-		}
+		characterBopper(curBeat);
 
 		switch (curStage)
 		{
@@ -3890,6 +3943,23 @@ class PlayState extends MusicBeatState
 		
 		setOnScripts('curSection', curSection);
 		callOnScripts('onSectionHit', []);
+	}
+
+	public function characterBopper(beat:Int):Void
+	{
+		if (gf != null && beat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && !gf.getAnimationName().startsWith('sing') && !gf.stunned)
+			gf.dance();
+		if (boyfriend != null && beat % boyfriend.danceEveryNumBeats == 0 && !boyfriend.getAnimationName().startsWith('sing') && !boyfriend.stunned)
+			boyfriend.dance();
+		if (dad != null && beat % dad.danceEveryNumBeats == 0 && !dad.getAnimationName().startsWith('sing') && !dad.stunned)
+			dad.dance();
+	}
+
+	public function playerDance():Void
+	{
+		var anim:String = boyfriend.getAnimationName();
+		if(boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
+			boyfriend.dance();
 	}
 
 	#if LUA_ALLOWED

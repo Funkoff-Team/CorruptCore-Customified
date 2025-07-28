@@ -22,6 +22,8 @@ import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
 
+import lime.app.Application;
+
 import game.shaders.flixel.FlxShader;
 
 // Android things (will be neccesary in the future)

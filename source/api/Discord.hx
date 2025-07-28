@@ -93,7 +93,7 @@ class DiscordClient
 		presence.details = details;
 		presence.state = state;
 		presence.largeImageKey = 'icon';
-		presence.largeImageText = 'Engine Version: (${MainMenuState.ccEngineVersion})';
+		presence.largeImageText = 'Engine Version: (${Application.current.meta.get('version')})';
 		presence.smallImageKey = smallImageKey;
 		// Obtained times are in milliseconds so they are divided so Discord can use it
 		presence.startTimestamp = Std.int(startTimestamp / 1000);

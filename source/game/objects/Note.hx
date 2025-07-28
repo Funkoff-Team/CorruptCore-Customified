@@ -124,6 +124,8 @@ class Note extends FlxSprite
 	}
 
 	private function set_noteType(value:String):String {
+		if(noteData < 0) return '';
+
 		noteSplashTexture = PlayState.SONG.splashSkin;
 		if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length)
 		{
