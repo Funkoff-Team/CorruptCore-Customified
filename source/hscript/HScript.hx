@@ -71,6 +71,7 @@ class HScript implements HscriptInterface {
 		"HScriptSubstate" => game.scripting.HScriptSubstate,
 		"MusicBeatState" => MusicBeatState,
 		"MusicBeatSubstate" => MusicBeatSubstate,
+		"LoadingState" => game.states.LoadingState,
 		#end
 
 		"PauseSubState"	 => game.substates.PauseSubState,

@@ -89,21 +89,37 @@ class MusicBeatSubstate extends FlxSubState
 	public function runStateFiles(state:String, checkSpecificScript:Bool = false) {
 		#if SCRIPTABLE_STATES
 		if(!scriptsAllowed) return;
+		
 		var filesPushed = [];
-		for (folder in Paths.getStateScripts(state))
+		var scriptPaths = Paths.getSubStateScripts(state);
+		
+		for (path in scriptPaths)
 		{
-			if(FileSystem.exists(folder))
+			if(FileSystem.exists(path))
 			{
-				for (file in FileSystem.readDirectory(folder))
+				if(FileSystem.isDirectory(path))
 				{
-					#if HSCRIPT_ALLOWED
-					if (file.endsWith((checkSpecificScript ? (state + ".hx") : '.hx')) && !filesPushed.contains(file)) {
-						menuScriptArray.push(new HScript(folder + file));
-						filesPushed.push(file);
+					for (file in FileSystem.readDirectory(path))
+					{
+						#if HSCRIPT_ALLOWED
+						if (file.endsWith('.hx') && 
+							(checkSpecificScript ? (file == state + ".hx") : true) && 
+							!filesPushed.contains(file)) 
+						{
+							var fullPath = path + file;
+							menuScriptArray.push(new HScript(fullPath));
+							filesPushed.push(file);
+						}
+						#else
+						break;
+						#end
 					}
-					#else
-					break;
-					#end
+				}
+				// Если это файл
+				else if (path.endsWith('.hx') && !filesPushed.contains(path))
+				{
+					menuScriptArray.push(new HScript(path));
+					filesPushed.push(path);
 				}
 			}
 		}

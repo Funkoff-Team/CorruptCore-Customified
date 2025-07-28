@@ -299,27 +299,37 @@ class MusicBeatState extends FlxUIState
 	public var menuScriptArray:Array<HScript> = [];
 	public var scriptsAllowed:Bool = true;
 	#end
-	public function runStateFiles(state:String) {
+	public function runStateFiles(statePath:String) {
 		#if SCRIPTABLE_STATES
 		if(!scriptsAllowed) return;
 
 		var filesPushed = [];
-		for (folder in Paths.getStateScripts(state))
+		
+		var scriptPaths = Paths.getStateScripts(statePath);
+		
+		for (folder in scriptPaths)
 		{
-			trace(folder);
-			if(FileSystem.exists(folder))
+			if(FileSystem.exists(folder) && FileSystem.isDirectory(folder))
 			{
 				for (file in FileSystem.readDirectory(folder))
 				{
-					trace(file);
 					#if HSCRIPT_ALLOWED
 					if (file.endsWith('.hx') && !filesPushed.contains(file)) {
-						menuScriptArray.push(new HScript(folder + file));
+						var fullPath = folder + file;
+						menuScriptArray.push(new HScript(fullPath));
 						filesPushed.push(file);
 					}
 					#else
 					break;
 					#end
+				}
+			}
+			else if (FileSystem.exists(folder + '.hx'))
+			{
+				var fullPath = folder + '.hx';
+				if(!filesPushed.contains(fullPath)) {
+					menuScriptArray.push(new HScript(fullPath));
+					filesPushed.push(fullPath);
 				}
 			}
 		}

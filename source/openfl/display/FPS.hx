@@ -28,7 +28,11 @@ class FPS extends Bitmap
 	private var cacheCount:Int = 0;
 	private var currentTime:Float = 0;
 	private var times:Array<Float> = [];
+	#if (openfl >= "9.4.0")
+	private var peakMemory:Float = 0;
+	#else
 	private var peakMemory:UInt = 0;
+	#end
 
 	private var strokeSize:Int = 1; //set ur border size here
 	private var strokeColor:Int = 0xFF000000;
@@ -73,7 +77,11 @@ class FPS extends Bitmap
 		if (currentCount != cacheCount)
 		{
 			var output = "FPS: " + currentFPS;
+			#if (openfl >= "9.4.0")
+			var memoryUsage:Float = System.totalMemoryNumber;
+			#else
 			var memoryUsage:UInt = System.totalMemory;
+			#end
 			if (memoryUsage > peakMemory) peakMemory = memoryUsage;
 
 			output += "\nRAM: " + getSizeLabel(memoryUsage);
@@ -101,7 +109,7 @@ class FPS extends Bitmap
 		cacheCount = currentCount;
 	}
 
-	private function getSizeLabel(num:UInt):String
+	private function getSizeLabel(#if (openfl >= "9.4.0") num:Float #else num:UInt #end):String
 	{
 		var size:Float = num;
 		var data = 0;
@@ -126,9 +134,9 @@ class FPS extends Bitmap
 		tf.autoSize = LEFT;
 		tf.multiline = true;
 		tf.selectable = false;
-		tf.antiAliasType = ADVANCED;
-		tf.sharpness = 375;
-		tf.gridFitType = PIXEL;
+		tf.antiAliasType = NORMAL;
+		tf.sharpness = 100;
+		//tf.gridFitType = PIXEL;
 
 		var w = tf.width + strokeSize * 2;
 		var h = tf.height + strokeSize * 2;
