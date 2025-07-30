@@ -38,6 +38,7 @@ class HScript implements HscriptInterface {
         "Math" => Math,
         "Std" => Std,
 		"StringTools" => StringTools,
+		"Type" => Type,
 		"Lambda" => Lambda,
 		"Reflect" => Reflect,
 
@@ -97,6 +98,7 @@ class HScript implements HscriptInterface {
 		"FlxRuntimeShader" => flixel.addons.display.FlxRuntimeShader, 
 		"ErrorRuntimeShader" => game.backend.ErrorShader.ErrorRuntimeShader,
 		#end
+		"FlxShader" => game.shaders.flixel.FlxShader,
 		"ShaderFilter"	=> openfl.filters.ShaderFilter,
 
 		#if flxanimate "FlxAnimate" => FlxAnimate, #end
@@ -308,15 +310,32 @@ class HScript implements HscriptInterface {
 		return interp.scriptObject;
 
 	function importScript(path:String, absolute:Bool = false, ?ignoreError:Bool = false) {
-		var scriptPath = ((Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) ? Paths.mods(Paths.currentModDirectory + '/' + path) : Paths.mods(path));
+		#if MODS_ALLOWED
+		var scriptPath = ((Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) ? 
+			Paths.mods(Paths.currentModDirectory + '/' + path) : 
+			Paths.mods(path));
+		#else
+		var scriptPath = absolute ? path : Paths.getPreloadPath(path);
+		#end
+
 		try {
-			subScripts.push(new HScript((absolute ? path : scriptPath)));
+			#if HSCRIPT_ALLOWED
+			var targetPath = absolute ? path : scriptPath;
+			
+			if(!FileSystem.exists(targetPath)) {
+				throw 'File not found: $targetPath';
+			}
+			
+			subScripts.push(new HScript(targetPath));
 			return true;
-		} catch(e) {
-			if(!ignoreError) CoolUtil.hxTrace('importScript: Path "${(absolute ? path : scriptPath)}" does not exist!', 0xFFFF0000);
+			#else
+			if(!ignoreError) CoolUtil.hxTrace('importScript: HScript not allowed!', 0xFFFF0000);
+			return false;
+			#end
+		} catch(e:Dynamic) {
+			if(!ignoreError) CoolUtil.hxTrace('importScript: ${e.message}', 0xFFFF0000);
 			return false;
 		}
-		return false;
 	}
 
     public function initParser() {

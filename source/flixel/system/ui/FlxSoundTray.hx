@@ -70,8 +70,8 @@ class FlxSoundTray extends Sprite
     {
         super();
 
-        FlxG.sound.cache(volumeUpSound);
-        FlxG.sound.cache(volumeDownSound);
+        FlxG.sound.cache('$volumeUpSound.ogg');
+        FlxG.sound.cache('$volumeDownSound.ogg');
 
         visible = false;
         scaleX = _defaultScale;

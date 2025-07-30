@@ -21,7 +21,7 @@ import openfl.errors.Error;
 
 //crash handler stuff
 #if !CRASH_HANDLER
-import CrashHandler;
+import game.backend.CrashHandler;
 #end
 
 using StringTools;

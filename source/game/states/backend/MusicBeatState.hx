@@ -43,13 +43,13 @@ class MusicBeatState extends FlxUIState
 
 	public static var timePassedOnState:Float = 0;
 
+	//hscript
+	public var className:String = "";
+	public var useCustomStateName:Bool = false;
+
 	override function create() {
-		runStateFiles((useCustomStateName ? className : Type.getClassName(Type.getClass(this))));
-		
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		if(!_fnfCameraInitialized) initFNFCamera();
-
-		super.create();
 
 		CustomFadeTransition.nextCamera = FlxG.camera;
 
@@ -64,6 +64,10 @@ class MusicBeatState extends FlxUIState
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
+
+		runStateFiles((useCustomStateName ? className : Type.getClassName(Type.getClass(this))));
+
+		super.create();
 
 		quickCallMenuScript("onCreatePost", []);
 	}
@@ -255,8 +259,6 @@ class MusicBeatState extends FlxUIState
 	/*
 	* HScript things
 	*/
-	public var className:String = "";
-	public var useCustomStateName:Bool = false;
 	#if SCRIPTABLE_STATES
 	override public function openSubState(subState:FlxSubState) 
 	{

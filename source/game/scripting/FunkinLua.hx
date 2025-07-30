@@ -2702,7 +2702,11 @@ class FunkinLua {
 		{
 			try {
 				if(!absolute)
+					#if MODS_ALLOWED
 					File.saveContent(Paths.mods(path), content);
+					#else
+					File.saveContent(Paths.getPreloadPath(path), content);
+					#end
 				else
 					File.saveContent(path, content);
 
@@ -2953,43 +2957,87 @@ class FunkinLua {
 	}
 	#end
 
-	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic):Any
+	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic):Bool
 	{
+		if (variable == null || variable.length == 0) return false;
+		
 		var shit:Array<String> = variable.split('[');
-		if(shit.length > 1)
+		if (shit.length > 1)
 		{
 			var blah:Dynamic = null;
-			if(PlayState.instance.variables.exists(shit[0]))
+			var propName:String = shit[0];
+			
+			if (PlayState.instance != null && PlayState.instance.variables.exists(propName))
 			{
-				var retVal:Dynamic = PlayState.instance.variables.get(shit[0]);
-				if(retVal != null)
-					blah = retVal;
+				blah = PlayState.instance.variables.get(propName);
 			}
-			else
-				blah = Reflect.getProperty(instance, shit[0]);
-
+			else if (instance != null && Reflect.hasField(instance, propName))
+			{
+				blah = Reflect.getProperty(instance, propName);
+			}
+			
+			if (blah == null) {
+				trace('WARNING: Property not found: ${shit[0]}');
+				return false;
+			}
+			
 			for (i in 1...shit.length)
 			{
-				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
-				if(i >= shit.length-1) //Last array
-					blah[leNum] = value;
-				else //Anything else
-					blah = blah[leNum];
+				var arrayPart:String = shit[i];
+				if (arrayPart.endsWith(']')) arrayPart = arrayPart.substr(0, arrayPart.length - 1);
+				
+				if (arrayPart.length == 0) continue;
+				
+				var key:Dynamic = try Std.parseInt(arrayPart) catch(e:Dynamic) arrayPart;
+				
+				if (i == shit.length - 1)
+				{
+					if (Std.isOfType(blah, Array) || Reflect.hasField(blah, 'set') || Reflect.isObject(blah))
+					{
+						blah[key] = value;
+						return true;
+					}
+					trace('WARNING: Cannot set index on non-array: ${shit[0]}');
+					return false;
+				}
+				else
+				{
+					if (blah != null && (Reflect.isObject(blah) || Std.isOfType(blah, Array)))
+					{
+						blah = blah[key];
+					}
+					else
+					{
+						trace('WARNING: Cannot access index on non-container: ${shit.slice(0, i).join('[')}');
+						return false;
+					}
+				}
 			}
-			return blah;
+			return false;
 		}
-		/*if(Std.isOfType(instance, Map))
-			instance.set(variable,value);
-		else*/
-			
-		if(PlayState.instance.variables.exists(variable))
+		
+		try
 		{
-			PlayState.instance.variables.set(variable, value);
-			return true;
+			if (PlayState.instance != null && PlayState.instance.variables.exists(variable))
+			{
+				PlayState.instance.variables.set(variable, value);
+				return true;
+			}
+			
+			if (instance != null)
+			{
+				Reflect.setProperty(instance, variable, value);
+				return true;
+			}
+			
+			trace('WARNING: Instance is null for property: $variable');
+			return false;
 		}
-
-		Reflect.setProperty(instance, variable, value);
-		return true;
+		catch(e:Dynamic)
+		{
+			trace('ERROR: Failed to set property $variable: ${e.message}');
+			return false;
+		}
 	}
 	public static function getVarInArray(instance:Dynamic, variable:String):Any
 	{
@@ -3058,12 +3106,15 @@ class FunkinLua {
 			return true;
 		}
 
-		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('shaders/') #if MODS_ALLOWED , Paths.mods('shaders/') #end];
+
+		#if MODS_ALLOWED
 		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/shaders/'));
 
 		for(mod in Paths.getGlobalMods())
 			foldersToCheck.insert(0, Paths.mods(mod + '/shaders/'));
+		#end
 		
 		for (folder in foldersToCheck)
 		{

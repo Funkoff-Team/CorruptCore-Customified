@@ -12,11 +12,10 @@ class Init extends FlxState
 
     override function create()
     {
-        #if LUA_ALLOWED
+        #if (LUA_ALLOWED && MODS_ALLOWED)
 		Paths.pushGlobalMods();
-		#end
-		// Just to load a mod on start up if ya got one. For mods that change the menu music and bg
 		WeekData.loadTheFirstEnabledMod();
+		#end
 
         FlxG.sound.muteKeys = muteKeys;
 		FlxG.sound.volumeDownKeys = volumeDownKeys;
