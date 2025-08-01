@@ -518,9 +518,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 		var blockInput:Bool = false;
 		for (inputText in blockPressWhileTypingOn) {
 			if(inputText.hasFocus) {
-				FlxG.sound.muteKeys = [];
-				FlxG.sound.volumeDownKeys = [];
-				FlxG.sound.volumeUpKeys = [];
+				ClientPrefs.toggleVolumeKeys(false);
 				blockInput = true;
 
 				if(FlxG.keys.justPressed.ENTER) inputText.hasFocus = false;
@@ -529,9 +527,8 @@ class DialogueCharacterEditorState extends MusicBeatState
 		}
 
 		if(!blockInput && !animationDropDown.dropPanel.visible) {
-			FlxG.sound.muteKeys = Init.muteKeys;
-			FlxG.sound.volumeDownKeys = Init.volumeDownKeys;
-			FlxG.sound.volumeUpKeys = Init.volumeUpKeys;
+			ClientPrefs.toggleVolumeKeys(true);
+			
 			if(FlxG.keys.justPressed.SPACE && UI_mainbox.selected_tab_id == 'Character') {
 				character.playAnim(character.jsonFile.animations[curAnim].anim);
 				daText.resetDialogue();

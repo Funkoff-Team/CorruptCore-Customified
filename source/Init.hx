@@ -17,10 +17,6 @@ class Init extends FlxState
 		WeekData.loadTheFirstEnabledMod();
 		#end
 
-        FlxG.sound.muteKeys = muteKeys;
-		FlxG.sound.volumeDownKeys = volumeDownKeys;
-		FlxG.sound.volumeUpKeys = volumeUpKeys;
-
         FlxG.fixedTimestep = false;
 	    FlxG.game.focusLostFramerate = #if mobile 30 #else 60 #end;
         FlxG.keys.preventDefaultKeys = [TAB];

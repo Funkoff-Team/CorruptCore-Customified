@@ -24,6 +24,10 @@ import openfl.errors.Error;
 import game.backend.CrashHandler;
 #end
 
+#if LUA_ALLOWED
+import game.scripting.CallbackHandler;
+#end
+
 using StringTools;
 
 // NATIVE API STUFF, YOU CAN IGNORE THIS AND SCROLL //
@@ -127,6 +131,8 @@ class Main extends Sprite
 		lime.Native.fixScaling();
 		#end
 
+		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(CallbackHandler.call)); #end
+
 		#if VIDEOS_ALLOWED
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
 		#end
@@ -176,10 +182,6 @@ class Main extends Sprite
 			FlxG.stage.window.borderless = false;
 		}
 		#end
-
-		/*#if desktop
-		DiscordClient.prepare();
-		#end*/
 	}
 
 	private static function resetSpriteCache(sprite:Sprite):Void {
@@ -410,7 +412,7 @@ class FunkinGame extends FlxGame
 	 */
 	override function update():Void
 	{
-		#if debug if (FlxG.keys.justPressed.F9) crashGame(); #end
+		if (FlxG.keys.justPressed.F9) crashGame();
 		try
 		{
 			super.update();

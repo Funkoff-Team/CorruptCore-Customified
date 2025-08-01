@@ -3367,11 +3367,13 @@ class FunkinLua {
 	}
 
 	var lastCalledFunction:String = '';
+	public static var lastCalledScript:FunkinLua = null;
 	public function call(func:String, args:Array<Dynamic>):Dynamic {
 		#if LUA_ALLOWED
 		if(closed) return Function_Continue;
 
 		lastCalledFunction = func;
+		lastCalledScript = this;
 		try {
 			if(lua == null) return Function_Continue;
 
@@ -3486,6 +3488,11 @@ class FunkinLua {
 
 	#if LUA_ALLOWED
 	public function getBool(variable:String) {
+		if(lastCalledScript == null) return false;
+
+		var lua:State = lastCalledScript.lua;
+		if(lua == null) return false;
+		
 		var result:String = null;
 		Lua.getglobal(lua, variable);
 		result = Convert.fromLua(lua, -1);

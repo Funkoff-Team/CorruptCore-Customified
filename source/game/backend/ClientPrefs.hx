@@ -311,12 +311,7 @@ class ClientPrefs {
 	public static function reloadControls() {
 		PlayerSettings.player1.controls.setKeyboardScheme(KeyboardScheme.Solo);
 
-		Init.muteKeys = copyKey(keyBinds.get('volume_mute'));
-		Init.volumeDownKeys = copyKey(keyBinds.get('volume_down'));
-		Init.volumeUpKeys = copyKey(keyBinds.get('volume_up'));
-		FlxG.sound.muteKeys = Init.muteKeys;
-		FlxG.sound.volumeDownKeys = Init.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = Init.volumeUpKeys;
+		reloadVolumeKeys();
 	}
 	public static function copyKey(arrayToCopy:Array<FlxKey>):Array<FlxKey> {
 		var copiedArray:Array<FlxKey> = arrayToCopy.copy();
@@ -332,5 +327,21 @@ class ClientPrefs {
 			len = copiedArray.length;
 		}
 		return copiedArray;
+	}
+
+	inline public static function reloadVolumeKeys()
+	{
+		Init.muteKeys = copyKey(keyBinds.get('volume_mute'));
+		Init.volumeDownKeys = copyKey(keyBinds.get('volume_down'));
+		Init.volumeUpKeys = copyKey(keyBinds.get('volume_up'));
+		toggleVolumeKeys(true);
+	}
+
+	inline public static function toggleVolumeKeys(?turnOn:Bool = true)
+	{
+		final emptyArray = [];
+		FlxG.sound.muteKeys = turnOn ? Init.muteKeys : emptyArray;
+		FlxG.sound.volumeDownKeys = turnOn ? Init.volumeDownKeys : emptyArray;
+		FlxG.sound.volumeUpKeys = turnOn ? Init.volumeUpKeys : emptyArray;
 	}
 }

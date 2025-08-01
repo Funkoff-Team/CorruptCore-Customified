@@ -1270,15 +1270,9 @@ class PlayState extends MusicBeatState
 		video.cameras = [camOther];
 		add(video);
 
-		video.onFormat(() -> {
-			video.setGraphicSize(0, FlxG.height);
-			video.updateHitbox();
-			video.screenCenter(FlxAxes.X);
-		});
-
 		video.onEnd(() -> {
+			remove(video);
 			video.destroy();
-			video = null;
 		});
 
 		if (video.load(filepath)) {
@@ -1999,9 +1993,11 @@ class PlayState extends MusicBeatState
 				resyncVocals();
 			}
 
+			#if VIDEOS_ALLOWED
 			if (video != null && video.bitmap != null) {
 				video.bitmap.resume();
 			}
+			#end
 
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = true);
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished) twn.active = true);
