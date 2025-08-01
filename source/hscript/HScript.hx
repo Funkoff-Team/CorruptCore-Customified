@@ -8,6 +8,11 @@ import flixel.FlxG;
 import flixel.util.FlxColor;
 
 import game.scripting.FunkinLua;
+
+import game.scripting.HScriptFlxPoint;
+import game.scripting.HScriptFlxColor;
+import game.scripting.HScriptFlxAxes;
+
 import game.backend.utils.CoolUtil;
 import game.PlayState;
 
@@ -104,10 +109,11 @@ class HScript implements HscriptInterface {
 		#if flxanimate "FlxAnimate" => FlxAnimate, #end
 
 		//Extras with abstracts/enums
-		"FlxPoint" => CoolUtil.getMacroAbstractClass("flixel.math.FlxPoint"),
-		"FlxAxes" => CoolUtil.getMacroAbstractClass("flixel.util.FlxAxes"),
-		"FlxColor" => CoolUtil.getMacroAbstractClass("flixel.util.FlxColor")
-    ];
+		"FlxPoint" => HScriptFlxPoint,
+		"FlxColor" => HScriptFlxColor,
+		"FlxAxes" => HScriptFlxAxes
+	];
+
 	public static var staticVariables:Map<String, Dynamic> = [];
 
     public var parser:Parser;

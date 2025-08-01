@@ -203,7 +203,7 @@ class FlxSoundTray extends Sprite
         {
             var sound = FlxAssets.getSound(up ? volumeUpSound : volumeDownSound);
             if (sound != null)
-                FlxG.sound.load(sound).play();
+                FlxG.sound.play(sound);
         }
 
         // reduced display time (from 1.0 to 0.7)

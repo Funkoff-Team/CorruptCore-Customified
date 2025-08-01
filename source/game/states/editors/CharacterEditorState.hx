@@ -1134,8 +1134,8 @@ class CharacterEditorState extends MusicBeatState
 		
 		cameraFollowPointer.setPosition(x, y);
 		
-		FlxG.camera.scroll.x = cameraFollowPointer.getMidpoint().x / 2;
-		FlxG.camera.scroll.y = cameraFollowPointer.getMidpoint().x / 2;
+		/*FlxG.camera.scroll.x = cameraFollowPointer.getMidpoint().x / 2;
+		FlxG.camera.scroll.y = cameraFollowPointer.getMidpoint().x / 2;*/
 	}
 
 	function findAnimationByName(name:String):AnimArray {
@@ -1490,6 +1490,29 @@ class CharacterEditorState extends MusicBeatState
 				}
 			}
 			else holdingArrowsTime = 0;
+
+			if (changedOffset) {
+				if (char.animation.curAnim != null) {
+					var animName = char.animation.curAnim.name;
+					char.animOffsets.set(animName, [char.offset.x, char.offset.y]);
+					
+					for (anim in char.animationsArray) {
+						if (anim.anim == animName) {
+							anim.offsets = [Std.int(char.offset.x), Std.int(char.offset.y)];
+							break;
+						}
+					}
+					
+					if (ghostChar.visible && ghostChar.animation.curAnim != null && ghostChar.animation.curAnim.name == animName) {
+						ghostChar.animOffsets.set(animName, [char.offset.x, char.offset.y]);
+						ghostChar.offset.set(char.offset.x, char.offset.y);
+					}
+					
+					genBoyOffsets();
+					saveHistoryStuff();
+				}
+				changedOffset = false;
+			}
 		}
 		//camHUD.zoom = FlxG.camera.zoom;
 		ghostChar.setPosition(char.x, char.y);
