@@ -7,17 +7,19 @@ import flixel.animation.FlxBaseAnimation;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
-import game.backend.Section.SwagSection;
+
 #if MODS_ALLOWED
 import sys.io.File;
 import sys.FileSystem;
 #end
+
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
 
 import game.stages.objects.TankmenBG;
+import game.backend.Section.SwagSection;
 
 using StringTools;
 
@@ -160,7 +162,7 @@ class Character extends FlxSprite
 			spriteType = "packer";
 		}
 
-		#if flxanimate
+		#if flixel_animate
 		#if MODS_ALLOWED
 		var modAnimToFind:String = Paths.modFolders('images/' + json.image + '/Animation.json');
 		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
@@ -185,13 +187,12 @@ class Character extends FlxSprite
 			case "sparrow":
 				frames = Paths.getSparrowAtlas(json.image);
 
-			#if flxanimate
+			#if flixel_animate
 			case "texture":
 				atlas = new FlxAnimate();
-				atlas.showPivot = false;
 				try
 				{
-					Paths.loadAnimateAtlas(atlas, json.image);
+					atlas.frames = Paths.getAnimateAtlas(json.image);
 				}
 				catch (e:haxe.Exception)
 				{
@@ -247,12 +248,12 @@ class Character extends FlxSprite
 					else
 						animation.addByPrefix(animAnim, animName, animFps, animLoop);
 				}
-				#if flxanimate
+				#if flixel_animate
 				else
 				{
 					if (animIndices != null && animIndices.length > 0)
 						atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
-					else if (atlas.anim.symbolDictionary.exists(animName)) // ? Allow us to use labels please
+					else if (atlas.library.getSymbol(animName) != null) // ? Allow us to use labels please
 						atlas.anim.addBySymbol(animAnim, animName, animFps, animLoop);
 					else // ? Allow us to use labels please
 						atlas.anim.addByFrameLabel(animAnim, animName, animFps, animLoop);
@@ -284,7 +285,7 @@ class Character extends FlxSprite
 			}
 		}
 
-		#if flxanimate
+		#if flixel_animate
 		if (isAnimateAtlas)
 			copyAtlasValues();
 		#end
@@ -313,7 +314,7 @@ class Character extends FlxSprite
 
 		if (debugMode
 			|| (!isAnimateAtlas && animation.curAnim == null)
-			|| (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)))
+			|| (isAnimateAtlas && atlas.anim.curAnim == null))
 		{
 			super.update(elapsed);
 			return;
@@ -555,7 +556,7 @@ class Character extends FlxSprite
 
 	inline public function isAnimationNull():Bool
 	{
-		return !isAnimateAtlas ? (animation.curAnim == null) : (atlas.anim.curInstance == null || atlas.anim.curSymbol == null);
+		return !isAnimateAtlas ? (animation.curAnim == null) : (atlas.anim.curAnim == null);	
 	}
 
 	var _lastPlayedAnimation:String;
@@ -577,13 +578,13 @@ class Character extends FlxSprite
 		if(isAnimationNull()) return;
 
 		if(!isAnimateAtlas) animation.curAnim.finish();
-		else atlas.anim.curFrame = atlas.anim.length - 1;
+		else atlas.anim.frameIndex = atlas.anim.numFrames - 1;
 	}
 
 	// Atlas support
 	// special thanks ne_eo for the references, you're the goat!!
 	public var isAnimateAtlas:Bool = false;
-	#if flxanimate
+	#if flixel_animate
 	public var atlas:FlxAnimate;
 	#end
 
@@ -592,10 +593,10 @@ class Character extends FlxSprite
 		var lastAlpha:Float = alpha;
 		var lastColor:FlxColor = color;
 
-		#if flxanimate
+		#if flixel_animate
 		if (isAnimateAtlas)
 		{
-			if (atlas.anim.curInstance != null)
+			if (atlas.anim.curAnim != null)
 			{
 				copyAtlasValues();
 				atlas.draw();
@@ -614,7 +615,7 @@ class Character extends FlxSprite
 		super.draw();
 	}
 
-	#if flxanimate
+	#if flixel_animate
 	public function copyAtlasValues()
 	{
 		@:privateAccess

@@ -21,7 +21,7 @@ haxelib set flixel-addons 3.2.3
 haxelib set hscript 2.4.0
 haxelib set hxdiscord_rpc 1.2.4 --quiet
 haxelib git sl-windows-api https://github.com/GreenColdTea/windows-api-improved.git
-haxelib git flxanimate https://github.com/Psych-Slice/FlxAnimate.git 18091dfeb629ba2805a5f3e10f5de80433080359
+haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git 8487b0f2ea771bb4aa66675101043d5eb195f3ab
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
 haxelib list
 echo.

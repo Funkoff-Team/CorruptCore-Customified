@@ -130,7 +130,7 @@
 
 	<haxedef name="hscriptPos" />
 
-	<haxelib name="flxanimate" />
+	<haxelib name="flixel-animate" />
 	<haxelib name="hxcpp"/>	
 
 	<!-- Disable Discord IO Thread -->

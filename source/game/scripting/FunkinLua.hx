@@ -13,6 +13,8 @@ import flixel.input.keyboard.FlxKey;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
+import flixel.graphics.FlxGraphic;
+import flixel.group.FlxGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
@@ -61,6 +63,11 @@ import hscript.Expr;
 
 #if desktop
 import api.Discord;
+#end
+
+#if flixel_animate
+import animate.internal.Timeline;
+import animate.FlxAnimateJson.TimelineJson;
 #end
 
 using StringTools;
@@ -1904,8 +1911,8 @@ class FunkinLua {
 		});
 
 		//FlxAnimate Funcs
-		#if flxanimate
-		Lua_helper.add_callback(lua, "makeFlxAnimateSprite", function(tag:String, ?x:Float = 0, ?y:Float = 0, ?loadFolder:String = null) {
+		#if flixel_animate
+		Lua_helper.add_callback(lua, "makeFlxAnimateSprite", function(tag:String, atlasFolder:String, ?x:Float = 0, ?y:Float = 0) {
 			tag = tag.replace('.', '');
 			var lastSprite = PlayState.instance.variables.get(tag);
 			if(lastSprite != null)
@@ -1916,22 +1923,17 @@ class FunkinLua {
 			}
 
 			var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
-			if(loadFolder != null) Paths.loadAnimateAtlas(mySprite, loadFolder);
+			mySprite.frames = Paths.getAnimateAtlas(atlasFolder);
 			PlayState.instance.variables.set(tag, mySprite);
 			mySprite.active = true;
 		});
-
-		Lua_helper.add_callback(lua, "loadAnimateAtlas", function(tag:String, folderOrImg:Dynamic, ?spriteJson:Dynamic = null, ?animationJson:Dynamic = null) {
-			var spr:FlxAnimate = PlayState.instance.variables.get(tag);
-			if(spr != null) Paths.loadAnimateAtlas(spr, folderOrImg, spriteJson, animationJson);
-		});
 		
-		Lua_helper.add_callback(lua, "addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+		Lua_helper.add_callback(lua, "addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?flipX:Bool = false, ?flipY:Bool = false)
 		{
 			var obj:Dynamic = PlayState.instance.variables.get(tag);
 			if(cast (obj, FlxAnimate) == null) return false;
 
-			obj.anim.addBySymbol(name, symbol, framerate, loop, matX, matY);
+			obj.anim.addBySymbol(name, symbol, framerate, loop, flipX, flipY);
 			if(obj.anim.lastPlayedAnim == null)
 			{
 				if(obj.playAnim != null) obj.playAnim(name, true); //is ModchartAnimateSprite
@@ -1940,7 +1942,7 @@ class FunkinLua {
 			return true;
 		});
 
-		Lua_helper.add_callback(lua, "addAnimationBySymbolIndices", function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+		Lua_helper.add_callback(lua, "addAnimationBySymbolIndices", function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?flipX:Bool = false, ?flipY:Bool = false)
 		{
 			var obj:Dynamic = PlayState.instance.variables.get(tag);
 			if(cast (obj, FlxAnimate) == null) return false;
@@ -1957,12 +1959,88 @@ class FunkinLua {
 				indices = myIndices;
 			}
 
-			obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop, matX, matY);
+			obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop, flipX, flipY);
 			if(obj.anim.lastPlayedAnim == null)
 			{
 				if(obj.playAnim != null) obj.playAnim(name, true); //is ModchartAnimateSprite
 				else obj.animation.play(name, true);
 			}
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "addAnimationByFrameLabel", function(tag:String, name:String, label:String, ?framerate:Float = 24, ?loop:Bool = false, ?flipX:Bool = false, ?flipY:Bool = false)
+		{
+			var obj:Dynamic = PlayState.instance.variables.get(tag);
+			if(cast (obj, FlxAnimate) == null) return false;
+
+			obj.anim.addByFrameLabel(name, label, framerate, loop, flipX, flipY);
+			if(obj.anim.lastPlayedAnim == null)
+			{
+				if(obj.playAnim != null) obj.playAnim(name, true); //is ModchartAnimateSprite
+				else obj.animation.play(name, true);
+			}
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "addAnimationByFrameLabelIndices", function(tag:String, name:String, label:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?flipX:Bool = false, ?flipY:Bool = false)
+		{
+			var obj:Dynamic = PlayState.instance.variables.get(tag);
+			if(cast (obj, FlxAnimate) == null) return false;
+
+			if(indices == null)
+				indices = [0];
+			else if(Std.isOfType(indices, String))
+			{
+				var strIndices:Array<String> = cast (indices, String).trim().split(',');
+				var myIndices:Array<Int> = [];
+				for (i in 0...strIndices.length) {
+					myIndices.push(Std.parseInt(strIndices[i]));
+				}
+				indices = myIndices;
+			}
+
+			obj.anim.addByFrameLabelIndices(name, label, indices, framerate, loop, flipX, flipY);
+			if(obj.anim.lastPlayedAnim == null)
+			{
+				if(obj.playAnim != null) obj.playAnim(name, true); //is ModchartAnimateSprite
+				else obj.animation.play(name, true);
+			}
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "addByTimeline", function(tag:String, name:String, timelinePath:String, ?framerate:Float = 24, ?loop:Bool = true, ?flipX:Bool = false, ?flipY:Bool = false) {
+			var obj:Dynamic = PlayState.instance.variables.get(tag);
+			if(cast (obj, FlxAnimate) == null) return false;
+
+			var timeline:Timeline = loadTimelineFromJson(timelinePath);
+			if(timeline == null) {
+				luaTrace('addByTimeline: Timeline not found: $timelinePath', false, false, FlxColor.RED);
+				return false;
+			}
+
+			obj.anim.addByTimeline(name, timeline, framerate, loop, flipX, flipY);
+			return true;
+		});
+
+		Lua_helper.add_callback(lua, "addByTimelineIndices", function(tag:String, name:String, timelinePath:String, indices:Any = null, ?framerate:Float = 24, ?loop:Bool = true, ?flipX:Bool = false, ?flipY:Bool = false) {
+			var obj:Dynamic = PlayState.instance.variables.get(tag);
+			if(cast (obj, FlxAnimate) == null) return false;
+
+			var timeline:Timeline = loadTimelineFromJson(timelinePath);
+			if(timeline == null) {
+				luaTrace('addByTimelineIndices: Timeline not found: $timelinePath', false, false, FlxColor.RED);
+				return false;
+			}
+
+			var idxArray:Array<Int> = [];
+			if(Std.isOfType(indices, String)) {
+				var strIndices = cast(indices, String).split(',');
+				for(i in strIndices) idxArray.push(Std.parseInt(i.trim()));
+			} else if(Std.isOfType(indices, Array)) {
+				idxArray = cast indices;
+			}
+
+			obj.anim.addByTimelineIndices(name, timeline, idxArray, framerate, loop, flipX, flipY);
 			return true;
 		});
 		#end
@@ -3072,6 +3150,29 @@ class FunkinLua {
 		return Reflect.getProperty(instance, variable);
 	}
 
+	#if flixel_animate
+	private function loadTimelineFromJson(path:String):Timeline {
+		#if MODS_ALLOWED
+		var rawJson:String = Paths.getTextFromFile(path);
+		#else
+		var rawJson:String = Assets.getText(Paths.json(path));
+		#end
+
+		if(rawJson != null && rawJson.length > 0) {
+			try {
+				var json:TimelineJson = haxe.Json.parse(rawJson);
+				// This ass pissed me off tbh
+				var dummyGraphic = FlxGraphic.fromRectangle(1, 1, FlxColor.TRANSPARENT);
+				var dummyParent = new FlxAnimateFrames(dummyGraphic);
+				return new Timeline(json, dummyParent, path);
+			} catch(e:Dynamic) {
+				trace('Error parsing timeline JSON: $e');
+			}
+		}
+		return null;
+	}
+	#end
+
 	inline static function getTextObject(name:String):FlxText
 	{
 		return PlayState.instance.modchartTexts.exists(name) ? PlayState.instance.modchartTexts.get(name) : Reflect.getProperty(PlayState.instance, name);
@@ -3550,13 +3651,13 @@ class ModchartBackdrop extends FlxBackdrop {
 	}
 }
 
-#if flxanimate
+#if flixel_animate
 class ModchartAnimateSprite extends FlxAnimate
 {
 	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
-	public function new(?x:Float = 0, ?y:Float = 0, ?path:String, ?settings:FlxAnimate.Settings)
+	public function new(?x:Float = 0, ?y:Float = 0, ?path:String)
 	{
-		super(x, y, path, settings);
+		super(x, y, path);
 		antialiasing = ClientPrefs.globalAntialiasing;
 	}
 
@@ -3591,20 +3692,75 @@ class ModchartText extends FlxText
 class DebugLuaText extends FlxText
 {
 	private var disableTime:Float = 6;
+	public var readyToRemove:Bool = false;
 	public var parentGroup:FlxTypedGroup<DebugLuaText>;
+
 	public function new(text:String, parentGroup:FlxTypedGroup<DebugLuaText>, color:FlxColor) {
 		this.parentGroup = parentGroup;
-		super(10, 10, 0, text, 16);
+		super(10, 10, FlxG.width - 20, text, 16); 
+		
 		setFormat(Paths.font("vcr.ttf"), 20, color, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scrollFactor.set();
 		borderSize = 1;
+		
+		wordWrap = true;
+		
+		updateHitbox();
 	}
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 		disableTime -= elapsed;
+		
 		if(disableTime < 0) disableTime = 0;
 		if(disableTime < 1) alpha = disableTime;
+		
+		if(disableTime <= 0 && alpha <= 0) {
+			readyToRemove = true;
+		}
+	}
+}
+
+class DebugTextGroup extends FlxTypedGroup<DebugLuaText>
+{
+	private var totalHeight:Float = 0;
+	
+	public function new() {
+		super();
+	}
+	
+	public function addText(text:DebugLuaText) {
+		insert(0, text);
+		recalculatePositions();
+	}
+	
+	public function removeText(text:DebugLuaText) {
+		remove(text);
+		recalculatePositions();
+	}
+	
+	override function update(elapsed:Float) {
+		super.update(elapsed);
+		
+		var i:Int = 0;
+		while (i < length) {
+			var text = members[i];
+			if (text != null && text.readyToRemove) {
+				removeText(text);
+				text.destroy();
+			} else {
+				i++;
+			}
+		}
+	}
+	
+	public function recalculatePositions() {
+		totalHeight = 10;
+		
+		forEachAlive(function(text:DebugLuaText) {
+			text.y = totalHeight;
+			totalHeight += text.height + 5;
+		});
 	}
 }
 
@@ -3680,7 +3836,7 @@ class HScript
 		"FunkinVideoSprite" => game.objects.FunkinVideoSprite,
 		#end
 
-		#if flxanimate "FlxAnimate" => FlxAnimate, #end
+		#if flixel_animate "FlxAnimate" => FlxAnimate, #end
 		
 		'Character' => Character,
 		'Alphabet' => game.objects.Alphabet,

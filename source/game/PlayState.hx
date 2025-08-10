@@ -1255,8 +1255,6 @@ class PlayState extends MusicBeatState
 	public function playVideo(name:String)
 	{
 		#if VIDEOS_ALLOWED
-		inCutscene = true;
-
 		var filepath = (name.startsWith("https://") ? name : Paths.video(name));
 		
 		if(#if MODS_ALLOWED !FileSystem.exists(filepath) #else !OpenFlAssets.exists(filepath) #end && !name.startsWith("https://")) {

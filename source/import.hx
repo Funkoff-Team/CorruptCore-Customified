@@ -39,9 +39,13 @@ import android.os.Build.VERSION_CODES as AndroidVersionCode;
 import android.os.BatteryManager as AndroidBatteryManager;
 #end
 
-#if flxanimate
-import flxanimate.*;
-import flxanimate.PsychFlxAnimate as FlxAnimate;
+#if flixel_animate
+import animate.*;
+import animate.FlxAnimate;
+#end
+
+#if haxeui_flixel
+import haxe.ui.backend.flixel.UIState;
 #end
 
 import game.*;

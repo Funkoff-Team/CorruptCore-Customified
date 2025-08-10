@@ -6,7 +6,7 @@ import llua.LuaL;
 import llua.State;
 import llua.Convert;
 
-class CallbackHandler
+class LuaCallbackHandler
 {
 	public static inline function call(l:State, fname:String):Int
 	{

@@ -541,18 +541,7 @@ class ChartingState extends MusicBeatState
 			}
 			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function() {
 				var songName = _song.song.toLowerCase();
-				var songFolder = Paths.formatToSongPath(UI_songTitle.text);
-				var formattedSongPath = checkForJSON(songName, songFolder);
-				#if sys
-				trace("Checking system file: " + formattedSongPath + " -> " + sys.FileSystem.exists(formattedSongPath));
-				#end
-				if (sys.FileSystem.exists(formattedSongPath)) {
-					loadJson(songName);
-				} else {
-					openSubState(new Prompt('Song not found!\nPlease check the song name.', 1, function() {
-						closeSubState();
-					}, null, false, "OK", null));
-				}
+				loadJson(songName);
 			}, null, ignoreWarnings, "OK", "CANCEL"));
 		});
 
@@ -3934,10 +3923,22 @@ class ChartingState extends MusicBeatState
 
 	function loadJson(song:String):Void
 	{
-		var songLower:String = song.toLowerCase();	
-		var lastDashIndex = songLower.lastIndexOf("-");
-			
-		PlayState.SONG = Song.loadFromJson(songLower, songLower);
+		try {
+			if (CoolUtil.difficulties[PlayState.storyDifficulty] != CoolUtil.defaultDifficulty) {
+				if(CoolUtil.difficulties[PlayState.storyDifficulty] == null){
+					PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
+				}else{
+					PlayState.SONG = Song.loadFromJson(song.toLowerCase() + "-" + CoolUtil.difficulties[PlayState.storyDifficulty], song.toLowerCase());
+				}
+			} else {
+				PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
+			}
+		} catch (e:Dynamic) {
+			openSubState(new Prompt('Song not found!\nPlease check the song name.', 1, function() {
+				closeSubState();
+			}, null, false, "OK", null));
+			return;
+		}
 		MusicBeatState.resetState();
 	}
 

@@ -41,7 +41,7 @@ class HScriptFlxColor {
     
     public static function fromString(str:String):Null<Int> {
         var result = FlxColor.fromString(str);
-        return result != null ? result.to24Bit() : null;
+        return result != null ? result : null;
     }
     
     //Utility methods

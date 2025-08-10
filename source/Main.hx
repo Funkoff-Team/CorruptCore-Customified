@@ -25,14 +25,14 @@ import game.backend.CrashHandler;
 #end
 
 #if LUA_ALLOWED
-import game.scripting.CallbackHandler;
+import game.scripting.LuaCallbackHandler;
 #end
 
 using StringTools;
 
 // NATIVE API STUFF, YOU CAN IGNORE THIS AND SCROLL //
 #if (linux && !debug)
-@:cppInclude('./external/gamemode_client.h')
+@:cppInclude('./_external/gamemode_client.h')
 @:cppFileCode('#define GAMEMODE_AUTO')
 #end
 
@@ -131,7 +131,7 @@ class Main extends Sprite
 		lime.Native.fixScaling();
 		#end
 
-		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(CallbackHandler.call)); #end
+		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(LuaCallbackHandler.call)); #end
 
 		#if VIDEOS_ALLOWED
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
@@ -245,6 +245,7 @@ class Main extends Sprite
 	private static function getColorblindMatrix(type:Int, intensity:Float):Array<Float> {
 		var matrixShit:Array<Float> = [];
 		switch (type) {
+			// colorblindness types
 			case 0: // Deuteranopia
 				matrixShit = [
 					0.625, 0.375, 0, 0, 0,

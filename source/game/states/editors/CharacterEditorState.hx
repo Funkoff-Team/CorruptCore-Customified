@@ -928,10 +928,9 @@ class CharacterEditorState extends MusicBeatState
 		{
 			// animate sex loading
 			char.atlas = new FlxAnimate();
-			char.atlas.showPivot = false;
 			try
 			{
-				Paths.loadAnimateAtlas(char.atlas, char.imageFile);
+				char.atlas.frames = Paths.getAnimateAtlas(char.imageFile);
 			}
 			catch(e:Dynamic)
 			{

@@ -47,11 +47,18 @@ class HScript implements HscriptInterface {
 		"Lambda" => Lambda,
 		"Reflect" => Reflect,
 
+		'StringMap' => haxe.ds.StringMap,
+		'IntMap' => haxe.ds.IntMap,
+		'ObjectMap' => haxe.ds.ObjectMap,
+
 		//Flixel Classes
         "FlxG" => flixel.FlxG,
         "FlxSprite" => flixel.FlxSprite,
+		'FlxSpriteUtil' => flixel.util.FlxSpriteUtil,
         "FlxTimer" => flixel.util.FlxTimer,
         "FlxTween" => flixel.tweens.FlxTween,
+		"FlxTweenType" => game.scripting.HScriptFlxTweenType,
+		"FlxPoint" => flixel.math.FlxPoint.FlxBasePoint,
         "FlxEase" => flixel.tweens.FlxEase,
         "FlxText" => flixel.text.FlxText,
 
@@ -97,6 +104,7 @@ class HScript implements HscriptInterface {
 		"FlxGroup" => flixel.group.FlxGroup,
 		"FlxTypedGroup" => flixel.group.FlxGroup.FlxTypedGroup,
 		"FlxSpriteGroup" => flixel.group.FlxSpriteGroup,
+		"FlxSkewedSprite" => flixel.addons.effects.FlxSkewedSprite,
 		"FlxBackdrop" => flixel.addons.display.FlxBackdrop,
 		"FlxTiledSprite" => flixel.addons.display.FlxTiledSprite,
 		#if (!flash) 
@@ -106,10 +114,9 @@ class HScript implements HscriptInterface {
 		"FlxShader" => game.shaders.flixel.FlxShader,
 		"ShaderFilter"	=> openfl.filters.ShaderFilter,
 
-		#if flxanimate "FlxAnimate" => FlxAnimate, #end
+		#if flixel_animate "FlxAnimate" => FlxAnimate, #end
 
 		//Extras with abstracts/enums
-		"FlxPoint" => HScriptFlxPoint,
 		"FlxColor" => HScriptFlxColor,
 		"FlxAxes" => HScriptFlxAxes
 	];
