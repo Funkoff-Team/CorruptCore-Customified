@@ -128,6 +128,7 @@
 	<haxelib name="faxe" if="switch"/>
 	<haxelib name="hxcpp-debug-server" if="desktop debug"/>
 
+	<haxelib name="hscript" if="HSCRIPT_ALLOWED"/>
 	<haxedef name="hscriptPos" />
 
 	<haxelib name="flixel-animate" />
