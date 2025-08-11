@@ -209,6 +209,7 @@ class Main extends Sprite
 
 	/**
 	 * Crash handler stuff
+	 * 
 	 * Better instead of causing a dialog window appearing and crashing the game 
 	 */
 	private function onUncaughtError(e:UncaughtErrorEvent):Void
@@ -294,6 +295,7 @@ class Main extends Sprite
 
 	/**
 	 * Colorblind mode stuff
+	 * 
 	 * Applies a colorblind filter to the camera.
 	 * @param type - The type of colorblindness (0-7, -1 for no filter).
 	 * @param intensity - The intensity of the filter (0-1, 1 being full intensity).
