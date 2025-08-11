@@ -243,7 +243,7 @@ class Main extends Sprite
 		final crashReport = 'CRASH DETAILS:\n$errorMsg\n\nSTACK TRACE:\n$stackTrace';
 		
 		try {
-			FlxG.switchState(new CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
+			FlxG.switchState(() -> new CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
 		} catch (e:Dynamic) {
 			// If the crash handler fails, we log the error to console
 			trace("CRITICAL CRASH IN HANDLER:", e);

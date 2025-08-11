@@ -2492,7 +2492,7 @@ class PlayState extends MusicBeatState
 				FlxTween.globalManager.clear();
 				openSubState(new GameOverSubstate());
 
-				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+				// MusicBeatState.switchState(new GameOverState(boyfriend.getViewPosition().x, boyfriend.getViewPosition().y));
 
 				#if desktop
 				// Game Over doesn't get his own variable because it's only used here

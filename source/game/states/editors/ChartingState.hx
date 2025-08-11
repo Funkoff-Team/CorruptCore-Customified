@@ -2129,8 +2129,8 @@ class ChartingState extends MusicBeatState
 				if (clickedNote != null)
 				{
 					openSubState(new ContextMenu(
-						FlxG.mouse.screenX,
-						FlxG.mouse.screenY,
+						FlxG.mouse.viewX,
+						FlxG.mouse.viewY,
 						clickedNote,
 						deleteNote,
 						copyNote,
@@ -4249,7 +4249,7 @@ class ContextMenu extends MusicBeatSubstate
 		super.update(elapsed);
 		
 		if (FlxG.mouse.justPressed) {
-			var mousePoint = FlxG.mouse.getScreenPosition(camera);
+			var mousePoint = FlxG.mouse.getViewPosition(camera);
 			
 			if (!menuBg.getScreenBounds(null, camera).containsPoint(mousePoint)) {
 				closeMenu();

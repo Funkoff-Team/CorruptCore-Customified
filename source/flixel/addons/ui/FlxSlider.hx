@@ -289,7 +289,7 @@ class FlxSlider extends FlxSpriteGroup
 
 			if (FlxG.mouse.pressed)
 			{
-				handle.x = FlxG.mouse.getPositionInCameraView(camera).x;
+				handle.x = FlxG.mouse.getViewPosition(camera).x;
 				updateValue();
 
 				#if FLX_SOUND_SYSTEM
@@ -341,7 +341,7 @@ class FlxSlider extends FlxSpriteGroup
 
 	private function mouseInRect(rect:flixel.math.FlxRect) 
 	{
-		if (FlxMath.pointInFlxRect(FlxG.mouse.getPositionInCameraView(camera).x,FlxG.mouse.getPositionInCameraView(camera).y,rect)) return true;
+		if (FlxMath.pointInFlxRect(FlxG.mouse.getViewPosition(camera).x,FlxG.mouse.getViewPosition(camera).y,rect)) return true;
 		else return false;
 	}
 

@@ -38,6 +38,6 @@ class Init extends FlxState
 		if(!hscript.ScriptGlobal.globalScriptActive) hscript.ScriptGlobal.addGlobalScript();
 		#end
 
-		FlxG.switchState(new TitleState());
+		FlxG.switchState(() -> new TitleState());
     }
 }

@@ -578,7 +578,7 @@ class Character extends FlxSprite
 		if(isAnimationNull()) return;
 
 		if(!isAnimateAtlas) animation.curAnim.finish();
-		else atlas.anim.frameIndex = atlas.anim.numFrames - 1;
+		else atlas.anim.finish();
 	}
 
 	// Atlas support

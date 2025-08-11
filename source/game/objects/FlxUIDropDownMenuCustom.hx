@@ -468,7 +468,7 @@ class FlxUIDropDownMenuCustom extends FlxUIGroup implements IFlxUIWidget impleme
 
 	function mouseOverlapping()
 	{
-		var mousePoint = FlxG.mouse.getScreenPosition(camera);
+		var mousePoint = FlxG.mouse.getViewPosition(camera);
 		var objPoint = this.getScreenPosition(null, camera);
 		if(mousePoint.x >= objPoint.x && mousePoint.y >= objPoint.y &&
 			mousePoint.x < objPoint.x + this.width && mousePoint.y < objPoint.y + this.height)

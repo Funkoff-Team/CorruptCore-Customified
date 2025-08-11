@@ -283,7 +283,7 @@ class NoteOffsetState extends MusicBeatState
 			if (FlxG.mouse.justPressed)
 			{
 				holdingObjectType = null;
-				FlxG.mouse.getScreenPosition(camHUD, startMousePos);
+				FlxG.mouse.getViewPosition(camHUD, startMousePos);
 				if (startMousePos.x - comboNums.x >= 0 && startMousePos.x - comboNums.x <= comboNums.width &&
 					startMousePos.y - comboNums.y >= 0 && startMousePos.y - comboNums.y <= comboNums.height)
 				{
@@ -318,7 +318,7 @@ class NoteOffsetState extends MusicBeatState
 			{
 				if(FlxG.mouse.justMoved)
 				{
-					var mousePos:FlxPoint = FlxG.mouse.getScreenPosition(camHUD);
+					var mousePos:FlxPoint = FlxG.mouse.getViewPosition(camHUD);
 					switch (holdingObjectType) {
 						case "comboNums":
 							ClientPrefs.comboOffset[2] = Math.round((mousePos.x - startMousePos.x) + startComboOffset.x);
