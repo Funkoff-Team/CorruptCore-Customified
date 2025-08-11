@@ -2098,7 +2098,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if(!inCutscene && !paused && !freezeCamera) {
-			FlxG.camera.followLerp = elapsed * 4.8 * cameraSpeed * playbackRate;
+			FlxG.camera.followLerp = elapsed * 5 * cameraSpeed * playbackRate;
 			if(!startingSong && !endingSong && boyfriend.getAnimationName().startsWith('idle')) {
 				boyfriendIdleTime += elapsed;
 				if(boyfriendIdleTime >= 0.15) { // Kind of a mercy thing for making the achievement easier to get as it's apparently frustrating to some playerss

@@ -109,7 +109,7 @@ class Paths
 			}
 		}
 
-		FlxG.bitmap.dumpCache();
+		FlxG.bitmap.clearUnused();
 		
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];

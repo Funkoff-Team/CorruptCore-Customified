@@ -231,5 +231,21 @@ class FlxSoundTray extends Sprite
 
         x = (0.5 * (Lib.current.stage.stageWidth - _width * _defaultScale) - FlxG.game.x);
     }
+
+    #if (flixel > "6.0.0")
+	override function showAnim(volume:Float, ?sound:FlxSoundAsset, duration:Float = 1.0, label:String = "VOLUME") {}
+	
+	override function updateSize() {}
+	
+	override function showIncrement()
+	{
+		show(true);
+	}
+	
+	override function showDecrement()
+	{
+		show(false);
+	}
+	#end
 }
 #end

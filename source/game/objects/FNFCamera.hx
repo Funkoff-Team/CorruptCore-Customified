@@ -91,6 +91,26 @@ class FNFCamera extends FlxCamera
 		//trace('lerp on this frame: $mult');
 	}
 
+	#if (flixel >= "6.0.0")
+	/**
+	 * Updates interpolation tracking with exponential smoothing
+	 * @param elapsed Time elapsed since the last frame (in seconds)
+	 */
+	override function updateLerp(elapsed:Float)
+    {
+        if (followLerp >= 1.0)
+        {
+            scroll.copyFrom(_scrollTarget);
+        }
+        else if (followLerp > 0.0)
+        {
+            final mult:Float = 1 - Math.exp(-elapsed * followLerp * 60);
+            scroll.x += (_scrollTarget.x - scroll.x) * mult;
+            scroll.y += (_scrollTarget.y - scroll.y) * mult;
+        }
+    }
+	#else
 	override function set_followLerp(value:Float)
 		return followLerp = value;
+	#end
 }

@@ -192,8 +192,7 @@ class MusicBeatState extends FlxUIState
 	// Custom made Trans in
 	public static function startTransition(nextState:FlxState = null)
 	{
-		if(nextState == null)
-			nextState = FlxG.state;
+		if(nextState == null) nextState = FlxG.state;
 
 		FlxG.state.openSubState(new CustomFadeTransition(0.6, false));
 		if(nextState == FlxG.state)
