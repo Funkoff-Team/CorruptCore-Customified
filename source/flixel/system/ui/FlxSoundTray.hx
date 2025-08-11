@@ -12,8 +12,8 @@ import openfl.display.Shape;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
-#if flash
 import openfl.text.AntiAliasType;
+#if flash
 import openfl.text.GridFitType;
 #end
 
@@ -87,12 +87,13 @@ class FlxSoundTray extends Sprite
         text.multiline = true;
         text.wordWrap = true;
         text.selectable = false;
+        text.antiAliasType = AntiAliasType.ADVANCED;
 
         #if flash
         text.embedFonts = true;
-        text.antiAliasType = AntiAliasType.NORMAL;
         text.gridFitType = GridFitType.PIXEL;
         #else
+        text.sharpness = 400;
         #end
 		//ass text
         var dtf:TextFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 10, 0xffffff);
