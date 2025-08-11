@@ -9,7 +9,6 @@ import flixel.util.FlxColor;
 
 import game.scripting.FunkinLua;
 
-import game.scripting.HScriptFlxPoint;
 import game.scripting.HScriptFlxColor;
 import game.scripting.HScriptFlxAxes;
 
@@ -62,6 +61,7 @@ class HScript implements HscriptInterface {
         "FlxEase" => flixel.tweens.FlxEase,
         "FlxText" => flixel.text.FlxText,
 
+		//SYS Classes
 		#if sys
         "File" => sys.io.File,
         "FileSystem" => sys.FileSystem,
@@ -73,6 +73,7 @@ class HScript implements HscriptInterface {
         "PlayState" => PlayState,
         "Character" => game.objects.Character,
 		"CoolUtil"	=> CoolUtil,
+		"PlayerSettings" => game.backend.PlayerSettings,
         "ClientPrefs" => game.backend.ClientPrefs,
 		"BGSprite" => BGSprite,
 		#if VIDEOS_ALLOWED
