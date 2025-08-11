@@ -207,32 +207,97 @@ class Main extends Sprite
 	    return fpsVar.currentFPS;	
     }
 
+	/**
+	 * Crash handler stuff
+	 * Better instead of causing a dialog window appearing and crashing the game 
+	 */
 	private function onUncaughtError(e:UncaughtErrorEvent):Void
     {
         e.preventDefault();
         handleCrash(e.error);
     }
 
+	/**
+	 * Handles the crash and displays the crash log in the crash handler state.
+	 * @param e - The error that caused the crash. 
+	 */
 	public static function handleCrash(e:Dynamic):Void
     {
-        var emsg:String = "";
-		for (stackItem in haxe.CallStack.exceptionStack(true))
-		{
-			switch (stackItem)
-			{
-				case FilePos(s, file, line, column):
-					emsg += file + " (line " + line + ")\n";
-				default:
-					Sys.println(stackItem);
-					trace(stackItem);
-			}
+        var errorMsg = "Unknown error";
+    
+		if (e != null) {
+			if (Std.isOfType(e, haxe.Exception))
+				errorMsg = cast(e, haxe.Exception).message;
+			else if (Std.isOfType(e, String))
+				errorMsg = e;
+			else if (Reflect.hasField(e, "message"))
+				errorMsg = Reflect.field(e, "message");
+			else
+				errorMsg = Std.string(e);
 		}
 		
-		final crashReport = 'Error caught: ' + e.message + '\nLines:\n' + emsg;
+		var stack = haxe.CallStack.exceptionStack();
+		var stackTrace = formatExceptionStack(stack);
 		
-		FlxG.switchState(new game.states.CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
+		final crashReport = 'CRASH DETAILS:\n$errorMsg\n\nSTACK TRACE:\n$stackTrace';
+		
+		try {
+			FlxG.switchState(new CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
+		} catch (e:Dynamic) {
+			// If the crash handler fails, we log the error to console
+			trace("CRITICAL CRASH IN HANDLER:", e);
+		}
     }
 
+	/**
+	 * Formats the exception stack trace into a readable string.
+	 * Better than using "Called from " prefix.
+	 * @param stack - The stack trace to format.
+	 */
+	private static function formatExceptionStack(stack:Array<haxe.CallStack.StackItem>):String {
+		var result = "";
+		for (item in stack) {
+			switch(item) {
+				case FilePos(item, file, line):
+					result += 'at ${formatStackItem(item)} ($file: $line line)\n';
+					
+				case Method(classname, method):
+					result += 'in ${classname}.$method\n';
+					
+				case Module(module):
+					result += 'in module $module\n';
+					
+				case CFunction:
+					result += "in C function\n";
+					
+				case _:
+					result += 'in ${Std.string(item)}\n';
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Formats a stack item to a string.
+	 * @param item - The stack item to format.
+	 * @return A string representation of the stack item.
+	 */
+	private static function formatStackItem(item:haxe.CallStack.StackItem):String {
+		return switch(item) {
+			case Method(classname, method): '$classname.$method';
+			case Module(module): 'module $module';
+			case CFunction: "C function";
+			case FilePos(_, file, line): '$file:$line';
+			case _: Std.string(item);
+		}
+	}
+
+	/**
+	 * Colorblind mode stuff
+	 * Applies a colorblind filter to the camera.
+	 * @param type - The type of colorblindness (0-7, -1 for no filter).
+	 * @param intensity - The intensity of the filter (0-1, 1 being full intensity).
+	 */
 	public static function applyColorblindFilterToCamera(camera:FlxCamera, type:Int, intensity:Float = 1) {
 		camera.filters = [];
 		if (type == -1) return;

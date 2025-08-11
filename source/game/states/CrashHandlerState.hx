@@ -61,7 +61,7 @@ class CrashHandlerState extends MusicBeatState
 			logContent.add('======================= CRASH LOG =======================\n\n');
 			
 			logContent.add('CRASH TIME: ${now.toString()}\n');
-			logContent.add('ERROR DETAILS:\n${warningMessage}\n\n');
+			logContent.add('\n${warningMessage}\n');
 			
 			logContent.add('==================== SYSTEM INFORMATION ==================\n\n');
 
