@@ -406,8 +406,6 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.add(camOther, false);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
-		CustomFadeTransition.nextCamera = camOther;
-
 		persistentUpdate = true;
 		persistentDraw = true;
 
@@ -954,8 +952,6 @@ class PlayState extends MusicBeatState
 		super.create();
 
 		Paths.clearUnusedMemory();
-		
-		CustomFadeTransition.nextCamera = camOther;
 	}
 
 	#if (!flash && sys)
@@ -2167,7 +2163,7 @@ class PlayState extends MusicBeatState
 			paused = true;
 			canResync = false;
 			cancelMusicFadeTween();
-			MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
+			FlxG.switchState(() -> new CharacterEditorState(SONG.player2));
 		}
 		
 		if (startedCountdown)
@@ -2440,7 +2436,7 @@ class PlayState extends MusicBeatState
 		{
 			// gitaroo man easter egg
 			cancelMusicFadeTween();
-			MusicBeatState.switchState(new GitarooPause());
+			FlxG.switchState(() -> new GitarooPause());
 		}
 		else {*/
 		FlxG.sound.music?.pause();
@@ -2461,7 +2457,7 @@ class PlayState extends MusicBeatState
 		paused = true;
 		canResync = false;
 		cancelMusicFadeTween();
-		MusicBeatState.switchState(new ChartingState());
+		FlxG.switchState(() -> new ChartingState());
 		chartingMode = true;
 
 		#if desktop
@@ -2492,7 +2488,7 @@ class PlayState extends MusicBeatState
 				FlxTween.globalManager.clear();
 				openSubState(new GameOverSubstate());
 
-				// MusicBeatState.switchState(new GameOverState(boyfriend.getViewPosition().x, boyfriend.getViewPosition().y));
+				// FlxG.switchState(() -> new GameOverState(boyfriend.getViewPosition().x, boyfriend.getViewPosition().y));
 
 				#if desktop
 				// Game Over doesn't get his own variable because it's only used here
@@ -2948,11 +2944,8 @@ class PlayState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 
 					cancelMusicFadeTween();
-					if(FlxTransitionableState.skipNextTransIn) {
-						CustomFadeTransition.nextCamera = null;
-					}
 					canResync = false;
-					MusicBeatState.switchState(new StoryMenuState());
+					FlxG.switchState(() -> new StoryMenuState());
 
 					// if ()
 					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
@@ -2991,11 +2984,8 @@ class PlayState extends MusicBeatState
 				trace('WENT BACK TO FREEPLAY??');
 				WeekData.loadTheFirstEnabledMod();
 				cancelMusicFadeTween();
-				if(FlxTransitionableState.skipNextTransIn) {
-					CustomFadeTransition.nextCamera = null;
-				}
 				canResync = false;
-				MusicBeatState.switchState(new FreeplayState());
+				FlxG.switchState(() -> new FreeplayState());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				changedDifficulty = false;
 			}

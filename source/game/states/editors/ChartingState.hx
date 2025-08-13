@@ -548,7 +548,7 @@ class ChartingState extends MusicBeatState
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
 		{
 			PlayState.SONG = Song.parseJSONshit(FlxG.save.data.autosave);
-			MusicBeatState.resetState();
+			FlxG.resetState();
 		});
 
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
@@ -2016,7 +2016,7 @@ class ChartingState extends MusicBeatState
 				autosaveSong();
 				FlxG.sound.music.pause();
 				vocals.pause();
-				MusicBeatState.switchState(new game.states.editors.EditorPlayState(sectionStartTime()));
+				FlxG.switchState(() -> new game.states.editors.EditorPlayState(sectionStartTime()));
 			}
 			if (FlxG.keys.justPressed.ENTER #if mobile || _virtualpad.buttonA.justPressed #end)
 			{
@@ -2152,7 +2152,7 @@ class ChartingState extends MusicBeatState
 
 			if (FlxG.keys.justPressed.BACKSPACE #if android || FlxG.android.justReleased.BACK #end) {
 				PlayState.chartingMode = false;
-				MusicBeatState.switchState(new game.states.editors.MasterEditorMenu());
+				FlxG.switchState(() -> new game.states.editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				FlxG.mouse.visible = false;
 				return;
@@ -3939,7 +3939,7 @@ class ChartingState extends MusicBeatState
 			}, null, false, "OK", null));
 			return;
 		}
-		MusicBeatState.resetState();
+		FlxG.resetState();
 	}
 
 	function autosaveSong():Void

@@ -482,7 +482,7 @@ class ModsMenuState extends MusicBeatState
 			saveTxt();
 			if(needaReset)
 			{
-				//MusicBeatState.switchState(new TitleState());
+				//FlxG.switchState(() -> new TitleState());
 				TitleState.initialized = false;
 				TitleState.closedState = false;
 				FlxG.sound.music.fadeOut(0.3);
@@ -495,7 +495,7 @@ class ModsMenuState extends MusicBeatState
 			}
 			else
 			{
-				MusicBeatState.switchState(new MainMenuState());
+				FlxG.switchState(() -> new MainMenuState());
 			}
 		}
 
@@ -672,7 +672,7 @@ class ModsMenuState extends MusicBeatState
 			var rawZip:String = File.getContent(fullPath);
 			if(rawZip != null)
 			{
-				MusicBeatState.resetState();
+				FlxG.resetState();
 				var uncompressingFile:Bytes = new Uncompress().run(File.getBytes(rawZip));
 				if (uncompressingFile.done)
 				{

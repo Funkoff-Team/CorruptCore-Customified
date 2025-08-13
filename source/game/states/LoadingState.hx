@@ -3,10 +3,10 @@ package game.states;
 import lime.app.Promise;
 import lime.app.Future;
 import flixel.FlxG;
-import flixel.FlxState;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxTimer;
+import flixel.util.typeLimit.NextState;
 import flixel.math.FlxMath;
 
 import openfl.utils.Assets;
@@ -26,13 +26,13 @@ class LoadingState extends MusicBeatState
 	
 	// TO DO: Make this easier
 	
-	var target:FlxState;
+	var target:NextState;
 	var stopMusic = false;
 	var directory:String;
 	var callbacks:MultiCallback;
 	var targetShit:Float = 0;
 
-	function new(target:FlxState, stopMusic:Bool, directory:String)
+	function new(target:NextState, stopMusic:Bool, directory:String)
 	{
 		super();
 		this.target = target;
@@ -132,7 +132,7 @@ class LoadingState extends MusicBeatState
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 		
-		MusicBeatState.switchState(target);
+		FlxG.switchState(target);
 	}
 	
 	static function getSongPath()
@@ -145,12 +145,7 @@ class LoadingState extends MusicBeatState
 		return Paths.voices(PlayState.SONG.song);
 	}
 	
-	inline static public function loadAndSwitchState(target:FlxState, stopMusic = false)
-	{
-		MusicBeatState.switchState(getNextState(target, stopMusic));
-	}
-	
-	static function getNextState(target:FlxState, stopMusic = false):FlxState
+	public static inline function loadAndSwitchState(target:NextState, stopMusic = false)
 	{
 		var directory:String = 'shared';
 		var weekDir:String = StageData.forceNextDirectory;
@@ -168,10 +163,9 @@ class LoadingState extends MusicBeatState
 		if (!loaded)
 			return new LoadingState(target, stopMusic, directory);
 		#end
-		if (stopMusic && FlxG.sound.music != null)
-			FlxG.sound.music.stop();
+		if (stopMusic) FlxG.sound?.music?.stop();
 		
-		return target;
+		FlxG.switchState(target);
 	}
 	
 	#if NO_PRELOAD_ALL
@@ -191,6 +185,9 @@ class LoadingState extends MusicBeatState
 		super.destroy();
 		
 		callbacks = null;
+
+		funkay = FlxDestroyUtil.destroy(funkay);
+    	loadBar = FlxDestroyUtil.destroy(loadBar);
 	}
 	
 	static function initSongsManifest()

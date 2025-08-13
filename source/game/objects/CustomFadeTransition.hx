@@ -18,7 +18,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
 
     public static var finishCallback:Void->Void;
     private var leTween:FlxTween = null;
-    public static var nextCamera:FlxCamera;
     var isTransIn:Bool = false;
     var transBlack:FlxSprite;
     var transGradient:FlxSprite;
@@ -32,6 +31,9 @@ class CustomFadeTransition extends MusicBeatSubstate {
 	}
 
     override function create() {
+        // connecting to camera
+        cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+
         var zoom:Float = CoolUtil.boundTo(FlxG.camera.zoom, 0.05, 1);
         var width:Int = Std.int(FlxG.width / zoom);
         var height:Int = Std.int(FlxG.height / zoom);
@@ -72,9 +74,6 @@ class CustomFadeTransition extends MusicBeatSubstate {
             });
             FlxTween.tween(transBlack, {alpha: 1}, duration, {ease: FlxEase.linear});
         }
-
-        // connecting to camera
-        cameras = [nextCamera != null ? nextCamera : FlxG.camera];
 
         super.create();
     }

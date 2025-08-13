@@ -61,7 +61,6 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
 
-		CustomFadeTransition.nextCamera = camOther;
 		FlxG.camera.scroll.set(120, 130);
 
 		#if desktop
@@ -392,8 +391,7 @@ class NoteOffsetState extends MusicBeatState
 			if(beatTween != null) beatTween.cancel();
 
 			persistentUpdate = false;
-			CustomFadeTransition.nextCamera = camOther;
-			MusicBeatState.switchState(new OptionsState());
+			FlxG.switchState(() -> new OptionsState());
 			if (OptionsState.onPlayState)
 			{
 				if (ClientPrefs.pauseMusic != "None")

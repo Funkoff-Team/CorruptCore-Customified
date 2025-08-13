@@ -23,9 +23,6 @@ class ClassExtendMacro {
     public static var modifiedClasses:Array<String> = [];
 
     static final BLOCKED_PACKAGES = [
-        "sys.thread",
-        "away3d.tools",
-        "hscript",
         "flixel.addons.ui",
         "openfl.utils",
         "openfl.net"

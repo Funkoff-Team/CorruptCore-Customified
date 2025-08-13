@@ -9,18 +9,6 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
-import flixel.addons.transition.FlxTransitionSprite.GraphicTransTileDiamond;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.transition.TransitionData;
-import haxe.Json;
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#end
-import game.substates.options.GraphicsSettingsSubState;
-//import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
@@ -35,12 +23,25 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+
 import lime.app.Application;
+
 import openfl.Assets;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+
+import haxe.Json;
+
+#if MODS_ALLOWED
+import sys.FileSystem;
+import sys.io.File;
+#end
 
 import game.scripting.FunkinLua;
+import game.substates.options.GraphicsSettingsSubState;
 
 using StringTools;
+
 typedef TitleData =
 {
 
@@ -177,14 +178,14 @@ class TitleState extends MusicBeatState
 
 		FlxG.mouse.visible = false;
 		#if FREEPLAY
-		MusicBeatState.switchState(new FreeplayState());
+		FlxG.switchState(() -> new FreeplayState());
 		#elseif CHARTING
-		MusicBeatState.switchState(new ChartingState());
+		FlxG.switchState(() -> new ChartingState());
 		#else
 		if(FlxG.save.data.flashing == null && !FlashingState.leftState) {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
-			MusicBeatState.switchState(new FlashingState());
+			FlxG.switchState(() -> new FlashingState());
 		} else {
 			#if desktop
 			if (!DiscordClient.isInitialized)
@@ -219,18 +220,6 @@ class TitleState extends MusicBeatState
 	{
 		if (!initialized)
 		{
-			/*var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
-			diamond.persist = true;
-			diamond.destroyOnNoUse = false;
-
-			FlxTransitionableState.defaultTransIn = new TransitionData(FADE, FlxColor.BLACK, 1, new FlxPoint(0, -1), {asset: diamond, width: 32, height: 32},
-				new FlxRect(-300, -300, FlxG.width * 1.8, FlxG.height * 1.8));
-			FlxTransitionableState.defaultTransOut = new TransitionData(FADE, FlxColor.BLACK, 0.7, new FlxPoint(0, 1),
-				{asset: diamond, width: 32, height: 32}, new FlxRect(-300, -300, FlxG.width * 1.8, FlxG.height * 1.8));
-
-			transIn = FlxTransitionableState.defaultTransIn;
-			transOut = FlxTransitionableState.defaultTransOut;*/
-
 			// HAD TO MODIFY SOME BACKEND SHIT
 			// IF THIS PR IS HERE IF ITS ACCEPTED UR GOOD TO GO
 			// https://github.com/HaxeFlixel/flixel-addons/pull/348
@@ -484,9 +473,9 @@ class TitleState extends MusicBeatState
 				new FlxTimer().start(1, function(tmr:FlxTimer)
 				{
 					if (mustUpdate) {
-						MusicBeatState.switchState(new OutdatedState());
+						FlxG.switchState(() -> new OutdatedState());
 					} else {
-						MusicBeatState.switchState(new MainMenuState());
+						FlxG.switchState(() -> new MainMenuState());
 					}
 					closedState = true;
 				});
@@ -524,7 +513,7 @@ class TitleState extends MusicBeatState
 								function(twn:FlxTween) {
 									FlxTransitionableState.skipNextTransIn = true;
 									FlxTransitionableState.skipNextTransOut = true;
-									MusicBeatState.switchState(new TitleState());
+									FlxG.switchState(() -> new TitleState());
 								}
 							});
 							FlxG.sound.music.fadeOut();

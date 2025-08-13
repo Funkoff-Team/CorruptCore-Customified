@@ -201,7 +201,7 @@ class PauseSubState extends MusicBeatSubstate
 					var poop = Highscore.formatSong(name, curSelected);
 					PlayState.SONG = Song.loadFromJson(poop, name);
 					PlayState.storyDifficulty = curSelected;
-					MusicBeatState.resetState();
+					FlxG.resetState();
 					FlxG.sound.music.volume = 0;
 					PlayState.changedDifficulty = true;
 					PlayState.chartingMode = false;
@@ -248,7 +248,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.instance.paused = true;
 					PlayState.instance.vocals.volume = 0;
 					PlayState.instance.canResync = false;
-					MusicBeatState.switchState(new OptionsState());
+					FlxG.switchState(() -> new OptionsState());
 					if (ClientPrefs.pauseMusic != "None")
 					{
 						FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.pauseMusic)), pauseMusic.volume);
@@ -271,9 +271,9 @@ class PauseSubState extends MusicBeatSubstate
 
 					WeekData.loadTheFirstEnabledMod();
 					if(PlayState.isStoryMode) {
-						MusicBeatState.switchState(new StoryMenuState());
+						FlxG.switchState(() -> new StoryMenuState());
 					} else {
-						MusicBeatState.switchState(new FreeplayState());
+						FlxG.switchState(() -> new FreeplayState());
 					}
 					PlayState.cancelMusicFadeTween();
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
@@ -301,15 +301,12 @@ class PauseSubState extends MusicBeatSubstate
 		FlxG.sound.music.volume = 0;
 		PlayState.instance.vocals.volume = 0;
 
-		if(noTrans)
+		if (noTrans)
 		{
 			FlxTransitionableState.skipNextTransOut = true;
-			FlxG.resetState();
 		}
-		else
-		{
-			MusicBeatState.resetState();
-		}
+		
+		FlxG.resetState();
 	}
 
 	override function destroy()

@@ -235,8 +235,8 @@ class FreeplayState extends MusicBeatState
 	}*/
 
 	var instPlaying:Int = -1;
-	public static var vocals:FlxSound = null;
 	var holdTime:Float = 0;
+	public static var vocals:FlxSound = null;
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music.volume < 0.7)
@@ -270,8 +270,7 @@ class FreeplayState extends MusicBeatState
 		var space = FlxG.keys.justPressed.SPACE;
 		var ctrl = FlxG.keys.justPressed.CONTROL;
 
-		var shiftMult:Int = 1;
-		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
+		var shiftMult:Int = FlxG.keys.pressed.SHIFT ? 3 : 1;
 
 		if(songs.length > 1)
 		{
@@ -320,7 +319,7 @@ class FreeplayState extends MusicBeatState
 				colorTween.cancel();
 			}
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new MainMenuState());
+			FlxG.switchState(() -> new MainMenuState());
 		}
 
 		if(ctrl)
@@ -375,15 +374,9 @@ class FreeplayState extends MusicBeatState
 			PlayState.storyDifficulty = curDifficulty;
 
 			trace('CURRENT WEEK: ' + WeekData.getWeekFileName());
-			if(colorTween != null) {
-				colorTween.cancel();
-			}
+			colorTween?.cancel();
 			
-			if (FlxG.keys.pressed.SHIFT){
-				LoadingState.loadAndSwitchState(new ChartingState());
-			}else{
-				LoadingState.loadAndSwitchState(new PlayState());
-			}
+			LoadingState.loadAndSwitchState(() -> (FlxG.keys.pressed.SHIFT ? new ChartingState() : new PlayState()));
 
 			FlxG.sound.music.volume = 0;
 					
@@ -399,10 +392,9 @@ class FreeplayState extends MusicBeatState
 	}
 
 	public static function destroyFreeplayVocals() {
-		if(vocals != null) {
-			vocals.stop();
-			vocals.destroy();
-		}
+		vocals?.stop();
+		vocals?.destroy();
+
 		vocals = null;
 	}
 
@@ -445,7 +437,7 @@ class FreeplayState extends MusicBeatState
 			}
 			intendedColor = newColor;
 			colorTween = FlxTween.color(bg, 1, bg.color, intendedColor, {
-				onComplete: function(twn:FlxTween) {
+				onComplete: (twn:FlxTween) -> {
 					colorTween = null;
 				}
 			});

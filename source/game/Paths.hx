@@ -112,7 +112,7 @@ class Paths
 		FlxG.bitmap.clearUnused();
 		
 		// flags everything to be cleared out next unused memory clear
-		localTrackedAssets = [];
+		localTrackedAssets.resize(0);
 		openfl.Assets.cache.clear("songs");
 	}
 
@@ -135,21 +135,15 @@ class Paths
 				}
 			}
 
-			//trace('check...');
 			try
 			{
 				var gfx:FlxGraphic = Reflect.getProperty(spr, 'graphic');
-				if(gfx != null)
-				{
-					protectedGfx.push(gfx);
-					//trace('gfx added to the list successfully!');
-				}
+				if(gfx != null) protectedGfx.push(gfx);
 			}
 			//catch(haxe.Exception) {}
 		}
 
-		for (member in FlxG.state.members)
-			checkForGraphics(member);
+		for (member in FlxG.state.members) checkForGraphics(member);
 
 		if(FlxG.state.subState != null)
 			for (member in FlxG.state.subState.members)

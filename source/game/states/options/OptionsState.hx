@@ -122,7 +122,7 @@ class OptionsState extends MusicBeatState
 			}
 			else 
 			{
-				MusicBeatState.switchState(new MainMenuState());
+				FlxG.switchState(() -> new MainMenuState());
 			}
 		}
 

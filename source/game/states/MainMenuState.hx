@@ -7,6 +7,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
+import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.effects.FlxFlicker;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -21,7 +22,6 @@ import lime.app.Application;
 
 import game.states.backend.Achievements;
 import game.states.editors.MasterEditorMenu;
-
 
 using StringTools;
 
@@ -69,9 +69,6 @@ class MainMenuState extends MusicBeatState
 		camAchievement.bgColor.alpha = 0;
 
 		FlxG.cameras.add(camAchievement, false);
-
-		transIn = FlxTransitionableState.defaultTransIn;
-		transOut = FlxTransitionableState.defaultTransOut;
 
 		persistentUpdate = persistentDraw = true;
 
@@ -193,7 +190,7 @@ class MainMenuState extends MusicBeatState
 			{
 				selectedSomethin = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new TitleState());
+				FlxG.switchState(() -> new TitleState());
 			}
 
 			if (controls.ACCEPT)
@@ -215,22 +212,22 @@ class MainMenuState extends MusicBeatState
 						switch (optionShit[curSelected])
 						{
 							case 'story_mode':
-								MusicBeatState.switchState(new StoryMenuState());
+								FlxG.switchState(() -> new StoryMenuState());
 							case 'freeplay':
-								MusicBeatState.switchState(new FreeplayState());
+								FlxG.switchState(() -> new FreeplayState());
 
 							#if MODS_ALLOWED
 							case 'mods':
-								MusicBeatState.switchState(new ModsMenuState());
+								FlxG.switchState(() -> new ModsMenuState());
 							#end
 
 							#if ACHIEVEMENTS_ALLOWED
 							case 'awards':
-								MusicBeatState.switchState(new AchievementsMenuState());
+								FlxG.switchState(() -> new AchievementsMenuState());
 							#end
 
 							case 'credits':
-								MusicBeatState.switchState(new CreditsState());
+								FlxG.switchState(() -> new CreditsState());
 							case 'options':
 								LoadingState.loadAndSwitchState(new OptionsState());
 								OptionsState.onPlayState = false;
@@ -255,7 +252,7 @@ class MainMenuState extends MusicBeatState
 			else if (FlxG.keys.anyJustPressed(debugKeys))
 			{
 				selectedSomethin = true;
-				MusicBeatState.switchState(new MasterEditorMenu());
+				FlxG.switchState(() -> new MasterEditorMenu());
 			}
 			#end
 		}
