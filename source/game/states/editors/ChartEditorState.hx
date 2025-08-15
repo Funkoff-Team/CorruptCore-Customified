@@ -79,7 +79,7 @@ import sys.io.File;
 #end
 @:access(openfl.media.Sound.__buffer)
 
-class ChartingState extends MusicBeatState
+class ChartEditorState extends MusicBeatState
 
 {
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
@@ -1547,7 +1547,7 @@ class ChartingState extends MusicBeatState
 		voicesOppVolume.name = 'voices_opp_volume';
 		blockPressWhileTypingOnStepper.push(voicesOppVolume);
 		
-		#if !html5
+		#if FLX_PITCH
 		sliderRate = new FlxUISlider(this, 'playbackSpeed', 165, 120, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderRate.nameLabel.text = 'Playback Rate';
 		tab_group_chart.add(sliderRate);
@@ -2497,9 +2497,11 @@ class ChartingState extends MusicBeatState
 		if (playbackSpeed >= 3)
 			playbackSpeed = 3;
 
+		#if FLX_PITCH
 		FlxG.sound.music.pitch = playbackSpeed;
 		vocals.pitch = playbackSpeed;
 		opponentVocals.pitch = playbackSpeed;
+		#end
 
 		var currentTime:String = formatTime(Conductor.songPosition);
         var songLength:String = (FlxG.sound.music != null) ? formatTime(FlxG.sound.music.length) : "00:00:00";
@@ -4107,7 +4109,9 @@ class ChartingTipsSubstate extends MusicBeatSubstate
 			"A/D - Go to previous/next section\n" +
 			"Left/Right - Change quantization\n" +
 			"Up/Down - Change playback position with quantization\n" +
+			#if FLX_PITCH
 			"[ / ] - Change playback speed (SHIFT for faster change)\n" +
+			#end
 			"ALT + [ / ] - Reset playback speed\n" +
 			"SHIFT - Move faster (4x speed)\n" +
 			"CTRL + click - Select/deselect notes\n" +
@@ -4233,7 +4237,7 @@ class ContextMenu extends MusicBeatSubstate
 
 	function openNoteProperties(note:Note):Void
 	{
-		var parent:ChartingState = cast FlxG.state.subState._parentState;
+		var parent:ChartEditorState = cast FlxG.state.subState._parentState;
 		@:privateAccess {
 			openSubState(new NotePropertiesSubstate(note, function(updatedNote:Note) {
 				parent.saveToUndo();

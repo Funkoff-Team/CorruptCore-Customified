@@ -47,6 +47,7 @@
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="LUA_ALLOWED" if="cpp" />
 	<define name="HSCRIPT_ALLOWED" if="cpp"/>
+	<define name="MODCHART_ALLOWED" if="debug"/> <!-- disabled for now-->
 	<define name="ACHIEVEMENTS_ALLOWED" if="officialBuild" />
 	<define name="VIDEOS_ALLOWED" if="desktop || mobile" />
 	<define name="TITLE_SCREEN_EASTER_EGG" if="officialBuild" /> <!-- DELETE THE if="officialBuild" for enabling this on an unofficial build -->
@@ -134,6 +135,8 @@
 	<haxelib name="flixel-animate" />
 	<haxelib name="hxcpp"/>	
 
+	<haxelib name="funkin-modchart" if="MODCHART_ALLOWED"/>
+
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
@@ -156,6 +159,13 @@
 		<haxedef name="HXVLC_NO_SHARE_DIRECTORY" />
 		<haxedef name="HXVLC_EXPERIMENTAL_WINDOWSARM" if="windows HXCPP_ARM64" />
 		<haxedef name="HXVLC_OPENAL" />
+	</section>
+
+	<section if="funkin-modchart">
+		<haxedef name="FM_ENGINE" value="PSYCH"/>
+		<haxedef name="FM_ENGINE_VERSION" value="0.6"/>
+
+		<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
 	</section>
 
 	<!-- Basically Allows Videos To Render In Higher Quality On Higher Resoluttions -->

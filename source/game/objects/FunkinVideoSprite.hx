@@ -88,6 +88,7 @@ class FunkinVideoSprite extends FlxVideoSprite
 	public function delayAndStart(delay:Float = 0)
 	{
 		FlxTimer.wait(delay, play);
+		#if FLX_PITCH bitmap.rate = PlayState.instance?.playbackRate; #end
 	}
 	
 	/**

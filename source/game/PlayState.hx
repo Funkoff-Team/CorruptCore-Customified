@@ -79,7 +79,7 @@ import game.shaders.*;
 import game.shaders.WiggleEffect.WiggleEffectType;
 
 import game.states.backend.Achievements;
-import game.states.editors.ChartingState;
+import game.states.editors.ChartEditorState;
 import game.states.editors.CharacterEditorState;
 
 #if !flash 
@@ -94,6 +94,10 @@ import sys.io.File;
 
 #if VIDEOS_ALLOWED
 import hxvlc.flixel.FlxVideo as MP4Handler;
+#end
+
+#if MODCHART_ALLOWED
+import modchart.Manager as ModManager;
 #end
 
 using StringTools;
@@ -145,6 +149,10 @@ class PlayState extends MusicBeatState
 	public var modchartSounds:Map<String, FlxSound> = new Map();
 	public var modchartTexts:Map<String, ModchartText> = new Map();
 	public var modchartSaves:Map<String, FlxSave> = new Map();
+	#end
+
+	#if MODCHART_ALLOWED
+	public var modManager:ModManager;
 	#end
 
 	public var BF_X:Float = 770;
@@ -678,6 +686,10 @@ class PlayState extends MusicBeatState
 
 		generateSong(SONG.song);
 
+		#if MODCHART_ALLOWED
+		modManager = new ModManager();
+		#end
+
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
 		// add(strumLine);
 
@@ -932,7 +944,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		stagesFunc(function(stage:BaseStage) stage.createPost());
-		callOnScripts('onCreatePost', []);
+		callOnScripts('onCreatePost');
 
 		cacheCountdown();
 		cachePopUpScore();
@@ -1047,6 +1059,7 @@ class PlayState extends MusicBeatState
 
 	function set_playbackRate(value:Float):Float
 	{
+		#if FLX_PITCH
 		if(generatedMusic)
 		{
 			if(vocals != null) vocals.pitch = value;
@@ -1065,7 +1078,10 @@ class PlayState extends MusicBeatState
 		trace('Anim speed: ' + FlxG.animationTimeScale);
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000 * value;
 		setOnScripts('playbackRate', playbackRate);
-		return value;
+		#else
+		playbackRate = 1.0;
+		#end
+		return playbackRate;
 	}
 
 	public function addTextToDebug(text:String, color:FlxColor) {
@@ -1204,16 +1220,19 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function startVideo(name:String)
+	public function playVideo(name:String, isNotMidPartSong:Bool = false)
 	{
 		#if VIDEOS_ALLOWED
-		inCutscene = true;
+		inCutscene = isNotMidPartSong;
+		canPause = !isNotMidPartSong;
 
 		var filepath = (name.startsWith("https://") ? name : Paths.video(name));
 		
-		if(#if sys !FileSystem.exists(filepath) #else !OpenFlAssets.exists(filepath) #end && !name.startsWith("https://")) {
+		var fileExists = #if sys FileSystem.exists(filepath) #else OpenFlAssets.exists(filepath) #end || name.startsWith("https://");
+		
+		if(!fileExists) {
 			FlxG.log.warn('Couldnt find video file: $name');
-			startAndEnd();
+			if(isNotMidPartSong) startCountdown();
 			return;
 		}
 
@@ -1230,62 +1249,30 @@ class PlayState extends MusicBeatState
 
 		video.onEnd(() -> {
 			callOnScripts('onVideoCompleted', [name]);
-			video.destroy();
-			video = null;
-			startAndEnd();
-		});
-
-		if (video.load(filepath)) {
-			video.delayAndStart();
-		} else {
-			FlxG.log.warn('Failed to load video: $name');
-			startAndEnd();
-		}
-		#else
-		FlxG.log.warn('Platform not supported!');
-		startAndEnd();
-		#end
-	}
-
-	//same as above but for mid part songs
-	public function playVideo(name:String)
-	{
-		#if VIDEOS_ALLOWED
-		var filepath = (name.startsWith("https://") ? name : Paths.video(name));
-		
-		if(#if MODS_ALLOWED !FileSystem.exists(filepath) #else !OpenFlAssets.exists(filepath) #end && !name.startsWith("https://")) {
-			FlxG.log.warn('Couldnt find video file: $name');
-			trace('Couldnt find video file: $name');
-			return;
-		}
-
-		video = new FunkinVideoSprite(0, 0, true);
-		video.antialiasing = ClientPrefs.globalAntialiasing;
-		video.cameras = [camOther];
-		add(video);
-
-		video.onEnd(() -> {
 			remove(video);
 			video.destroy();
+			video = null;
+			canPause = true;
+			
+			if(isNotMidPartSong) startAndEnd();
 		});
 
-		if (video.load(filepath)) {
+		if(video.load(filepath)) {
 			video.delayAndStart();
 		} else {
 			FlxG.log.warn('Failed to load video: $name');
-			trace('Failed to load video: $name');
+			if(isNotMidPartSong) startAndEnd();
 		}
 		#else
 		FlxG.log.warn('Platform not supported!');
+		if(isNotMidPartSong) startAndEnd();
 		#end
 	}
 
 	function startAndEnd()
 	{
-		if(endingSong)
-			endSong();
-		else
-			startCountdown();
+		if(endingSong) endSong();
+		else startCountdown();
 	}
 
 	var dialogueCount:Int = 0;
@@ -1353,13 +1340,13 @@ class PlayState extends MusicBeatState
 	public function startCountdown()
 	{
 		if(startedCountdown) {
-			callOnScripts('onStartCountdown', []);
+			callOnScripts('onStartCountdown');
 			return false;
 		}
 
 		seenCutscene = true;
 		inCutscene = false;
-		var ret:Dynamic = callOnScripts('onStartCountdown', [], false);
+		var ret:Dynamic = callOnScripts('onStartCountdown', null, true);
 		if(ret != FunkinLua.Function_Stop) {
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 
@@ -1378,7 +1365,7 @@ class PlayState extends MusicBeatState
 			startedCountdown = true;
 			Conductor.songPosition = -Conductor.crochet * 5;
 			setOnScripts('startedCountdown', true);
-			callOnScripts('onCountdownStarted', []);
+			callOnScripts('onCountdownStarted', null);
 
 			var swagCounter:Int = 0;
 			if (startOnTime > 0) {
@@ -1392,6 +1379,12 @@ class PlayState extends MusicBeatState
 				return true;
 			}
 			moveCameraSection();
+
+			//modchart calling func
+			#if MODCHART_ALLOWED
+			callOnScripts('onModchartCall', [modManager]);
+            addModManager(modManager);
+			#end
 
 			startTimer = new FlxTimer().start(Conductor.crochet / 1000 / playbackRate, function(tmr:FlxTimer)
 			{
@@ -1492,11 +1485,19 @@ class PlayState extends MusicBeatState
 				callOnScripts('onCountdownTick', [swagCounter]);
 
 				swagCounter += 1;
-				// generateSong('fresh');
 			}, 5);
 		}
 		return true;
 	}
+
+	#if MODCHART_ALLOWED
+	public function addModManager(obj:ModManager)
+	{
+		if (obj.playfields == null || obj.playfields.length == 0) return;
+		
+		add(obj);
+	}
+	#end
 
 	public function addBehindGF(obj:FlxObject)
 	{
@@ -1578,15 +1579,17 @@ class PlayState extends MusicBeatState
 		opponentVocals.pause();
 
 		FlxG.sound.music.time = time;
-		FlxG.sound.music.pitch = playbackRate;
+		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
 		FlxG.sound.music.play();
 
 		if (Conductor.songPosition <= vocals.length)
 		{
 			vocals.time = time;
 			opponentVocals.time = time;
+			#if FLX_PITCH
 			vocals.pitch = playbackRate;
 			opponentVocals.pitch = playbackRate;
+			#end
 		}
 		vocals.play();
 		opponentVocals.play();
@@ -1616,7 +1619,7 @@ class PlayState extends MusicBeatState
 
 		@:privateAccess
 		FlxG.sound.playMusic(inst._sound, 1, false);
-		FlxG.sound.music.pitch = playbackRate;
+		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
 		FlxG.sound.music.onComplete = finishSong.bind();
 		vocals.play();
 		opponentVocals.play();
@@ -1655,7 +1658,7 @@ class PlayState extends MusicBeatState
 		DiscordClient.changePresence(detailsText, SONG.song.replace('-', ' ') + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
 		#end
 		setOnScripts('songLength', songLength);
-		callOnScripts('onSongStart', []);
+		callOnScripts('onSongStart');
 	}
 
 	var debugNum:Int = 0;
@@ -1694,8 +1697,10 @@ class PlayState extends MusicBeatState
 		}
 		catch(e:Dynamic) {}
 
+		#if FLX_PITCH
 		vocals.pitch = playbackRate;
 		opponentVocals.pitch = playbackRate;
+		#end
 		FlxG.sound.list.add(vocals);
 		FlxG.sound.list.add(opponentVocals);
 
@@ -1770,7 +1775,7 @@ class PlayState extends MusicBeatState
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
 				swagNote.row = Conductor.secsToRow(daStrumTime);
 				swagNote.noteType = songNotes[3];
-				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = game.states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = game.states.editors.ChartEditorState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 
 				var idx = swagNote.gfNote ? 2 : gottaHitNote ? 0 : 1;
 				if (noteRows[idx][swagNote.row] == null)
@@ -1997,7 +2002,7 @@ class PlayState extends MusicBeatState
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished) twn.active = true);
 
 			paused = false;
-			callOnScripts('onResume', []);
+			callOnScripts('onResume');
 
 			#if desktop
 			if (startTimer != null && startTimer.finished)
@@ -2054,17 +2059,18 @@ class PlayState extends MusicBeatState
 		opponentVocals.pause();
 
 		FlxG.sound.music.play();
-		FlxG.sound.music.pitch = playbackRate;
+		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate;
+		#end
 		Conductor.songPosition = FlxG.sound.music.time;
 		if (Conductor.songPosition <= vocals.length)
 		{
 			vocals.time = Conductor.songPosition;
-			vocals.pitch = playbackRate;
+			#if FLX_PITCH vocals.pitch = playbackRate; #end
 		}
 		if (Conductor.songPosition <= opponentVocals.length)
 		{
 			opponentVocals.time = Conductor.songPosition;
-			opponentVocals.pitch = playbackRate;
+			#if FLX_PITCH opponentVocals.pitch = playbackRate; #end
 		}
 		vocals.play();
 		opponentVocals.play();
@@ -2457,7 +2463,7 @@ class PlayState extends MusicBeatState
 		paused = true;
 		canResync = false;
 		cancelMusicFadeTween();
-		FlxG.switchState(() -> new ChartingState());
+		FlxG.switchState(() -> new ChartEditorState());
 		chartingMode = true;
 
 		#if desktop
@@ -3522,9 +3528,7 @@ class PlayState extends MusicBeatState
 			combo = 0;
 
 			if(!practiceMode) songScore -= 10;
-			if(!endingSong) {
-				songMisses++;
-			}
+			if(!endingSong) songMisses++;
 			totalPlayed++;
 			RecalculateRating(true);
 
@@ -3824,15 +3828,13 @@ class PlayState extends MusicBeatState
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
 		FlxG.animationTimeScale = 1;
-		FlxG.sound.music.pitch = 1;
+		#if FLX_PITCH FlxG.sound.music.pitch = 1; #end
 		instance = null;
 		super.destroy();
 	}
 
 	public static function cancelMusicFadeTween() {
-		if(FlxG.sound.music.fadeTween != null) {
-			FlxG.sound.music.fadeTween.cancel();
-		}
+		FlxG.sound?.music?.fadeTween?.cancel();
 		FlxG.sound.music.fadeTween = null;
 	}
 
@@ -3858,7 +3860,7 @@ class PlayState extends MusicBeatState
 
 		lastStepHit = curStep;
 		setOnScripts('curStep', curStep);
-		callOnScripts('onStepHit', []);
+		callOnScripts('onStepHit');
 	}
 
 	var lightningStrikeBeat:Int = 0;
@@ -3896,7 +3898,7 @@ class PlayState extends MusicBeatState
 		lastBeatHit = curBeat;
 
 		setOnScripts('curBeat', curBeat); //DAWGG?????
-		callOnScripts('onBeatHit', []);
+		callOnScripts('onBeatHit');
 	}
 
 	override function sectionHit()
@@ -3929,7 +3931,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		setOnScripts('curSection', curSection);
-		callOnScripts('onSectionHit', []);
+		callOnScripts('onSectionHit');
 	}
 
 	public function characterBopper(beat:Int):Void
@@ -3945,7 +3947,7 @@ class PlayState extends MusicBeatState
 	public function playerDance():Void
 	{
 		var anim:String = boyfriend.getAnimationName();
-		if(boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
+		if(boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * boyfriend.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
 			boyfriend.dance();
 	}
 

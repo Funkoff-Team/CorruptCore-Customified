@@ -17,12 +17,13 @@ import lime.utils.Assets;
 import flixel.sound.FlxSound;
 import openfl.utils.Assets as OpenFlAssets;
 import game.backend.WeekData;
+
 #if MODS_ALLOWED
 import sys.FileSystem;
 #end
 
 import game.objects.HealthIcon;
-import game.states.editors.ChartingState;
+import game.states.editors.ChartEditorState;
 
 using StringTools;
 
@@ -356,17 +357,10 @@ class FreeplayState extends MusicBeatState
 		else if (accepted)
 		{
 			persistentUpdate = false;
-			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
-			var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
-			/*#if MODS_ALLOWED
-			if(!sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)) && !sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop))) {
-			#else
-			if(!OpenFlAssets.exists(Paths.json(songLowercase + '/' + poop))) {
-			#end
-				poop = songLowercase;
-				curDifficulty = 1;
-				trace('Couldnt find file');
-			}*/
+
+			final songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
+			final poop:String = Highscore.formatSong(songLowercase, curDifficulty);
+
 			trace(poop);
 
 			PlayState.SONG = Song.loadFromJson(poop, songLowercase);
@@ -376,7 +370,12 @@ class FreeplayState extends MusicBeatState
 			trace('CURRENT WEEK: ' + WeekData.getWeekFileName());
 			colorTween?.cancel();
 			
-			LoadingState.loadAndSwitchState(() -> (FlxG.keys.pressed.SHIFT ? new ChartingState() : new PlayState()));
+			final shiftPressed = FlxG.keys.pressed.SHIFT;
+			LoadingState.loadAndSwitchState(() -> {
+				return shiftPressed 
+					? new ChartEditorState() 
+					: new PlayState();
+			});
 
 			FlxG.sound.music.volume = 0;
 					
@@ -442,8 +441,6 @@ class FreeplayState extends MusicBeatState
 				}
 			});
 		}
-
-		// selector.y = (70 * curSelected) + 30;
 
 		#if !switch
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);

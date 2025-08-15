@@ -248,7 +248,7 @@ class EditorPlayState extends MusicBeatState
 						swagNote.mustPress = gottaHitNote;
 						swagNote.sustainLength = songNotes[2];
 						swagNote.noteType = songNotes[3];
-						if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = game.states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+						if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = game.states.editors.ChartEditorState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 						swagNote.scrollFactor.set();
 
 						var susLength:Float = swagNote.sustainLength;
@@ -326,7 +326,7 @@ class EditorPlayState extends MusicBeatState
 	}
 
 	private function endSong() {
-		LoadingState.loadAndSwitchState(new game.states.editors.ChartingState());
+		LoadingState.loadAndSwitchState(new game.states.editors.ChartEditorState());
 	}
 
 	public var noteKillOffset:Float = 350;
@@ -336,7 +336,7 @@ class EditorPlayState extends MusicBeatState
 		{
 			FlxG.sound.music.pause();
 			vocals.pause();
-			LoadingState.loadAndSwitchState(new game.states.editors.ChartingState());
+			LoadingState.loadAndSwitchState(new game.states.editors.ChartEditorState());
 		}
 
 		if (startingSong) {

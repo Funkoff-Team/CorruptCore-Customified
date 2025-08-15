@@ -6,7 +6,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import openfl.display.BitmapData;
-import game.states.editors.ChartingState;
+import game.states.editors.ChartEditorState;
 
 using StringTools;
 
@@ -323,7 +323,7 @@ class Note extends FlxSprite
 			animation.play(animName, true);
 
 		if(inEditor) {
-			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
+			setGraphicSize(ChartEditorState.GRID_SIZE, ChartEditorState.GRID_SIZE);
 			updateHitbox();
 		}
 	}
