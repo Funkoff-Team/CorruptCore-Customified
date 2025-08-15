@@ -107,7 +107,7 @@ class CrashHandler
     private static function showErrorPopup(message:String):Void
     {
         try {
-            CoolUtil.showPopUp(message, "Error!");
+            CoolUtil.showPopUp(message, "Error!", MSG_ERROR);
         } catch (e:Dynamic) {
             trace("Failed to show error popup: " + e);
         }

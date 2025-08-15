@@ -115,7 +115,7 @@ class FunkinLua {
 			if(resultStr != null && result != 0) {
 				trace(isString ? 'Error on lua code! $resultStr' : 'Error on lua script! $resultStr');
 				#if windows
-				if(!isString) lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
+				if(!isString) CoolUtil.showPopUp(resultStr, 'Error on lua script!', MSG_INFORMATION);
 				#else
 				luaTrace((isString ? 'Error loading lua code: $resultStr' : ('Error loading lua script: "$script"\n' + resultStr)), true, false, FlxColor.RED);
 				#end
@@ -130,8 +130,8 @@ class FunkinLua {
 			var resultStr:String = Lua.tostring(lua, result);
 			if(resultStr != null && result != 0) {
 				trace('Error on lua script! ' + resultStr);
-				#if windows
-				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
+				#if !mac
+				CoolUtil.showPopUp(resultStr, 'Error on lua script!', MSG_INFORMATION);
 				#else
 				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false, FlxColor.RED);
 				#end

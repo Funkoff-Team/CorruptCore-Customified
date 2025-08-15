@@ -47,9 +47,9 @@ class FunkinShader extends FlxShader implements IErrorHandler
 
 		var crashLogPath:String = './crash/shader_${shaderName}_${dateNow}.txt';
 		sys.io.File.saveContent(crashLogPath, error);
-		Application.current.window.alert('Error log saved at: $crashLogPath', alertTitle);
+		CoolUtil.showPopUp('Error log saved at: $crashLogPath', alertTitle, MSG_INFORMATION);
 		#else
-		Application.current.window.alert('Error logs aren\'t created on debug builds, check the trace log instead.', alertTitle);
+		CoolUtil.showPopUp('Error logs aren\'t created on debug builds, check the trace log instead.', alertTitle);
 		#end
 
 		onError(error);

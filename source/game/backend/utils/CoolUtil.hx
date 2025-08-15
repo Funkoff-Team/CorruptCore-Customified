@@ -8,6 +8,8 @@ import sys.FileSystem;
 #end
 #if (cpp && windows)
 import winapi.WindowsAPI;
+import winapi.WindowsAPI.MessageBoxIcon;
+import winapi.WindowsAPI.MessageBoxType;
 #end
 
 using StringTools;
@@ -223,10 +225,8 @@ class CoolUtil
 				} catch(e:Dynamic) {
 					var errorTitle = 'Mod name: ' + Paths.currentModDirectory;
 					var errorMsg = 'An error occurred: $e';
-					#if windows
-					flixel.FlxG.stage.window.alert(errorMsg, errorTitle);
-					#end
-					trace('$errorTitle - $errorMsg');
+
+					showPopUp(errorMsg, errorTitle);
 				}
 			}
 		}
@@ -250,6 +250,54 @@ class CoolUtil
 		#end
 		return null;
 	}
+
+	//for the future updates
+	public static function unzipFile(srcZip:String, dstDir:String, ignoreRootFolder:Bool = false) {
+        trace("Unzipping archive...");
+		
+        FileSystem.createDirectory(dstDir);
+        
+        var inFile = sys.io.File.read(srcZip);
+        var entries = haxe.zip.Reader.readZip(inFile);
+        inFile.close();
+
+        for(entry in entries) {
+            var fileName = entry.fileName;
+            if (fileName.charAt(0) != "/" && fileName.charAt(0) != "\\" && fileName.split("..").length <= 1) {
+                var dirs = ~/[\/\\]/g.split(fileName);
+                if ((ignoreRootFolder != false && dirs.length > 1) || ignoreRootFolder == false) {
+                    if (ignoreRootFolder != false) {
+                        dirs.shift();
+                    }
+                
+                    var path = "";
+                    var file = dirs.pop();
+                    for (d in dirs) {
+                        path += d;
+                        sys.FileSystem.createDirectory(dstDir + "/" + path);
+                        path += "/";
+                    }
+                
+                    if (file == "")
+                        continue;
+
+                    path += file;
+                
+                    var data = haxe.zip.Reader.unzip(entry);
+                    var f = File.write(dstDir + "/" + path, true);
+                    f.write(data);
+                    f.close();
+                }
+            }
+        } //_entry
+
+        var contents = sys.FileSystem.readDirectory(dstDir);
+        if (contents.length > 0) {
+            trace('Unzipped successfully to ${dstDir}: (${contents.length} top level items found)');
+        } else {
+            throw 'No contents found in "${dstDir}"';
+        }
+    }
 
 	public static function numberArray(max:Int, ?min = 0):Array<Int>
 	{
@@ -289,13 +337,13 @@ class CoolUtil
 		#end
 	}
 
-	public static function showPopUp(message:String, title:String, ?icon:Dynamic, ?type:Dynamic):Void
+	public static function showPopUp(message:String, title:String #if (windows && cpp), ?icon:MessageBoxIcon, ?type:MessageBoxType #end):Void
 	{
 		#if android
 		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);
 		#elseif linux
 		Sys.command("zenity", ["--info", "--title=" + title, "--text=" + message]);
-		#elseif windows
+		#elseif (windows && cpp)
 		WindowsAPI.showMessageBox(message, title, icon, type);
 		#else
 		lime.app.Application.current.window.alert(message, title);

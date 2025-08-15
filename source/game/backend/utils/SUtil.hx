@@ -63,18 +63,6 @@ class SUtil
 		return daPath;
 	}
 
-	public static function showPopUp(message:String, title:String):Void
-	{
-		FlxG.sound.music.stop();
-		#if android
-		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);
-		#elseif (!ios || !iphonesim)
-		lime.app.Application.current.window.alert(message, title);
-		#else
-		trace('$title - $message');
-		#end
-	}
-
 	public static function saveContent(fileName:String, fileData:String, ?alert:Bool = true):Void
 	{
 		try
@@ -84,11 +72,11 @@ class SUtil
 
 			File.saveContent('saves/$fileName', fileData);
 			if (alert)
-				showPopUp('$fileName has been saved.', "Success!");
+				CoolUtil.showPopUp('$fileName has been saved.', "Success!");
 		}
 		catch (e:Exception)
 			if (alert)
-				showPopUp('$fileName couldn\'t be saved.\n(${e.message})', "Error!")
+				CoolUtil.showPopUp('$fileName couldn\'t be saved.\n(${e.message})', "Error!")
 			else
 				trace('$fileName couldn\'t be saved. (${e.message})');
 	}
@@ -119,7 +107,7 @@ class SUtil
 			&& !AndroidPermissions.getGrantedPermissions().contains('android.permission.READ_MEDIA_IMAGES'))
 			|| (AndroidVersion.SDK_INT < AndroidVersionCode.TIRAMISU
 				&& !AndroidPermissions.getGrantedPermissions().contains('android.permission.READ_EXTERNAL_STORAGE')))
-			showPopUp('If you accepted the permissions you are all good!' + '\nIf you didn\'t then expect a crash' + '\nPress OK to see what happens',
+			CoolUtil.showPopUp('If you accepted the permissions you are all good!' + '\nIf you didn\'t then expect a crash' + '\nPress OK to see what happens',
 				'Notice!');
 
 		try
@@ -129,7 +117,7 @@ class SUtil
 		}
 		catch (e:Dynamic)
 		{
-			showPopUp('Please create directory to\n' + SUtil.getStorageDirectory(true) + '\nPress OK to close the game', 'Error!');
+			CoolUtil.showPopUp('Please create directory to\n' + SUtil.getStorageDirectory(true) + '\nPress OK to close the game', 'Error!');
 			LimeSystem.exit(1);
 		}
 	}
