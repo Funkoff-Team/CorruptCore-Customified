@@ -45,7 +45,7 @@ class CoolUtil
 		return n;
 	}
 
-	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
+	inline public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
 	{
 		var p = point == null ? FlxPoint.weak() : point;
 		p.set((x * Math.cos(angle)) - (y * Math.sin(angle)), (x * Math.sin(angle)) + (y * Math.cos(angle)));
@@ -252,7 +252,7 @@ class CoolUtil
 	}
 
 	//for the future updates
-	public static function unzipFile(srcZip:String, dstDir:String, ignoreRootFolder:Bool = false) {
+	inline public static function unzipFile(srcZip:String, dstDir:String, ignoreRootFolder:Bool = false) {
         trace("Unzipping archive...");
 		
         FileSystem.createDirectory(dstDir);
@@ -299,7 +299,7 @@ class CoolUtil
         }
     }
 
-	public static function numberArray(max:Int, ?min = 0):Array<Int>
+	inline public static function numberArray(max:Int, ?min = 0):Array<Int>
 	{
 		var dumbArray:Array<Int> = [];
 		for (i in min...max)
@@ -310,19 +310,19 @@ class CoolUtil
 	}
 
 	//uhhhh does this even work at all? i'm starting to doubt
-	public static function precacheSound(sound:String, ?library:String = null):Void {
+	inline public static function precacheSound(sound:String, ?library:String = null):Void {
 		Paths.sound(sound, library);
 	}
 
-	public static function precacheMusic(sound:String, ?library:String = null):Void {
+	inline public static function precacheMusic(sound:String, ?library:String = null):Void {
 		Paths.music(sound, library);
 	}
 
-	public static function hasVersion(vers:String) {
+	inline public static function hasVersion(vers:String) {
 		return lime.system.System.platformLabel.toLowerCase().indexOf(vers.toLowerCase()) != -1;
 	}
 
-	public static function browserLoad(site:String) {
+	inline public static function browserLoad(site:String) {
 		#if linux
 		Sys.command('/usr/bin/xdg-open', [site]);
 		#else
@@ -330,14 +330,14 @@ class CoolUtil
 		#end
 	}
 
-	public static function setDarkMode(title:String, enable:Bool) {
+	inline public static function setDarkMode(title:String, enable:Bool) {
 		#if windows
 		if(title == null) title = lime.app.Application.current.window.title;
 		lime.Native.setDarkMode(title, enable);
 		#end
 	}
 
-	public static function showPopUp(message:String, title:String #if (windows && cpp), ?icon:MessageBoxIcon, ?type:MessageBoxType #end):Void
+	inline public static function showPopUp(message:String, title:String #if (windows && cpp), ?icon:MessageBoxIcon, ?type:MessageBoxType #end):Void
 	{
 		#if android
 		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);

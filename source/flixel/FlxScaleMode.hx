@@ -4,51 +4,60 @@ import flixel.FlxG;
 import flixel.system.scaleModes.BaseScaleMode;
 
 /**
- * @author
+ * Scale mode that allows for wide screen support.
+ * Rewritten bcuz old code looks weird imo
  */
+
 class FlxScaleMode extends BaseScaleMode
 {
-	public static var allowWideScreen(default, set):Bool = true;
+    public static var allowWideScreen(default, set):Bool = true;
+    
+    override function updateGameSize(Width:Int, Height:Int):Void
+    {
+        if (shouldUseWideScreen())
+        {
+            super.updateGameSize(Width, Height);
+        }
+        else
+        {
+            final targetRatio = FlxG.width / FlxG.height;
+            final screenRatio = Width / Height;
+            
+            if (screenRatio < targetRatio)
+                gameSize.set(Width, Math.floor(Width / targetRatio));
+            else
+                gameSize.set(Math.floor(Height * targetRatio), Height);
+        }
+    }
 
-	override function updateGameSize(Width:Int, Height:Int):Void
-	{
-		if (ClientPrefs.noBordersScreen && allowWideScreen)
-		{
-			super.updateGameSize(Width, Height);
-		}
-		else
-		{
-			var ratio:Float = FlxG.width / FlxG.height;
-			var realRatio:Float = Width / Height;
+    override function updateGamePosition():Void
+    {
+        if (shouldUseWideScreen())
+        {
+            FlxG.game.x = 0;
+            FlxG.game.y = 0;
+        }
+        else
+        {
+            super.updateGamePosition();
+        }
+    }
 
-			var scaleY:Bool = realRatio < ratio;
+    static function set_allowWideScreen(value:Bool):Bool
+    {
+        if (allowWideScreen == value) return value;
+            
+        allowWideScreen = value;
+        resetScaleMode();
+        return value;
+    }
 
-			if (scaleY)
-			{
-				gameSize.x = Width;
-				gameSize.y = Math.floor(gameSize.x / ratio);
-			}
-			else
-			{
-				gameSize.y = Height;
-				gameSize.x = Math.floor(gameSize.y * ratio);
-			}
-		}
-	}
+	//better than copying this booleans several times
+    static inline function shouldUseWideScreen():Bool return ClientPrefs.noBordersScreen && allowWideScreen;
 
-	override function updateGamePosition():Void
-	{
-		if (ClientPrefs.noBordersScreen && allowWideScreen)
-			FlxG.game.x = FlxG.game.y = 0;
-		else
-			super.updateGamePosition();
-	}
-
-	@:noCompletion
-	private static function set_allowWideScreen(value:Bool):Bool
-	{
-		allowWideScreen = value;
-		FlxG.scaleMode = new FlxScaleMode();
-		return value;
-	}
+    static function resetScaleMode()
+    {
+        var currentType = Type.getClass(FlxG.scaleMode);
+        FlxG.scaleMode = Type.createInstance(currentType, []);
+    }
 }
