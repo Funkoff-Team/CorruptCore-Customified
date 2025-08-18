@@ -1,6 +1,6 @@
 package game.states.editors;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 #end
 import flixel.FlxG;
@@ -40,7 +40,7 @@ class MasterEditorMenu extends MusicBeatState
 	override function create()
 	{
 		FlxG.camera.bgColor = FlxColor.BLACK;
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Editors Main Menu", null);
 		#end

@@ -26,9 +26,11 @@ class Init extends FlxState
 		FlxG.mouse.visible = false;
 		#end
 
+		lime.Native.disableWinReport();
+
         PlayerSettings.init();
 
-        FlxG.save.bind('ccengine', 'justinx');
+        FlxG.save.bind('ccengine', CoolUtil.getSavePath());
 
 		ClientPrefs.loadPrefs();
 

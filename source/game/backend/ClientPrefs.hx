@@ -146,7 +146,7 @@ class ClientPrefs {
 		FlxG.save.flush();
 
 		var save:FlxSave = new FlxSave();
-		save.bind('fnf-CC-settings', 'justinX'); //Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
+		save.bind('fnf-CC-settings', CoolUtil.getSavePath()); //Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
 		save.data.customControls = keyBinds;
 		save.flush();
 		FlxG.log.add("Settings saved!");
@@ -294,7 +294,7 @@ class ClientPrefs {
 			colorBlindIntensity = FlxG.save.data.colorBlindIntensity;
 
 		var save:FlxSave = new FlxSave();
-		save.bind('fnf-CC-settings', 'justinX');
+		save.bind('fnf-CC-settings', CoolUtil.getSavePath());
 		if(save != null && save.data.customControls != null) {
 			var loadedControls:Map<String, Array<FlxKey>> = save.data.customControls;
 			for (control => keys in loadedControls) {

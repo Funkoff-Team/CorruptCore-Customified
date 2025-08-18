@@ -61,7 +61,7 @@ import hscript.Interp;
 import hscript.Expr;
 #end
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord;
 #end
 
@@ -2260,7 +2260,7 @@ class FunkinLua {
 		});
 		Lua_helper.add_callback(lua, "setBlendMode", function(obj:String, blend:String = '') {
 			var real = PlayState.instance.getLuaObject(obj);
-			if(real!=null) {
+			if(real != null) {
 				real.blend = blendModeFromString(blend);
 				return true;
 			}
@@ -2522,9 +2522,12 @@ class FunkinLua {
 		});
 
 		Lua_helper.add_callback(lua, "changePresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			#if desktop
+			#if DISCORD_ALLOWED
 			DiscordClient.changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
+			#else
+			luaTrace('changePresence: Discord presence is not allowed in this platform.', false, false, FlxColor.RED);
 			#end
+			return true;
 		});
 
 
@@ -2705,7 +2708,7 @@ class FunkinLua {
 			if(!PlayState.instance.modchartSaves.exists(name))
 			{
 				var save:FlxSave = new FlxSave();
-				save.bind(name, folder);
+				save.bind(name, CoolUtil.getSavePath() + "/" + folder);
 				PlayState.instance.modchartSaves.set(name, save);
 				return;
 			}

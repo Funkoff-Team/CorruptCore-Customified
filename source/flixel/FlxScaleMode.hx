@@ -52,7 +52,7 @@ class FlxScaleMode extends BaseScaleMode
         return value;
     }
 
-	//better than copying this booleans several times
+	//better than copying this booleans several time
     static inline function shouldUseWideScreen():Bool return ClientPrefs.noBordersScreen && allowWideScreen;
 
     static function resetScaleMode()

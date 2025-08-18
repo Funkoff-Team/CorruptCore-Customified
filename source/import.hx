@@ -77,7 +77,7 @@ import winapi.*;
 
 // that too
 #if mobile
-import mobile.*;
+import game.backend.mobile.*;
 #end
 
 import game.shaders.*;

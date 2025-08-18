@@ -1,6 +1,6 @@
 package game.states;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 import sys.thread.Thread;
 #end
@@ -187,7 +187,7 @@ class TitleState extends MusicBeatState
 			FlxTransitionableState.skipNextTransOut = true;
 			FlxG.switchState(() -> new FlashingState());
 		} else {
-			#if desktop
+			#if DISCORD_ALLOWED
 			if (!DiscordClient.isInitialized)
 			{
 				DiscordClient.initialize();

@@ -64,6 +64,7 @@ class Native
 		HWND window = FindWindowA(NULL, title.c_str());
 		// Look for child windows if top level aint found
 		if (window == NULL) window = FindWindowExA(GetActiveWindow(), NULL, NULL, title.c_str());
+		
 		// If still not found, try to get the active window
 		if (window == NULL) window = GetActiveWindow();
 		if (window == NULL) return;
@@ -129,6 +130,18 @@ class Native
 				ReleaseDC(curHandle, curHDC);
 			}
 		');
+		#end
+	}
+
+	/**
+    * Turns off that annoying "Report to Microsoft" dialog that pops up when the game crashes.
+    */
+	public static function disableWinReport():Void
+	{
+		#if (cpp && windows)
+		untyped __cpp__('SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);');
+		#else
+		// Do nothing lol
 		#end
 	}
 }

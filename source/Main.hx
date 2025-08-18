@@ -1,6 +1,6 @@
 package;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 #end
 import flixel.graphics.FlxGraphic;
@@ -89,11 +89,9 @@ class Main extends Sprite
 		// thanks @nebulazorua, @crowplexus, @diogotvv
 		FlxG.stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, (e) ->
 		{
-			if (e.keyCode == FlxKey.F11)
-				FlxG.fullscreen = !FlxG.fullscreen;
+			if (e.keyCode == FlxKey.F11) FlxG.fullscreen = !FlxG.fullscreen;
 			
-			if (e.keyCode == FlxKey.ENTER && e.altKey)
-				e.stopImmediatePropagation();
+			if (e.keyCode == FlxKey.ENTER && e.altKey) e.stopImmediatePropagation();
 		}, false, 100);
 	}
 
@@ -147,7 +145,9 @@ class Main extends Sprite
 
 		pluginsLessGo();
 
+		#if !html5
 		FlxG.scaleMode = new flixel.FlxScaleMode();
+		#end
 
 		#if !mobile
 		fpsVar = new FPS(10, 3, 0xFFFFFF);

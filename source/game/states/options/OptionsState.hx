@@ -1,6 +1,6 @@
 package game.states.options;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 #end
 import openfl.text.TextField;
@@ -63,7 +63,7 @@ class OptionsState extends MusicBeatState
 			Paths.clearUnusedMemory();
 		}
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
 

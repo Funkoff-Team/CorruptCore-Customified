@@ -92,11 +92,6 @@ class CoolUtil
 
 		return preprocessors;
 	}
-
-	/**
-	 * Gets the macro class created by hscript-improved for an abstract / enum
-	 */
-	@:noUsing public static inline function getMacroAbstractClass(className:String) return Type.resolveClass('${className}_HSC');
 	#end
 	
 	public static function getDifficultyFilePath(num:Null<Int> = null)
@@ -348,5 +343,13 @@ class CoolUtil
 		#else
 		lime.app.Application.current.window.alert(message, title);
 		#end
+	}
+
+	@:access(flixel.util.FlxSave.validate)
+	inline public static function getSavePath():String {
+		final company:String = FlxG.stage.application.meta.get('company');
+		// #if (flixel < "5.0.0") return company; #else
+		return '${company}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
+		// #end
 	}
 }

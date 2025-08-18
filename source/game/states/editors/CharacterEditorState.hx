@@ -1,6 +1,6 @@
 package game.states.editors;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 #end
 import flixel.FlxG;
@@ -1308,7 +1308,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function updatePresence() {
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Character Editor", "Character: " + daAnim, leHealthIcon.getCharacter());
 		#end

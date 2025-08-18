@@ -1,6 +1,6 @@
 package api;
 
-#if desktop
+#if DISCORD_ALLOWED
 import Sys.sleep;
 import lime.app.Application;
 import hxdiscord_rpc.Discord;

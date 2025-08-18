@@ -1,6 +1,6 @@
 package game.states.options;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 #end
 import flixel.util.FlxStringUtil;
@@ -63,7 +63,7 @@ class NoteOffsetState extends MusicBeatState
 
 		FlxG.camera.scroll.set(120, 130);
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Delay/Combo Offset Menu", null);
 		#end
 

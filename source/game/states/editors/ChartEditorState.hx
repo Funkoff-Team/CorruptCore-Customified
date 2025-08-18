@@ -2,7 +2,7 @@ package game.states.editors;
 
 //modified by Justin/GreenColdTea
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 #end
 import openfl.geom.Rectangle;
@@ -33,7 +33,7 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 #if mobile
-import mobile.flixel.FlxButton;
+import game.backend.mobile.flixel.FlxButton;
 #else
 import flixel.ui.FlxButton;
 #end
@@ -294,12 +294,12 @@ class ChartEditorState extends MusicBeatState
 				song: 'Test',
 				notes: [],
 				events: [],
-				bpm: 146.0,
+				bpm: 150.0,
 				needsVoices: true,
 				arrowSkin: '',
 				splashSkin: 'noteSplashes',//idk it would crash if i didn't
 				player1: 'bf',
-				player2: 'scrimbo',
+				player2: 'dad',
 				gfVersion: 'gf',
 				speed: 1,
 				stage: 'stage',
@@ -309,7 +309,7 @@ class ChartEditorState extends MusicBeatState
 			PlayState.SONG = _song;
 		}
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor", StringTools.replace(_song.song, '-', ' '));
 		#end

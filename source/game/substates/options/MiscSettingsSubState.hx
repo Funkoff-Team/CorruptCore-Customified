@@ -1,6 +1,6 @@
 package game.substates.options;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord.DiscordClient;
 #end
 import openfl.text.TextField;

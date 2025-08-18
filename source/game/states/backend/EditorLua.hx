@@ -30,7 +30,7 @@ import game.objects.DialogueBoxPsych;
 
 import game.states.editors.EditorPlayState;
 
-#if desktop
+#if DISCORD_ALLOWED
 import api.Discord;
 #end
 
