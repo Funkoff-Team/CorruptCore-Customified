@@ -12,6 +12,14 @@ class Init extends FlxState
 
     override function create()
     {
+		PlayerSettings.init();
+
+        FlxG.save.bind('ccengine', CoolUtil.getSavePath());
+
+		ClientPrefs.init();
+
+		Highscore.load();
+
         #if (LUA_ALLOWED && MODS_ALLOWED)
 		Paths.pushGlobalMods();
 		WeekData.loadTheFirstEnabledMod();
@@ -25,16 +33,6 @@ class Init extends FlxState
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		#end
-
-		lime.Native.disableWinReport();
-
-        PlayerSettings.init();
-
-        FlxG.save.bind('ccengine', CoolUtil.getSavePath());
-
-		ClientPrefs.loadPrefs();
-
-        Highscore.load();
 
         #if GLOBAL_SCRIPTS
 		if(!hscript.ScriptGlobal.globalScriptActive) hscript.ScriptGlobal.addGlobalScript();

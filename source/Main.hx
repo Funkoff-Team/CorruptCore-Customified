@@ -28,6 +28,8 @@ import game.backend.CrashHandler;
 import game.scripting.LuaCallbackHandler;
 #end
 
+import game.backend.plugins.HotReloadPlugin;
+
 using StringTools;
 
 // NATIVE API STUFF, YOU CAN IGNORE THIS AND SCROLL //
@@ -127,6 +129,7 @@ class Main extends Sprite
 
         #if (cpp && windows)
 		lime.Native.fixScaling();
+		lime.Native.disableWinReport();
 		#end
 
 		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(LuaCallbackHandler.call)); #end
@@ -134,8 +137,6 @@ class Main extends Sprite
 		#if VIDEOS_ALLOWED
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
 		#end
-	
-		ClientPrefs.loadDefaultKeys();
 
 		#if CRASH_HANDLER
 		addChild(new FunkinGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
@@ -243,6 +244,9 @@ class Main extends Sprite
 		final crashReport = 'CRASH DETAILS:\n$errorMsg\n\nSTACK TRACE:\n$stackTrace';
 		
 		try {
+			FlxTransitionableState.skipNextTransOut = true;
+			FlxTransitionableState.skipNextTransIn = true;
+			
 			FlxG.switchState(() -> new CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
 		} catch (e:Dynamic) {
 			// If the crash handler fails, we log the error to console
@@ -405,7 +409,7 @@ class Main extends Sprite
 
 	private function pluginsLessGo()
 	{
-		plugins.HotReloadPlugin.init();
+		HotReloadPlugin.init();
 	}
 }
 

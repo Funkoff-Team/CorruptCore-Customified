@@ -1,4 +1,4 @@
-package plugins;
+package game.backend.plugins;
 
 import flixel.FlxG;
 import flixel.FlxBasic;

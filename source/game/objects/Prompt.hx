@@ -1,14 +1,12 @@
 package game.objects;
 import flixel.*;
 import flixel.FlxSubState;
-import flixel.addons.ui.FlxUIButton;
-import flixel.addons.ui.FlxUIPopup;
 import flixel.text.FlxText;
-import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
+import flixel.util.FlxDestroyUtil;
 
 /**
  * ...
@@ -23,22 +21,34 @@ class Prompt extends MusicBeatSubstate
 	var buttons:FlxSprite = new FlxSprite(473.3, 450);
 	var theText:String = '';
 	var goAnyway:Bool = false;
-	var UI_box:FlxUIPopup;
 	var panel:FlxSprite;
 	var panelbg:FlxSprite;
-	var buttonAccept:FlxButton;
-	var buttonNo:FlxButton;
+	var buttonAccept:PsychUIButton;
+	var buttonNo:PsychUIButton;
 	var cornerSize:Int = 10;
 	private var _option1:String;
     private var _option2:String;
+	
+	public var bg:FlxSprite;
+	public var titleText:FlxText;
+	public var onCreate:Prompt->Void;
+	public var onUpdate:Prompt->Float->Void;
 
-	public function new(promptText:String='', defaultSelected:Int = 0, okCallback:Void->Void, cancelCallback:Void->Void, acceptOnDefault:Bool=false, option1:String=null, option2:String=null) 
+	private var _sizeX:Float = 0;
+	private var _sizeY:Float = 0;
+	private var _blockInput:Float = 0.1;
+	private var _newStyle:Bool = true;
+
+	public function new(promptText:String='', defaultSelected:Int = 0, okCallback:Void->Void, cancelCallback:Void->Void, acceptOnDefault:Bool=false, option1:String=null, option2:String=null, ?newStyle:Bool = true, ?sizeX:Float = 420, ?sizeY:Float = 160) 
 	{
 		selected = defaultSelected;
 		okc = okCallback;
 		cancelc = cancelCallback;
 		theText = promptText;
 		goAnyway = acceptOnDefault;
+		_newStyle = newStyle;
+		_sizeX = sizeX;
+		_sizeY = sizeY;
 			
 		_option1 = option1;
 		_option2 = option2;
@@ -48,25 +58,74 @@ class Prompt extends MusicBeatSubstate
 			
 		if (option1 != null) op1 = option1;
 		if (option2 != null) op2 = option2;
-		buttonAccept = new FlxButton(473.3, 450, op1, function(){
+		buttonAccept = new PsychUIButton(473.3, 450, op1, () -> {
 			if(okc != null) okc();
 			close();
 		});
-		buttonNo = new FlxButton(633.3,450, op2, function() {
+		buttonNo = new PsychUIButton(633.3,450, op2, () -> {
 			if(cancelc != null) cancelc();
 			close();
 		});
 
 		super();  
-	}		
+	}
+	
+	// New constructor for simplified usage
+	public static function simple(promptText:String, yesCallback:Void->Void, ?noCallback:Void->Void, ?yesText:String = "OK", ?noText:String = "Cancel"):Prompt
+	{
+		return new Prompt(promptText, 0, yesCallback, noCallback, false, yesText, noText, true);
+	}
 	
 	override public function create():Void 
+	{
+		if (goAnyway)
 		{
-			super.create();
-			if (goAnyway){
-				if(okc != null) okc();
-				close();
+			if(okc != null) okc();
+			close();
+		} else {
+			if (_newStyle) {
+				// Psych new style implementation
+				cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+				bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+				bg.alpha = 0.8;
+				bg.scale.set(_sizeX, _sizeY);
+				bg.updateHitbox();
+				bg.screenCenter();
+				bg.scrollFactor.set();
+				bg.cameras = cameras;
+				add(bg);
+				
+				titleText = new FlxText(0, bg.y + 30, 400, theText, 16);
+				titleText.screenCenter(X);
+				titleText.alignment = CENTER;
+				titleText.scrollFactor.set();
+				titleText.cameras = cameras;
+				add(titleText);
+				
+				var btnY = 390;
+				buttonAccept = new PsychUIButton(0, btnY, _option1 != null ? _option1 : "OK", function() {
+					if(okc != null) okc();
+					close();
+				});
+				buttonAccept.screenCenter(X);
+				buttonAccept.scrollFactor.set();
+				buttonAccept.x -= 100;
+				buttonAccept.cameras = cameras;
+				add(buttonAccept);
+
+				if (_option2 != null) {
+					buttonNo = new PsychUIButton(0, btnY, _option2, function() {
+						if(cancelc != null) cancelc();
+						close();
+					});
+					buttonNo.screenCenter(X);
+					buttonNo.scrollFactor.set();
+					buttonNo.x += 100;
+					buttonNo.cameras = cameras;
+					add(buttonNo);
+				}
 			} else {
+				// Old style implementation
 				panel = new FlxSprite(0, 0);
 				panelbg = new FlxSprite(0, 0);
 				makeSelectorGraphic(panel, 300, 150, 0xff999999);
@@ -75,20 +134,18 @@ class Prompt extends MusicBeatSubstate
 				panel.screenCenter();
 				panelbg.scrollFactor.set();
 				panelbg.screenCenter();
-				
+					
 				add(panelbg);
 				add(panel);
 				add(buttonAccept);
-				if (_option2 != null) {
-					add(buttonNo);
-				}
-				
+				if (_option2 != null) add(buttonNo);
+					
 				var textField:FlxText = new FlxText(0, panel.y, 300, theText, 16);
 				textField.alignment = 'center';
 				textField.screenCenter();
 				textField.y -= 10;
 				add(textField);
-				
+					
 				if (_option2 == null) {
 					buttonAccept.x = panel.x + panel.width / 2 - buttonAccept.width / 2;
 				} else {
@@ -101,46 +158,32 @@ class Prompt extends MusicBeatSubstate
 				buttonAccept.y = panel.y + panel.height - 30;
 				textField.scrollFactor.set();
 			}
+			
+			if (onCreate != null) onCreate(this);
 		}
-
-	/*
-	override public function update(elapsed:Float):Void 
+		super.create();
+	}
+	
+	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		
-		
-		
-		if (!goAnyway){
-			
-			
-			
-		if (controls.UI_LEFT_P || controls.UI_RIGHT_P){
-			if (selected == 0){
-				selected = 1;
-			}else{
-				selected = 0;
-			}
-			FlxG.sound.play(Paths.sound('scrollMenu'));
-			//buttons.animation.play('but' + selected);
-		}
-		buttonAccept.color.brightness = 0.5;
-		buttonNo.color.brightness = 0.5;
-		if (selected == 0 ) buttonAccept.color.brightness = 0.9;
-		if (selected == 1 ) buttonNo.color.brightness = 0.9;
-		if (controls.ACCEPT ){
-			if (selected == 0){
-				FlxG.sound.play(Paths.sound('confirmMenu'));
-				if(okc != null)okc();
-			}else{
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				if(cancelc != null)cancelc();
-			}
+
+		_blockInput = Math.max(0, _blockInput - elapsed);
+		if(_blockInput <= 0 && FlxG.keys.justPressed.ESCAPE)
+		{
 			close();
+			return;
 		}
-		
-		}
+
+		if(onUpdate != null)
+			onUpdate(this, elapsed);
 	}
-	*/
+	
+	override function destroy()
+	{
+		for (member in members) FlxDestroyUtil.destroy(member);
+		super.destroy();
+	}
 	
 	function makeSelectorGraphic(panel:FlxSprite,w,h,color:FlxColor)
 	{
@@ -174,5 +217,22 @@ class Prompt extends MusicBeatSubstate
 		panel.pixels.fillRect(new Rectangle((flipX ? antiX : 6), Std.int(Math.abs(antiY - 2)),  5, 1), color);
 		panel.pixels.fillRect(new Rectangle((flipX ? antiX : 8), Std.int(Math.abs(antiY - 1)),  3, 1), color);
 	}
-	
+}
+
+// Exit confirmation prompt used on all editors, for convenience
+// Ass thing tbh lol
+class ExitConfirmationPrompt extends Prompt
+{
+	public function new(?finishCallback:Void->Void)
+	{
+		var exitCallback = function()
+		{
+			FlxG.mouse.visible = false;
+			FlxG.switchState(new game.states.editors.MasterEditorMenu());
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			if(finishCallback != null) finishCallback();
+		};
+		
+		super('There\'s unsaved progress,\nare you sure you want to exit?', 0, exitCallback, null, false, "Exit", null, true);
+	}
 }

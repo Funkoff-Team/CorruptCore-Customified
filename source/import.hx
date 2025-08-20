@@ -39,11 +39,14 @@ import android.os.Build.VERSION_CODES as AndroidVersionCode;
 import android.os.BatteryManager as AndroidBatteryManager;
 #end
 
+import psych.ui.*;
+
 #if flixel_animate
 import animate.*;
 import animate.FlxAnimate;
 #end
 
+//mb lol
 #if haxeui_flixel
 import haxe.ui.backend.flixel.UIState;
 #end

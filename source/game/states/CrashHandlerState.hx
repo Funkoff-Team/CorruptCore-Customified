@@ -42,6 +42,9 @@ class CrashHandlerState extends MusicBeatState
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
+		FlxTransitionableState.skipNextTransOut = true;
+		FlxTransitionableState.skipNextTransIn = true;
+
 		FlxG.sound.playMusic(Paths.music("NO-WAY!"));
 		
 		#if sys

@@ -137,6 +137,7 @@ class ControlsSubState extends MusicBeatSubstate {
 			if(controls.ACCEPT && nextAccept <= 0) {
 				if(optionShit[curSelected][0] == defaultKey) {
 					ClientPrefs.keyBinds = ClientPrefs.defaultKeys.copy();
+					ClientPrefs.reloadControls();
 					reloadKeys();
 					changeSelection();
 					FlxG.sound.play(Paths.sound('confirmMenu'));
@@ -162,7 +163,7 @@ class ControlsSubState extends MusicBeatSubstate {
 					keysArray[opposite] = NONE;
 				}
 				ClientPrefs.keyBinds.set(optionShit[curSelected][1], keysArray);
-
+				ClientPrefs.reloadControls();
 				reloadKeys();
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				rebindingKey = false;
