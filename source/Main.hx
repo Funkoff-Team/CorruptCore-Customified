@@ -462,6 +462,21 @@ class FunkinGame extends FlxGame
 			onCrash(e);
 		}
 	}
+
+	/**
+	 * Handles the `onResize` call and updates the game state.
+	 */
+	override function onResize(_):Void
+	{
+		try
+		{
+			super.onResize(_);
+		}
+		catch (e)
+		{
+			onCrash(e);
+		}
+	}
 	
 	/**
 	 * Handles the `onEnterFrame` call and figures out how many updates and draw calls to do.
@@ -484,7 +499,7 @@ class FunkinGame extends FlxGame
 	 */
 	override function update():Void
 	{
-		if (FlxG.keys.justPressed.F9) crashGame();
+		#if WANNA_TEST_CH if (FlxG.keys.justPressed.F9) crashGame(); #end
 		try
 		{
 			super.update();
@@ -509,7 +524,7 @@ class FunkinGame extends FlxGame
 			onCrash(e);
 		}
 	}
-
+	
 	private final function onCrash(e:haxe.Exception):Void
     {
         Main.handleCrash(e);

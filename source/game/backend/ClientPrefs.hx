@@ -85,7 +85,8 @@ class ClientPrefs {
 
     public static var defaultKeys:Map<String, Array<FlxKey>> = null;
 
-    public static function init() {
+    public static function init() 
+	{
         loadDefaultKeys();
         loadPrefs();
     }
