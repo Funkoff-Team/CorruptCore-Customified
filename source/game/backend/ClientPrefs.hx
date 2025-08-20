@@ -10,28 +10,8 @@ import game.backend.Controls;
  * ClientPrefs class to manage client preferences and settings.
  */
 class ClientPrefs {
-    /** 
-	 * Grouping settings by category.
-	 * for organization only, not for saves
-	**/
-    public static final VISUAL_SETTINGS:Array<String> = [
-        'downScroll', 'middleScroll', 'opponentStrums', 'showFPS', 'flashing',
-        'globalAntialiasing', 'noteSplashes', 'lowQuality', 'shaders', 'camZooms',
-        'hideHud', 'healthBarAlpha', 'scoreZoom', 'timeBarType', 'cacheOnGPU',
-        'noBordersScreen', 'adaptiveCache'
-    ];
-    
-    public static final AUDIO_SETTINGS:Array<String> = [
-        'hitsoundVolume', 'pauseMusic'
-    ];
-    
-    public static final ACCESSIBILITY_SETTINGS:Array<String> = [
-        'ghostTapping', 'noReset', 'colorBlindMode', 'colorBlindIntensity', 'safeFrames'
-    ];
-
     /**
 	 * Preferences.
-	 * saved as separate variables for backward compatibility.
 	**/
     public static var downScroll:Bool = false;
     public static var middleScroll:Bool = false;
