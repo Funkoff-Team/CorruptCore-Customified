@@ -43,7 +43,7 @@ class PsychUICheckBox extends FlxSpriteGroup
 		if(FlxG.mouse.justPressed)
 		{
 			var screenPos:FlxPoint = getScreenPosition(null, camera);
-			var mousePos:FlxPoint = FlxG.mouse.getPositionInCameraView(camera);
+			var mousePos:FlxPoint = #if (flixel < "5.9.0") FlxG.mouse.getPositionInCameraView(camera) #else FlxG.mouse.getViewPosition(camera) #end;
 			if((mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width) &&
 				(mousePos.y >= screenPos.y && mousePos.y < screenPos.y + height))
 			{

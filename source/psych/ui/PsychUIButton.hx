@@ -1,5 +1,7 @@
 package psych.ui;
 
+import flixel.math.FlxPoint;
+import flixel.util.FlxDestroyUtil;
 import psych.ui.PsychUIBox.UIStyleData;
 
 class PsychUIButton extends FlxSpriteGroup
@@ -10,6 +12,8 @@ class PsychUIButton extends FlxSpriteGroup
 	public var label(default, set):String;
 	public var bg:FlxSprite;
 	public var text:FlxText;
+
+	public var labelOffsets:Array<FlxPoint> = [];
 
 	public var onChangeState:String->Void;
 	public var onClick:Void->Void;
@@ -109,5 +113,14 @@ class PsychUIButton extends FlxSpriteGroup
 	{
 		if(text != null && text.exists) text.text = v;
 		return (label = v);
+	}
+
+	override public function destroy()
+	{
+		super.destroy();
+		for (point in labelOffsets) {
+			FlxDestroyUtil.put(point);
+		}
+		labelOffsets = null;
 	}
 }

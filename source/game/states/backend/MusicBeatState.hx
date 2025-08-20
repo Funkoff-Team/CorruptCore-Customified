@@ -4,7 +4,6 @@ import game.objects.FNFCamera;
 import game.backend.Conductor.BPMChangeEvent;
 import game.scripting.FunkinLua;
 import flixel.FlxG;
-import flixel.addons.ui.FlxUIState;
 import flixel.math.FlxRect;
 import flixel.util.FlxTimer;
 import flixel.addons.transition.FlxTransitionableState;
@@ -24,7 +23,7 @@ import sys.FileSystem;
 import hscript.HScript;
 #end
 
-class MusicBeatState extends FlxUIState
+class MusicBeatState extends FlxState
 {
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
