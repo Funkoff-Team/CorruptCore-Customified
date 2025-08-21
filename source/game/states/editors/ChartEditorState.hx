@@ -342,8 +342,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		add(leftIcon);
 		add(rightIcon);
 
-		leftIcon.setPosition(eventIcon.x + 90, -100);
-		rightIcon.setPosition(GRID_SIZE * 16.67, -100);
+		leftIcon.setPosition(eventIcon.x + 90, eventIcon.y - 10);
+		rightIcon.setPosition(leftIcon.x + 162, leftIcon.y);
 
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		curRenderedNotes = new FlxTypedGroup<Note>();
@@ -376,11 +376,11 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		strumLine.screenCenter(X);
 		add(strumLine);
 
-		quant = new AttachedSprite('chart_quant','chart_quant');
+		quant = new AttachedSprite('chart_quant', 'chart_quant');
 		quant.animation.addByPrefix('q','chart_quant',0,false);
 		quant.animation.play('q', true, false, 0);
 		quant.sprTracker = strumLine;
-		quant.x -= GRID_SIZE;
+		quant.xAdd = -GRID_SIZE;
 		quant.yAdd = 8;
 		add(quant);
 
@@ -412,8 +412,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		player.cameras = [camUI];
 		add(player);
 
-		mainBox = new PsychUIBox(GRID_SIZE / 2, 25, 365, 400, ['Charting', 'Events', 'Note', 'Section', 'Song']);
-		mainBox.selectedName = 'Song';
+		mainBox = new PsychUIBox(GRID_SIZE / 2 - 2, 50, 365, 400, ['Charting', 'Events', 'Note', 'Section', 'Song']);
+		mainBox.selectedName = 'Charting';
 		mainBox.scrollFactor.set();
 		mainBox.cameras = [camUI];
 		add(mainBox);
@@ -958,11 +958,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			for (note in _song.notes[curSec].sectionNotes)
 			{
 				var boob = note[1];
-				if (boob>3){
-					boob -= 4;
-				}else{
-					boob += 4;
-				}
+				boob -= (boob > 3) ? 4 : -4;
 
 				var copiedNote:Array<Dynamic> = [note[0], boob, note[2], note[3]];
 				duetNotes.push(copiedNote);
@@ -1234,12 +1230,11 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				changeEventSelected();
 				updateGrid();
 			}
-		});
+		}, 20);
 		removeButton.setGraphicSize(Std.int(removeButton.height), Std.int(removeButton.height));
 		removeButton.updateHitbox();
 		removeButton.normalStyle.bgColor = FlxColor.RED;
 		removeButton.normalStyle.textColor = FlxColor.WHITE;
-		setAllLabelsOffset(removeButton, -30, 0);
 		tab_group_event.add(removeButton);
 
 		var addButton:PsychUIButton = new PsychUIButton(removeButton.x + removeButton.width + 10, removeButton.y, '+', function()
@@ -1252,24 +1247,21 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				changeEventSelected(1);
 				updateGrid();
 			}
-		});
+		}, 20);
 		addButton.setGraphicSize(Std.int(removeButton.width), Std.int(removeButton.height));
 		addButton.updateHitbox();
 		addButton.normalStyle.bgColor = FlxColor.GREEN;
 		addButton.normalStyle.textColor = FlxColor.WHITE;
-		setAllLabelsOffset(addButton, -30, 0);
 		tab_group_event.add(addButton);
 
-		var moveLeftButton:PsychUIButton = new PsychUIButton(addButton.x + addButton.width + 20, addButton.y, '<', () -> changeEventSelected(-1));
+		var moveLeftButton:PsychUIButton = new PsychUIButton(addButton.x + addButton.width + 20, addButton.y, '<', () -> changeEventSelected(-1), 20);
 		moveLeftButton.setGraphicSize(Std.int(addButton.width), Std.int(addButton.height));
 		moveLeftButton.updateHitbox();
-		setAllLabelsOffset(moveLeftButton, -30, 0);
 		tab_group_event.add(moveLeftButton);
 
-		var moveRightButton:PsychUIButton = new PsychUIButton(moveLeftButton.x + moveLeftButton.width + 10, moveLeftButton.y, '>', () -> changeEventSelected(1));
+		var moveRightButton:PsychUIButton = new PsychUIButton(moveLeftButton.x + moveLeftButton.width + 10, moveLeftButton.y, '>', () -> changeEventSelected(1), 20);
 		moveRightButton.setGraphicSize(Std.int(moveLeftButton.width), Std.int(moveLeftButton.height));
 		moveRightButton.updateHitbox();
-		setAllLabelsOffset(moveRightButton, -30, 0);
 		tab_group_event.add(moveRightButton);
 
 		selectedEventText = new FlxText(addButton.x - 100, addButton.y + addButton.height + 6, (moveRightButton.x - addButton.x) + 186, 'Selected Event: None');
@@ -1297,14 +1289,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			selectedEventText.text = 'Selected Event: None';
 		}
 		updateNoteUI();
-	}
-
-	function setAllLabelsOffset(button:PsychUIButton, x:Float, y:Float)
-	{
-		for (point in button.labelOffsets)
-		{
-			point.set(x, y);
-		}
 	}
 
 	var metronome:PsychUICheckBox;
