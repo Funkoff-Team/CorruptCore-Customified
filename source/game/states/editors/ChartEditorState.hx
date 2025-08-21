@@ -69,6 +69,9 @@ import sys.io.File;
 class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 
 {
+	public static final GRID_SIZE:Int = 40;
+	public final CAM_OFFSET:Int = 180;
+
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
 	[
 		'',
@@ -126,7 +129,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		['Set Property', "Value 1: Variable name\nValue 2: New value"]
 	];
 
-	var _file:FileReference;
+	private var _file:FileReference;
     var postfix:String = '';
     
 	var mainBox:PsychUIBox;
@@ -152,9 +155,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 	var highlight:FlxSprite;
 
-	public static var GRID_SIZE:Int = 40;
-	var CAM_OFFSET:Int = 180;
-
 	var dummyArrow:FlxSprite;
 
 	var curRenderedSustains:FlxTypedGroup<FlxSprite>;
@@ -176,6 +176,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	var curUndoIndex = 0;
 	var curRedoIndex = 0;
 	public var _song:SwagSong;
+
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
 	**/
@@ -217,14 +218,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     	0xFF00FFFF, // blue (down)
     	0xFF12FA05, // green (up note)
     	0xFFF9393F  // red (right note)
-	];
-
-	// for opponent there are other colors to not miss with them
-	public static var sustainColorsOppo:Array<FlxColor> = [
-		0xFFFF0000,
-		0xFFFF0000,
-		0xFFFF0000,
-		0xFFFF0000 
 	];
 
 	//select box things
@@ -697,8 +690,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		stageDropDown = new PsychUIDropDownMenu(player1DropDown.x + 175, player1DropDown.y, stages, (id:Int, character:String) -> _song.stage = stages[id]);
 		stageDropDown.selectedLabel = _song.stage;
 		
-		var skin = PlayState.SONG.arrowSkin;
-		if(skin == null) skin = '';
+		var skin = PlayState.SONG.arrowSkin ?? '';
 		noteSkinInputText = new PsychUIInputText(player2DropDown.x, player2DropDown.y + 50, 150, skin, 8);
 
 		noteSplashesInputText = new PsychUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, _song.splashSkin, 8);
@@ -827,10 +819,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		var pasteButton:PsychUIButton = new PsychUIButton(copyButton.x + 130, copyButton.y, "Paste Section", function()
 		{
-			if(notesCopied == null || notesCopied.length < 1)
-			{
-				return;
-			}
+			if(notesCopied == null || notesCopied.length < 1) return;
 
 			var addToTime:Float = Conductor.stepCrochet * (getSectionBeats() * 4 * (curSec - sectionToCopy));
 			//trace('Time to add: ' + addToTime);
@@ -912,7 +901,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		});
 
 		var stepperCopy:PsychUINumericStepper = null;
-		var copyLastButton:PsychUIButton = new PsychUIButton(10, swapSection.y + 30, "Copy Last Section", function()
+		var copyLastSecButton:PsychUIButton = new PsychUIButton(swapSection.x, swapSection.y + 35, "Copy Last Section", function()
 		{
 			var value:Int = Std.int(stepperCopy.value);
 			if(value == 0) return;
@@ -947,12 +936,11 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			}
 			updateGrid();
 		});
-		copyLastButton.setGraphicSize(80, 30);
-		copyLastButton.updateHitbox();
+		copyLastSecButton.resize(80, 26);
 		
-		stepperCopy = new PsychUINumericStepper(copyLastButton.x + 100, copyLastButton.y, 1, 1, -999, 999, 0);
+		stepperCopy = new PsychUINumericStepper(copyLastSecButton.x + 100, copyLastSecButton.y + 5, 1, 1, -999, 999, 0);
 
-		var duetButton:PsychUIButton = new PsychUIButton(10, copyLastButton.y + 45, "Duet Notes", function()
+		var duetButton:PsychUIButton = new PsychUIButton(10, copyLastSecButton.y + 45, "Duet Notes", function()
 		{
 			var duetNotes:Array<Array<Dynamic>> = [];
 			for (note in _song.notes[curSec].sectionNotes)
@@ -1007,7 +995,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		tab_group_section.add(check_eventsSec);
 		tab_group_section.add(swapSection);
 		tab_group_section.add(stepperCopy);
-		tab_group_section.add(copyLastButton);
+		tab_group_section.add(copyLastSecButton);
 		tab_group_section.add(duetButton);
 		tab_group_section.add(mirrorButton);
 	}
@@ -1231,8 +1219,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				updateGrid();
 			}
 		}, 20);
-		removeButton.setGraphicSize(Std.int(removeButton.height), Std.int(removeButton.height));
-		removeButton.updateHitbox();
 		removeButton.normalStyle.bgColor = FlxColor.RED;
 		removeButton.normalStyle.textColor = FlxColor.WHITE;
 		tab_group_event.add(removeButton);
@@ -1248,20 +1234,14 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				updateGrid();
 			}
 		}, 20);
-		addButton.setGraphicSize(Std.int(removeButton.width), Std.int(removeButton.height));
-		addButton.updateHitbox();
 		addButton.normalStyle.bgColor = FlxColor.GREEN;
 		addButton.normalStyle.textColor = FlxColor.WHITE;
 		tab_group_event.add(addButton);
 
 		var moveLeftButton:PsychUIButton = new PsychUIButton(addButton.x + addButton.width + 20, addButton.y, '<', () -> changeEventSelected(-1), 20);
-		moveLeftButton.setGraphicSize(Std.int(addButton.width), Std.int(addButton.height));
-		moveLeftButton.updateHitbox();
 		tab_group_event.add(moveLeftButton);
 
 		var moveRightButton:PsychUIButton = new PsychUIButton(moveLeftButton.x + moveLeftButton.width + 10, moveLeftButton.y, '>', () -> changeEventSelected(1), 20);
-		moveRightButton.setGraphicSize(Std.int(moveLeftButton.width), Std.int(moveLeftButton.height));
-		moveRightButton.updateHitbox();
 		tab_group_event.add(moveRightButton);
 
 		selectedEventText = new FlxText(addButton.x - 100, addButton.y + addButton.height + 6, (moveRightButton.x - addButton.x) + 186, 'Selected Event: None');
@@ -1448,7 +1428,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		voicesOppVolume.name = 'voices_opp_volume';
 		
 		#if FLX_PITCH
-		playbackSlider = new PsychUISlider(165, 120, (v:Float) -> playbackSpeed = v, playbackSpeed, 1, 0.1, 5.0, 200);
+		playbackSlider = new PsychUISlider(145, 120, (v:Float) -> playbackSpeed = v, 1, 0.1, 5.0, 200);
 		playbackSlider.label = 'Playback Rate';
 		tab_group_chart.add(playbackSlider);
 		#end
@@ -3241,7 +3221,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note(daStrumTime, daNoteInfo % 4, true);
+		var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, null, true);
 		if(note.noteData < 0) daSus == null;
 		if(daSus != null) { //Common note
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
@@ -3378,11 +3358,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		// Player/Opponent note sustains
 		var color:FlxColor;
-		if(note.noteData > 3) { // opponent notes (4-7)
-			color = sustainColorsOppo[note.noteData - 4];
-		} else { // player notes (0-3)
-			color = sustainColors[note.noteData];
-		}
+		color = sustainColors[note.noteData];
 
 		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE / 2).makeGraphic(8, height, color);
 		return spr;
@@ -3670,7 +3646,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		
 		saveToUndo();
 		
-		if (clipboardNotes == null) clipboardNotes = [];
 		clipboardNotes = [];
 		
 		if (selectedNotes.length > 0)
@@ -3826,9 +3801,9 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	{
 		try {
 			if (CoolUtil.difficulties[PlayState.storyDifficulty] != CoolUtil.defaultDifficulty) {
-				if(CoolUtil.difficulties[PlayState.storyDifficulty] == null){
+				if(CoolUtil.difficulties[PlayState.storyDifficulty] == null) {
 					PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
-				}else{
+				} else {
 					PlayState.SONG = Song.loadFromJson(song.toLowerCase() + "-" + CoolUtil.difficulties[PlayState.storyDifficulty], song.toLowerCase());
 				}
 			} else {
@@ -3964,7 +3939,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		var val:Null<Float> = null;
 		
 		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
-		return val != null ? val : 4;
+		return val ?? 4;
 	}
 }
 

@@ -270,16 +270,14 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 			{
 				dialogueFile.dialogue[curSelected].text = lineInputText.text;
 
-				daText.text = lineInputText.text;
-				if(daText.text == null) daText.text = '';
+				daText.text = lineInputText.text ?? '';
 				reloadText(true);
 			}
 			else if(sender == soundInputText)
 			{
 				daText.finishText();
 				dialogueFile.dialogue[curSelected].sound = soundInputText.text;
-				daText.sound = soundInputText.text;
-				if(daText.sound == null) daText.sound = '';
+				daText.sound = soundInputText.text ?? '';
 			}
 		} else if(id == PsychUINumericStepper.CHANGE_EVENT && (sender == speedStepper)) {
 			dialogueFile.dialogue[curSelected].speed = speedStepper.value;
