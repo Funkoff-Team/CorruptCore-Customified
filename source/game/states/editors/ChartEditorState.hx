@@ -279,6 +279,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				needsVoices: true,
 				arrowSkin: '',
 				splashSkin: 'noteSplashes',//idk it would crash if i didn't
+				holdCoverSkin: 'holdCovers',
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
@@ -484,6 +485,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	var UI_songTitle:PsychUIInputText;
 	var noteSkinInputText:PsychUIInputText;
 	var noteSplashesInputText:PsychUIInputText;
+	var holdCoverInputText:PsychUIInputText;
 	var stageDropDown:PsychUIDropDownMenu;
 	var playbackSlider:PsychUISlider;
 	function addSongUI():Void
@@ -695,7 +697,9 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		noteSplashesInputText = new PsychUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, _song.splashSkin, 8);
 
-		var reloadNotesButton:PsychUIButton = new PsychUIButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, 'Change Notes', function() {
+		holdCoverInputText = new PsychUIInputText(noteSplashesInputText.x, noteSplashesInputText.y + 35, 150, _song.holdCoverSkin, 8);
+
+		var reloadNotesButton:PsychUIButton = new PsychUIButton(noteSkinInputText.x + 160, noteSkinInputText.y - 2.5, 'Change Notes', function() {
 			try {
 				_song.arrowSkin = noteSkinInputText.text;
 				updateGrid();
@@ -728,6 +732,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		tab_group_song.add(reloadNotesButton);
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
+		tab_group_song.add(holdCoverInputText);
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
 		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
@@ -736,6 +741,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
 		tab_group_song.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
 		tab_group_song.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
+		tab_group_song.add(new FlxText(holdCoverInputText.x, holdCoverInputText.y - 15, 0, 'Note Hold Covers Texture:'));
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
@@ -1669,6 +1675,12 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if (input == noteSplashesInputText)
 		{
 			_song.splashSkin = input.text;
+			return;
+		}
+
+		if (input == holdCoverInputText)
+		{
+			_song.holdCoverSkin = input.text;
 			return;
 		}
 		

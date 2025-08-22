@@ -69,6 +69,7 @@ import game.objects.HealthIcon;
 import game.objects.Note;
 import game.objects.Note.EventNote;
 import game.objects.NoteSplash;
+import game.objects.NoteHoldCover;
 import game.objects.StrumNote;
 
 #if VIDEOS_ALLOWED
@@ -204,6 +205,7 @@ class PlayState extends MusicBeatState
 	public var opponentStrums:FlxTypedGroup<StrumNote>;
 	public var playerStrums:FlxTypedGroup<StrumNote>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
+	public var grpHoldCovers:FlxTypedGroup<NoteHoldCover>;
 
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
@@ -364,8 +366,6 @@ class PlayState extends MusicBeatState
 			'NOTE_RIGHT'
 		];
 
-		FlxG.sound.music?.stop();
-
 		//Ratings
 		ratingsData.push(new Rating('sick')); //default rating
 
@@ -393,8 +393,7 @@ class PlayState extends MusicBeatState
 			keysPressed.push(false);
 		}
 
-		if (FlxG.sound.music != null)
-			FlxG.sound.music.stop();
+		FlxG.sound?.music?.stop();
 
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
@@ -412,7 +411,9 @@ class PlayState extends MusicBeatState
 
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
+
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+		grpHoldCovers = new FlxTypedGroup<NoteHoldCover>();
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -681,6 +682,10 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.0;
 
+		var holdCover:NoteHoldCover = new NoteHoldCover();
+		grpHoldCovers.add(holdCover);
+		holdCover.alpha = 0.0;
+
 		opponentStrums = new FlxTypedGroup<StrumNote>();
 		playerStrums = new FlxTypedGroup<StrumNote>();
 
@@ -762,6 +767,7 @@ class PlayState extends MusicBeatState
 
 		strumLineNotes.cameras = [camHUD];
 		grpNoteSplashes.cameras = [camHUD];
+		grpHoldCovers.cameras = [camHUD];
 		notes.cameras = [camHUD];
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
@@ -1713,6 +1719,8 @@ class PlayState extends MusicBeatState
 
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
+
+		add(grpHoldCovers);
 
 		var noteData:Array<SwagSection>;
 
@@ -2832,10 +2840,7 @@ class PlayState extends MusicBeatState
 			if (songName == 'tutorial' && cameraTwn == null && FlxG.camera.zoom != 1)
 			{
 				cameraTwn = FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut, onComplete:
-					function (twn:FlxTween)
-					{
-						cameraTwn = null;
-					}
+					(_) -> cameraTwn = null
 				});
 			}
 		}
@@ -2858,15 +2863,13 @@ class PlayState extends MusicBeatState
 		updateTime = false;
 		FlxG.sound.music.volume = 0;
 		vocals.volume = 0;
-		vocals.pause();
+		vocals?.pause();
 		opponentVocals.volume = 0;
-		opponentVocals.pause();
+		opponentVocals?.pause();
 		if(ClientPrefs.noteOffset <= 0 || ignoreNoteOffset) {
 			endCallback();
 		} else {
-			finishTimer = new FlxTimer().start(ClientPrefs.noteOffset / 1000, function(tmr:FlxTimer) {
-				endCallback();
-			});
+			finishTimer = new FlxTimer().start(ClientPrefs.noteOffset / 1000, (_) -> endCallback());
 		}
 	}
 
@@ -3223,7 +3226,7 @@ class PlayState extends MusicBeatState
 			FlxTween.tween(numScore, {alpha: 0}, 0.2 / playbackRate, {
 				onComplete: function(tween:FlxTween)
 				{
-					numScore.destroy();
+					numScore?.destroy();
 				},
 				startDelay: Conductor.crochet * 0.002 / playbackRate
 			});
@@ -3247,10 +3250,10 @@ class PlayState extends MusicBeatState
 		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / playbackRate, {
 			onComplete: function(tween:FlxTween)
 			{
-				coolText.destroy();
-				comboSpr.destroy();
+				coolText?.destroy();
+				comboSpr?.destroy();
 
-				rating.destroy();
+				rating?.destroy();
 			},
 			startDelay: Conductor.crochet * 0.002 / playbackRate
 		});
@@ -3533,16 +3536,6 @@ class PlayState extends MusicBeatState
 			RecalculateRating(true);
 
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-			// FlxG.sound.play(Paths.sound('missnote1'), 1, false);
-			// FlxG.log.add('played imss note');
-
-			/*boyfriend.stunned = true;
-
-			// get stunned for 1/60 of a second, makes you able to
-			new FlxTimer().start(1 / 60, function(tmr:FlxTimer)
-			{
-				boyfriend.stunned = false;
-			});*/
 
 			if(boyfriend.hasMissAnimations && anim) {
 				if(boyfriend.animTimer <= 0 && !boyfriend.voicelining)
@@ -3624,6 +3617,8 @@ class PlayState extends MusicBeatState
 		}
 		StrumPlayAnim(true, Std.int(Math.abs(note.noteData)), time);
 		note.hitByOpponent = true;
+
+		spawnHoldCoverOnNote(note);
 
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
 
@@ -3756,6 +3751,8 @@ class PlayState extends MusicBeatState
 			var leData:Int = Math.round(Math.abs(note.noteData));
 			var leType:String = note.noteType;
 
+			spawnHoldCoverOnNote(note);
+
 			callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
 
 			#if HSCRIPT_ALLOWED
@@ -3803,6 +3800,71 @@ class PlayState extends MusicBeatState
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
 		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt);
 		grpNoteSplashes.add(splash);
+	}
+
+	public function spawnHoldCoverOnNote(note:Note) {
+		if(!ClientPrefs.noteHoldCovers) return;
+
+		var skin:String = 'holdCovers';
+		if(PlayState.SONG.holdCoverSkin != null && PlayState.SONG.holdCoverSkin.length > 0) skin = PlayState.SONG.holdCoverSkin;
+
+		var endNote:Note = note;
+		if (note.parent != null && note.parent.tail != null && note.parent.tail.length > 0) {
+			endNote = note.isSustainNote ? note.parent.tail[note.parent.tail.length - 1] : note.tail[note.tail.length - 1];
+		}
+		
+		if (!StringTools.endsWith(endNote.animation.curAnim.name, 'end')) return;
+		
+		if (endNote != null) {
+			if (endNote.extraData == null) endNote.extraData = new Map<String, Dynamic>();
+			var leSplash:NoteHoldCover = endNote.extraData[skin];
+			if (leSplash == null) {
+				spawnHoldCover(endNote);
+			} else {
+				leSplash.visible = true;
+			}
+		}
+	}
+
+	public function spawnHoldCover(note:Note) {
+		var skin:String = 'holdCovers';
+		if(PlayState.SONG.holdCoverSkin != null && PlayState.SONG.holdCoverSkin.length > 0) skin = PlayState.SONG.holdCoverSkin;
+		
+		if (!StringTools.endsWith(note.animation.curAnim.name, 'end')) return;
+		
+		var parentNote = note.parent;
+		var noteData = parentNote != null ? parentNote.noteData : note.noteData;
+		
+		var strum:StrumNote = (note.mustPress ? playerStrums : opponentStrums).members[noteData];
+
+		var hueColor:Float = 0;
+		var satColor:Float = 0;
+		var brtColor:Float = 0;
+		
+		if (strum != null) {
+			var dynStrum:Dynamic = cast strum;
+			if (dynStrum.colorSwap != null) {
+				hueColor = dynStrum.colorSwap.hue;
+				satColor = dynStrum.colorSwap.saturation;
+				brtColor = dynStrum.colorSwap.brightness;
+			}
+		}
+		
+		if (NoteHoldCover.activeCovers.exists(strum)) {
+			var existingCover = NoteHoldCover.activeCovers.get(strum);
+			existingCover.setupHoldCover(strum, note, skin, hueColor, satColor, brtColor);
+			return;
+		}
+		
+		var holdCover:NoteHoldCover = grpHoldCovers.recycle(NoteHoldCover);
+		holdCover.startCrochet = Conductor.stepCrochet;
+		holdCover.frameRate = Math.floor(24 / 100 * SONG.bpm);
+		
+		holdCover.setupHoldCover(strum, note, skin, hueColor, satColor, brtColor);
+		grpHoldCovers.add(holdCover);
+		
+		if (note.extraData == null) note.extraData = new Map<String, Dynamic>();
+		note.extraData[skin] = holdCover;
 	}
 
 	override function destroy() {
@@ -3946,9 +4008,9 @@ class PlayState extends MusicBeatState
 
 	public function playerDance():Void
 	{
-		var anim:String = boyfriend.getAnimationName();
+		var anim:String = boyfriend?.getAnimationName();
 		if(boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 #if FLX_PITCH / FlxG.sound.music.pitch #end) * boyfriend.singDuration && anim.startsWith('sing') && !anim.endsWith('miss'))
-			boyfriend.dance();
+			boyfriend?.dance();
 	}
 
 	#if LUA_ALLOWED
@@ -4101,11 +4163,7 @@ class PlayState extends MusicBeatState
 
 	function StrumPlayAnim(isDad:Bool, id:Int, time:Float) {
 		var spr:StrumNote = null;
-		if(isDad) {
-			spr = opponentStrums.members[id];
-		} else {
-			spr = playerStrums.members[id];
-		}
+		spr = isDad ? opponentStrums.members[id] : playerStrums.members[id];
 
 		if(spr != null) {
 			spr.playAnim('confirm', true);

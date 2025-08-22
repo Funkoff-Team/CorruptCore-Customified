@@ -43,6 +43,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
+		var option:Option = new Option('Note Hold Covers',
+			"If checked, the visual effect will appear when holding sustained notes.",
+			'noteHoldCovers',
+			'bool',
+			true);
+		addOption(option);
+
 		var option:Option = new Option('Hide HUD',
 			'If checked, hides most HUD elements.',
 			'hideHud',
