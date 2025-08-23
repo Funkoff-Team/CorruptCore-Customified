@@ -10,7 +10,7 @@ import flixel.util.FlxDestroyUtil;
 
 /**
  * ...
- * @author 
+ * @author ShadowMario
  * @modified by GreenColdTea
  */
 class Prompt extends MusicBeatSubstate
@@ -109,11 +109,12 @@ class Prompt extends MusicBeatSubstate
 				});
 				buttonAccept.screenCenter(X);
 				buttonAccept.scrollFactor.set();
-				buttonAccept.x -= 100;
 				buttonAccept.cameras = cameras;
 				add(buttonAccept);
 
 				if (_option2 != null) {
+					buttonAccept.x -= 100;
+					
 					buttonNo = new PsychUIButton(0, btnY, _option2, function() {
 						if(cancelc != null) cancelc();
 						close();

@@ -21,6 +21,9 @@ import openfl.text.GridFitType;
  * The flixel sound tray, the little volume meter that pops down sometimes.
  * Accessed via `FlxG.game.soundTray` or `FlxG.sound.soundTray`.
  */
+#if (flixel > "6.0.0")
+@:allow(flixel.system.frontEnds.SoundFrontEnd)
+#end
 class FlxSoundTray extends Sprite
 {
     /**
@@ -234,19 +237,19 @@ class FlxSoundTray extends Sprite
     }
 
     #if (flixel > "6.0.0")
-	override function showAnim(volume:Float, ?sound:FlxSoundAsset, duration:Float = 1.0, label:String = "VOLUME") {}
+	public function showAnim(volume:Float, ?sound:FlxSoundAsset, duration:Float = 1.0, label:String = "VOLUME") {}
 	
-	override function updateSize() {}
-	
-	override function showIncrement()
+	function showIncrement()
 	{
 		show(true);
 	}
 	
-	override function showDecrement()
+	function showDecrement()
 	{
 		show(false);
 	}
+
+    function updateSize() {}
 	#end
 }
 #end

@@ -291,7 +291,7 @@ class Character extends FlxSprite
 		#end
 		originalFlipX = flipX;
 
-		if (animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss'))
+		if (hasAnimation('singLEFTmiss') || hasAnimation('singDOWNmiss') || hasAnimation('singUPmiss') || hasAnimation('singRIGHTmiss'))
 			hasMissAnimations = true;
 		recalculateDanceIdle();
 		dance();
@@ -378,7 +378,7 @@ class Character extends FlxSprite
 		}
 
 		var name:String = getAnimationName();
-		if(isAnimationFinished() && animOffsets.exists('$name-loop'))
+		if(isAnimationFinished() && hasAnimation('$name-loop'))
 			playAnim('$name-loop');
 
 		for (ghost in animGhosts)
@@ -428,7 +428,7 @@ class Character extends FlxSprite
 		_lastPlayedAnimation = AnimName;
 
 		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName))
+		if (hasAnimation(AnimName))
 		{
 			offset.set(daOffset[0], daOffset[1]);
 		}
@@ -486,7 +486,7 @@ class Character extends FlxSprite
 		}
 
 		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName))
+		if (hasAnimation(AnimName))
 			ghost.offset.set(daOffset[0], daOffset[1]);
 		else
 			ghost.offset.set(0, 0);
@@ -511,32 +511,6 @@ class Character extends FlxSprite
 	function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
-	}
-
-	public var danceEveryNumBeats:Int = 2;
-
-	private var settingCharacterUp:Bool = true;
-
-	public function recalculateDanceIdle()
-	{
-		var lastDanceIdle:Bool = danceIdle;
-		danceIdle = (hasAnimation('danceLeft' + idleSuffix) && hasAnimation('danceRight' + idleSuffix));
-
-		if (settingCharacterUp)
-		{
-			danceEveryNumBeats = (danceIdle ? 1 : 2);
-		}
-		else if (lastDanceIdle != danceIdle)
-		{
-			var calc:Float = danceEveryNumBeats;
-			if (danceIdle)
-				calc /= 2;
-			else
-				calc *= 2;
-
-			danceEveryNumBeats = Math.round(Math.max(calc, 1));
-		}
-		settingCharacterUp = false;
 	}
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
@@ -579,6 +553,32 @@ class Character extends FlxSprite
 
 		if(!isAnimateAtlas) animation.curAnim.finish();
 		else atlas.anim.finish();
+	}
+
+	public var danceEveryNumBeats:Int = 2;
+
+	private var settingCharacterUp:Bool = true;
+
+	public function recalculateDanceIdle()
+	{
+		var lastDanceIdle:Bool = danceIdle;
+		danceIdle = (hasAnimation('danceLeft' + idleSuffix) && hasAnimation('danceRight' + idleSuffix));
+
+		if (settingCharacterUp)
+		{
+			danceEveryNumBeats = (danceIdle ? 1 : 2);
+		}
+		else if (lastDanceIdle != danceIdle)
+		{
+			var calc:Float = danceEveryNumBeats;
+			if (danceIdle)
+				calc /= 2;
+			else
+				calc *= 2;
+
+			danceEveryNumBeats = Math.round(Math.max(calc, 1));
+		}
+		settingCharacterUp = false;
 	}
 
 	// Atlas support
