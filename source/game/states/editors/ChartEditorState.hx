@@ -1959,12 +1959,12 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if(PsychUIInputText.focusOn != null) {
 			ClientPrefs.toggleVolumeKeys(false);
 			blockInput = true;
-			return;
 		}
-		ClientPrefs.toggleVolumeKeys();
 
 		if (!blockInput)
 		{
+			ClientPrefs.toggleVolumeKeys();
+
 			if (FlxG.keys.justPressed.ESCAPE #if mobile || _virtualpad.buttonB.justPressed #end)
 			{
 				autosaveSong();
@@ -2406,6 +2406,9 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		_song.bpm = tempBpm;
 
 		strumLineNotes.visible = quant.visible = vortex;
+
+		Conductor.songPosition = FlxG.sound.music.time;
+		strumLineUpdateY();
 
 		camPos.y = strumLine.y;
 		for (i in 0...8){
