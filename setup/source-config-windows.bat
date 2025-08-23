@@ -7,7 +7,7 @@ echo.
 haxelib setup C:\haxelib
 haxelib install tjson --quiet
 haxelib install hxjsonast --quiet
-haxelib set flixel 6.0.0
+haxelib set flixel 6.1.0
 haxelib git lime https://github.com/GreenColdTea/lime-9.0.0
 haxelib install format
 haxelib install hxp
@@ -16,7 +16,6 @@ haxelib install hxcpp --quiet
 haxelib install hxvlc --quiet --skip-dependencies
 haxelib run lime setup flixel
 haxelib set flixel-tools 1.5.1
-haxelib set flixel-ui 2.6.4
 haxelib set flixel-addons 3.3.2
 haxelib set hxdiscord_rpc 1.2.4
 haxelib git hscript https://github.com/CodenameCrew/hscript-improved.git codename-dev
