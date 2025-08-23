@@ -141,7 +141,9 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     var postfix:String = '';
     
 	var mainBox:PsychUIBox;
+	var mainBoxPosition:FlxPoint = FlxPoint.get(875, 50);
 	var infoBox:PsychUIBox;
+	var infoBoxPosition:FlxPoint = FlxPoint.get(50, 145);
 
 	var infoText:FlxText;
 
@@ -412,13 +414,13 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		player.cameras = [camUI];
 		add(player);
 
-		mainBox = new PsychUIBox(875, 50, 365, 400, ['Charting', 'Events', 'Note', 'Section', 'Song']);
+		mainBox = new PsychUIBox(mainBoxPosition.x, mainBoxPosition.y, 365, 400, ['Charting', 'Events', 'Note', 'Section', 'Song']);
 		mainBox.selectedName = 'Charting';
 		mainBox.scrollFactor.set();
 		mainBox.cameras = [camUI];
 		add(mainBox);
 
-		infoBox = new PsychUIBox(50, 145, 220, 190, ['Information']);
+		infoBox = new PsychUIBox(infoBoxPosition.x, infoBoxPosition.y, 220, 190, ['Information']);
 		infoBox.scrollFactor.set();
 		infoBox.cameras = [camUI];
 
@@ -2019,7 +2021,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				}
 			}
 
-			if (FlxG.mouse.justReleased)
+			if (FlxG.mouse.justReleased && !isMouseOverUI())
 			{
 				if (selecting)
 				{
