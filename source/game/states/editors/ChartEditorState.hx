@@ -467,7 +467,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		player.visible = false;
 
 		selectBox = new FlxSprite();
-		selectBox.makeGraphic(1, 1, FlxColor.TRANSPARENT);
+		selectBox.makeGraphic(1, 1, FlxColor.BLUE);
 		selectBox.alpha = 0.4;
 		selectBox.visible = false;
 		selectBox.blend = ADD;
@@ -3226,7 +3226,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				if(note.eventLength > 1) daText.yAdd += 8;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
-				//trace('test: ' + i[0], 'startThing: ' + startThing, 'endThing: ' + endThing);
 			}
 		}
 	
