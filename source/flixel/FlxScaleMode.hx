@@ -14,15 +14,15 @@ class FlxScaleMode extends BaseScaleMode
     
     override function updateGameSize(Width:Int, Height:Int):Void
     {
+        final targetRatio = FlxG.width / FlxG.height;
+        final screenRatio = Width / Height;
+        
         if (shouldUseWideScreen())
         {
-            super.updateGameSize(Width, Height);
+            gameSize.set(Width, Math.floor(Width / targetRatio));
         }
         else
         {
-            final targetRatio = FlxG.width / FlxG.height;
-            final screenRatio = Width / Height;
-            
             if (screenRatio < targetRatio)
                 gameSize.set(Width, Math.floor(Width / targetRatio));
             else
@@ -35,7 +35,7 @@ class FlxScaleMode extends BaseScaleMode
         if (shouldUseWideScreen())
         {
             FlxG.game.x = 0;
-            FlxG.game.y = 0;
+            FlxG.game.y = Math.round((FlxG.stage.stageHeight - gameSize.y) / 2);
         }
         else
         {
@@ -52,8 +52,8 @@ class FlxScaleMode extends BaseScaleMode
         return value;
     }
 
-	//better than copying this booleans several time
-    static inline function shouldUseWideScreen():Bool return ClientPrefs.noBordersScreen && allowWideScreen;
+    static inline function shouldUseWideScreen():Bool
+        return ClientPrefs.noBordersScreen && allowWideScreen;
 
     static function resetScaleMode()
     {

@@ -386,7 +386,59 @@ class Paths
 		return 'assets/$key';
 	}
 	#end
-	
+
+	public static function listDirectory(path:String):Array<String>
+	{
+		var result:Array<String> = [];
+		
+		#if MODS_ALLOWED
+		var modsList:Array<String> = [currentModDirectory];
+		modsList = modsList.concat(getGlobalMods());
+		
+		for (mod in modsList)
+		{
+			if (mod == null || mod.length == 0) continue;
+			
+			var modPath = mods('$mod/$path');
+			if (FileSystem.exists(modPath) && FileSystem.isDirectory(modPath))
+			{
+				for (file in FileSystem.readDirectory(modPath))
+				{
+					var fullPath = haxe.io.Path.join([modPath, file]);
+					if (!FileSystem.isDirectory(fullPath))
+						result.push(fullPath);
+				}
+			}
+		}
+		#end
+
+		var assetsPath = getPreloadPath(path);
+		if (OpenFlAssets.exists(assetsPath))
+		{
+			// some shits for web targets(for the future mb)
+			#if web
+			var prefix = assetsPath + "/";
+			for (asset in OpenFlAssets.list(ALL))
+			{
+				if (asset.startsWith(prefix) && asset != prefix)
+					result.push(asset);
+			}
+			#else
+			if (FileSystem.exists(assetsPath) && FileSystem.isDirectory(assetsPath))
+			{
+				for (file in FileSystem.readDirectory(assetsPath))
+				{
+					var fullPath = haxe.io.Path.join([assetsPath, file]);
+					if (!FileSystem.isDirectory(fullPath))
+						result.push(fullPath);
+				}
+			}
+			#end
+		}
+
+		return result;
+	}
+		
 	// completely rewritten asset loading? fuck!
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	static public function image(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxGraphic

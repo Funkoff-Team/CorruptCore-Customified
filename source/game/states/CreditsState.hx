@@ -227,7 +227,7 @@ class CreditsState extends MusicBeatState
 		{
 			if(!item.bold)
 			{
-				var lerpVal:Float = CoolUtil.boundTo(elapsed * 12, 0, 1);
+				var lerpVal:Float = MathUtil.boundTo(elapsed * 12, 0, 1);
 				if(item.targetY == 0)
 				{
 					var lastX:Float = item.x;

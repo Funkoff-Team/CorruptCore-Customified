@@ -25,42 +25,6 @@ class CoolUtil
 
 	public static var difficulties:Array<String> = [];
 
-	inline public static function quantize(f:Float, snap:Float){
-		// changed so this actually works lol
-		var m:Float = Math.fround(f * snap);
-		trace(snap);
-		return (m / snap);
-	}
-
-	inline public static function scale(x:Float, l1:Float, h1:Float, l2:Float, h2:Float):Float
-		return ((x - l1) * (h2 - l2) / (h1 - l1) + l2);
-
-	inline public static function clamp(n:Float, l:Float, h:Float)
-	{
-		if (n > h)
-			n = h;
-		if (n < l)
-			n = l;
-
-		return n;
-	}
-
-	inline public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
-	{
-		var p = point == null ? FlxPoint.weak() : point;
-		p.set((x * Math.cos(angle)) - (y * Math.sin(angle)), (x * Math.sin(angle)) + (y * Math.cos(angle)));
-		return p;
-	}
-
-	inline public static function boundTo(value:Float, min:Float, max:Float):Float 
-	{
-		return Math.max(min, Math.min(max, value));
-	}
-
-	inline public static function quantizeAlpha(f:Float, interval:Float){
-		return Std.int((f+interval/2)/interval)*interval;
-	}
-
 	inline static public function getBuildTarget() {
 		#if windows
 		return 'windows';
@@ -131,6 +95,7 @@ class CoolUtil
 
 		return daList;
 	}
+
 	public static function listFromString(string:String):Array<String>
 	{
 		var daList:Array<String> = [];
@@ -294,16 +259,6 @@ class CoolUtil
         }
     }
 
-	inline public static function numberArray(max:Int, ?min = 0):Array<Int>
-	{
-		var dumbArray:Array<Int> = [];
-		for (i in min...max)
-		{
-			dumbArray.push(i);
-		}
-		return dumbArray;
-	}
-
 	//uhhhh does this even work at all? i'm starting to doubt
 	inline public static function precacheSound(sound:String, ?library:String = null):Void {
 		Paths.sound(sound, library);
@@ -351,5 +306,48 @@ class CoolUtil
 		// #if (flixel < "5.0.0") return company; #else
 		return '${company}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
 		// #end
+	}
+
+	public static function recursivelyReadFolders(path:String)
+	{
+		#if sys
+		var ret:Array<String> = [];
+		for (i in FileSystem.readDirectory(path))
+			returnFileName(i, ret, path);
+
+		
+		path += '/';
+		for (i in 0...ret.length)
+			ret[i] = ret[i].replace(path, '');
+
+		return ret;
+		#end
+	}
+
+	static function returnFileName(path:String, toAdd:Array<String>, full:String) {
+		#if sys
+		if (FileSystem.isDirectory('$full/$path')) {
+			for (i in FileSystem.readDirectory('$full/$path')) {
+				returnFileName(i, toAdd, '$full/$path');
+			}
+		} else {
+			toAdd.push(('$full/$path'));
+		}
+		#end
+	}
+
+	public static inline function readRecursive(path:String):Array<String>
+	{
+		var result:Array<String> = [];
+		for (directory in Paths.listDirectory(path))
+		{
+			for (file in recursivelyReadFolders(directory))
+			{
+				if (!result.contains(file))
+					result.push(file);
+			}
+		}
+
+		return result;
 	}
 }

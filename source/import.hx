@@ -59,7 +59,6 @@ import game.states.options.*;
 import game.substates.*;
 import game.substates.options.*;
 import game.stages.*;
-import math.*;
 
 import game.objects.Alphabet;
 import game.objects.AttachedSprite;

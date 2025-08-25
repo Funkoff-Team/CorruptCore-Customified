@@ -242,7 +242,7 @@ class PsychUIRadioGroup extends FlxSpriteGroup
 		return maxItems;
 	}
 
-	public function updateRadioItems()
+	inline public function updateRadioItems()
 	{
 		if(maxItems > 0)
 		{

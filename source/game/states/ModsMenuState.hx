@@ -184,10 +184,7 @@ class ModsMenuState extends MusicBeatState
 				moveMod(-1, true);
 			}
 
-			if(doRestart)
-			{
-				needaReset = true;
-			}
+			if(doRestart) needaReset = true;
 			FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 		});
 		buttonTop.setGraphicSize(80, 50);
@@ -474,23 +471,20 @@ class ModsMenuState extends MusicBeatState
 
 		if(canExit && controls.BACK)
 		{
-			if(colorTween != null) {
-				colorTween.cancel();
-			}
+			if(colorTween != null) colorTween?.cancel();
+
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			FlxG.mouse.visible = false;
+
 			saveTxt();
 			if(needaReset)
 			{
 				//FlxG.switchState(() -> new TitleState());
 				TitleState.initialized = false;
 				TitleState.closedState = false;
-				FlxG.sound.music.fadeOut(0.3);
-				if(FreeplayState.vocals != null)
-				{
-					FreeplayState.vocals.fadeOut(0.3);
-					FreeplayState.vocals = null;
-				}
+				FlxG.sound?.music?.fadeOut(0.3);
+				FreeplayState.vocals?.fadeOut(0.3);
+				FreeplayState.vocals = null;
 				FlxG.camera.fade(FlxColor.BLACK, 0.5, false, FlxG.resetGame, false);
 			}
 			else
@@ -542,14 +536,10 @@ class ModsMenuState extends MusicBeatState
 
 		var newColor:Int = mods[curSelected].color;
 		if(newColor != intendedColor) {
-			if(colorTween != null) {
-				colorTween.cancel();
-			}
+			colorTween?.cancel();
 			intendedColor = newColor;
 			colorTween = FlxTween.color(bg, 1, bg.color, intendedColor, {
-				onComplete: function(twn:FlxTween) {
-					colorTween = null;
-				}
+				onComplete: (_) -> colorTween = null
 			});
 		}
 
@@ -562,9 +552,8 @@ class ModsMenuState extends MusicBeatState
 				mod.alphabet.alpha = 1;
 				selector.sprTracker = mod.alphabet;
 				descriptionTxt.text = mod.description;
-				if (mod.restart){//finna make it to where if nothing changed then it won't reset
+				if (mod.restart)//finna make it to where if nothing changed then it won't reset
 					descriptionTxt.text += " (This Mod will restart the game!)";
-				}
 
 				// correct layering
 				var stuffArray:Array<FlxSprite> = [/*removeButton, installButton,*/ selector, descriptionTxt, mod.alphabet, mod.icon];
@@ -591,14 +580,7 @@ class ModsMenuState extends MusicBeatState
 		{
 			var intendedPos:Float = (i - curSelected) * 225 + 200;
 			if(i > curSelected) intendedPos += 225;
-			if(elapsed == -1)
-			{
-				mod.alphabet.y = intendedPos;
-			}
-			else
-			{
-				mod.alphabet.y = FlxMath.lerp(mod.alphabet.y, intendedPos, CoolUtil.boundTo(elapsed * 12, 0, 1));
-			}
+			mod.alphabet.y = (elapsed != -1) ? FlxMath.lerp(mod.alphabet.y, intendedPos, MathUtil.boundTo(elapsed * 12, 0, 1)) : intendedPos;
 
 			if(i == curSelected)
 			{

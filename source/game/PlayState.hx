@@ -54,7 +54,7 @@ import openfl.utils.Assets as OpenFlAssets;
 import game.scripting.FunkinLua;
 
 #if HSCRIPT_ALLOWED
-import hscript.HScript;
+import game.scripting.FunkinHScript;
 #end
 
 import game.backend.Section.SwagSection;
@@ -133,6 +133,9 @@ class PlayState extends MusicBeatState
 	public var variables:Map<String, Dynamic> = new Map();
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
 	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
+	#if flixel_animate
+	public var modchartAnimateSprites:Map<String, ModchartAnimateSprite> = new Map<String, ModchartAnimateSprite>();
+	#end
 	public var modchartBackdrops:Map<String, ModchartBackdrop> = new Map<String, ModchartBackdrop>();
 	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
 	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
@@ -145,6 +148,9 @@ class PlayState extends MusicBeatState
 	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public var modchartTweens:Map<String, FlxTween> = new Map();
 	public var modchartSprites:Map<String, ModchartSprite> = new Map();
+	#if flixel_animate
+	public var modchartAnimateSprites:Map<String, ModchartAnimateSprite> = new Map();
+	#end
 	public var modchartBackdrops:Map<String, ModchartBackdrop> = new Map();
 	public var modchartTimers:Map<String, FlxTimer> = new Map();
 	public var modchartSounds:Map<String, FlxSound> = new Map();
@@ -302,7 +308,7 @@ class PlayState extends MusicBeatState
 
 	//Hscript stuff
 	#if HSCRIPT_ALLOWED
-	public var hscriptArray:Array<HScript> = [];
+	public var hscriptArray:Array<FunkinHScript> = [];
 	#end
 
 	//VideoSprite stuff
@@ -560,7 +566,7 @@ class PlayState extends MusicBeatState
 					}
 					#if HSCRIPT_ALLOWED
 					if (file.endsWith('.hx') && !filesPushed.contains(file)) {
-						hscriptArray.push(new HScript(folder + file));
+						hscriptArray.push(new FunkinHScript(folder + file));
 						filesPushed.push(file);
 					}
 					#end
@@ -838,21 +844,21 @@ class PlayState extends MusicBeatState
 			var hxToLoad:String = Paths.modFolders('custom_events/' + event + '.hx');
 			if(FileSystem.exists(hxToLoad))
 			{
-				hscriptArray.push(new HScript(hxToLoad));
+				hscriptArray.push(new FunkinHScript(hxToLoad));
 			}
 			else
 			{
 				hxToLoad = Paths.getPreloadPath('custom_events/' + event + '.hx');
 				if(FileSystem.exists(hxToLoad))
 				{
-					hscriptArray.push(new HScript(hxToLoad));
+					hscriptArray.push(new FunkinHScript(hxToLoad));
 				}
 			}
 			#elseif HSCRIPT_ALLOWED
 			var hxToLoad:String = Paths.getPreloadPath('custom_events/' + event + '.hx');
 			if(OpenFlAssets.exists(hxToLoad))
 			{
-				hscriptArray.push(new HScript(hxToLoad));
+				hscriptArray.push(new FunkinHScript(hxToLoad));
 			}
 			#end
 		}
@@ -888,7 +894,7 @@ class PlayState extends MusicBeatState
 					}
 					#if HSCRIPT_ALLOWED
 					if (file.endsWith('.hx') && !filesPushed.contains(file)) {
-						hscriptArray.push(new HScript(folder + file));
+						hscriptArray.push(new FunkinHScript(folder + file));
 						filesPushed.push(file);
 					}
 					#end
@@ -1203,13 +1209,16 @@ class PlayState extends MusicBeatState
 			{
 				if(script.scriptName == hxFile) return;
 			}
-			hscriptArray.push(new HScript(hxFile));
+			hscriptArray.push(new FunkinHScript(hxFile));
 		}
 		#end
 	}
 
 	public function getLuaObject(tag:String, text:Bool = true):FlxSprite {
 		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
+		#if flixel_animate
+		if(modchartAnimateSprites.exists(tag)) return modchartAnimateSprites.get(tag);
+		#end
 		if(modchartBackdrops.exists(tag)) return modchartBackdrops.get(tag);
 		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
 		if(variables.exists(tag)) return variables.get(tag);
@@ -2145,11 +2154,11 @@ class PlayState extends MusicBeatState
 		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
 		// FlxG.watch.addQuick('VOLRight', vocals.amplitudeRight);
 
-		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
+		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, MathUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
 		iconP1.scale.set(mult, mult);
 		iconP1.updateHitbox();
 
-		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, CoolUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
+		var mult:Float = FlxMath.lerp(1, iconP2.scale.x, MathUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
 		iconP2.scale.set(mult, mult);
 		iconP2.updateHitbox();
 
@@ -4061,7 +4070,7 @@ class PlayState extends MusicBeatState
 		var hscriptToLoad:String = Paths.modFolders(hscriptFile);
 		if(FileSystem.exists(hscriptToLoad))
 		{
-			hscriptArray.push(new HScript(hscriptToLoad));
+			hscriptArray.push(new FunkinHScript(hscriptToLoad));
 			return true;
 		}
 		else
@@ -4069,7 +4078,7 @@ class PlayState extends MusicBeatState
 			hscriptToLoad = Paths.getPreloadPath(hscriptFile);
 			if(FileSystem.exists(hscriptToLoad))
 			{
-				hscriptArray.push(new HScript(hscriptToLoad));
+				hscriptArray.push(new FunkinHScript(hscriptToLoad));
 				return true;
 			}
 		}
@@ -4077,7 +4086,7 @@ class PlayState extends MusicBeatState
 		var hscriptToLoad:String = Paths.getPreloadPath(hscriptFile);
 		if(FileSystem.exists(hscriptToLoad))
 		{
-			hscriptArray.push(new HScript(hscriptToLoad));
+			hscriptArray.push(new FunkinHScript(hscriptToLoad));
 			return true;
 		}
 		#end

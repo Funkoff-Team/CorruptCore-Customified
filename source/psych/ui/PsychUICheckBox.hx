@@ -1,5 +1,8 @@
 package psych.ui;
 
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
+
 class PsychUICheckBox extends FlxSpriteGroup
 {
 	public static final CLICK_EVENT = 'checkbox_click';
@@ -11,6 +14,10 @@ class PsychUICheckBox extends FlxSpriteGroup
 
 	public var checked(default, set):Bool = false;
 	public var onClick:Void->Void = null;
+
+	var _isHovered:Bool = false;
+	
+	inline public static var useSystemCursor:Bool = true;
 
 	public function new(x:Float, y:Float, label:String, ?textWid:Int = 100, ?callback:Void->Void)
 	{
@@ -40,18 +47,38 @@ class PsychUICheckBox extends FlxSpriteGroup
 	{
 		super.update(elapsed);
 
-		if(FlxG.mouse.justPressed)
+		var screenPos:FlxPoint = getScreenPosition(null, camera);
+		var mousePos:FlxPoint = #if (flixel < "5.9.0") FlxG.mouse.getPositionInCameraView(camera) #else FlxG.mouse.getViewPosition(camera) #end;
+		var isOver = (mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width) &&
+					(mousePos.y >= screenPos.y && mousePos.y < screenPos.y + height);
+
+		if (isOver && !_isHovered)
 		{
-			var screenPos:FlxPoint = getScreenPosition(null, camera);
-			var mousePos:FlxPoint = #if (flixel < "5.9.0") FlxG.mouse.getPositionInCameraView(camera) #else FlxG.mouse.getViewPosition(camera) #end;
-			if((mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width) &&
-				(mousePos.y >= screenPos.y && mousePos.y < screenPos.y + height))
-			{
-				checked = !checked;
-				if(onClick != null) onClick();
-				if(broadcastCheckBoxEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
-			}
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.BUTTON;
+			_isHovered = true;
 		}
+		else if (!isOver && _isHovered)
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.AUTO;
+			_isHovered = false;
+		}
+
+		if(FlxG.mouse.justPressed && isOver)
+		{
+			checked = !checked;
+			if(onClick != null) onClick();
+			if(broadcastCheckBoxEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
+		}
+	}
+
+	override public function destroy()
+	{
+		if (_isHovered && useSystemCursor)
+			Mouse.cursor = MouseCursor.AUTO;
+		
+		super.destroy();
 	}
 
 	function set_checked(v:Any)

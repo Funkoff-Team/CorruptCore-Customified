@@ -132,6 +132,7 @@
 	<haxelib name="faxe" if="switch"/>
 	<haxelib name="hxcpp-debug-server" if="desktop debug"/>
 
+	<haxelib name="rulescript" if="HSCRIPT_ALLOWED"/>
 	<haxelib name="hscript" if="HSCRIPT_ALLOWED"/>
 	<haxedef name="hscriptPos" />
 

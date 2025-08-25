@@ -200,7 +200,7 @@ class StoryMenuState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		// scoreText.setFormat('VCR OSD Mono', 32);
-		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, CoolUtil.boundTo(elapsed * 30, 0, 1)));
+		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, MathUtil.boundTo(elapsed * 30, 0, 1)));
 		if(Math.abs(intendedScore - lerpScore) < 10) lerpScore = intendedScore;
 
 		scoreText.text = "WEEK SCORE:" + lerpScore;
@@ -316,8 +316,7 @@ class StoryMenuState extends MusicBeatState
 			PlayState.isStoryMode = true;
 			selectedWeek = true;
 
-			var diffic = CoolUtil.getDifficultyFilePath(curDifficulty);
-			if(diffic == null) diffic = '';
+			var diffic = CoolUtil.getDifficultyFilePath(curDifficulty) ?? '';
 
 			PlayState.storyDifficulty = curDifficulty;
 
@@ -359,10 +358,7 @@ class StoryMenuState extends MusicBeatState
 			sprDifficulty.y = leftArrow.y - 15;
 
 			if(tweenDifficulty != null) tweenDifficulty.cancel();
-			tweenDifficulty = FlxTween.tween(sprDifficulty, {y: leftArrow.y + 15, alpha: 1}, 0.07, {onComplete: function(twn:FlxTween)
-			{
-				tweenDifficulty = null;
-			}});
+			tweenDifficulty = FlxTween.tween(sprDifficulty, {y: leftArrow.y + 15, alpha: 1}, 0.07, {onComplete: (_) -> tweenDifficulty = null});
 		}
 		lastDifficultyName = diff;
 
@@ -438,20 +434,13 @@ class StoryMenuState extends MusicBeatState
 		}
 		
 		if(CoolUtil.difficulties.contains(CoolUtil.defaultDifficulty))
-		{
 			curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficulties.indexOf(CoolUtil.defaultDifficulty)));
-		}
 		else
-		{
 			curDifficulty = 0;
-		}
 
 		var newPos:Int = CoolUtil.difficulties.indexOf(lastDifficultyName);
 		//trace('Pos of ' + lastDifficultyName + ' is ' + newPos);
-		if(newPos > -1)
-		{
-			curDifficulty = newPos;
-		}
+		if(newPos > -1) curDifficulty = newPos;
 		updateText();
 	}
 

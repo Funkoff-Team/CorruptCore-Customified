@@ -56,9 +56,8 @@ import game.objects.StrumNote;
 import game.shaders.flixel.FlxShader;
 
 #if HSCRIPT_ALLOWED
-import hscript.Parser;
-import hscript.Interp;
-import hscript.Expr;
+import rulescript.parsers.HxParser;
+import game.scripting.FunkinRScript.RuleScriptInterpEx as Interp;
 #end
 
 #if DISCORD_ALLOWED
@@ -3787,7 +3786,7 @@ class CustomSubstate extends MusicBeatSubstate
 #if HSCRIPT_ALLOWED
 class HScript
 {
-    public static var parser:Parser;
+    public static var parser:HxParser;
 	public var interp:Interp;
 	public var parentLua:FunkinLua;
 
@@ -3875,7 +3874,7 @@ class HScript
 		for(key => value in defaultClasses) interp.variables.set(key, value);
 		for(key => func in defaultFunctions) interp.variables.set(key, func);
 		
-		if(FlxG.state is PlayState) interp.scriptObject = PlayState.instance;
+		if(FlxG.state is PlayState) interp.variables.set('game', PlayState.instance);
 		if(parent != null) {
 			this.parentLua = parent;
 			interp.variables.set('this', this);
@@ -3885,15 +3884,14 @@ class HScript
 	}
 
 	function initParser() {
-		parser = new hscript.Parser();
+		parser = new rulescript.parsers.HxParser();
 		parser.preprocesorValues = CoolUtil.getHScriptPreprocessors();
 	}
 
 	public function execute(codeToRun:String):Dynamic {
-		@:privateAccess
-		HScript.parser.line = 1;
-		HScript.parser.allowTypes = true;
-		return interp.execute(HScript.parser.parseString(codeToRun));
+		HScript.parser.parser.line = 1;
+		HScript.parser.parser.allowTypes = true;
+		return interp.execute(HScript.parser.parser.parseString(codeToRun, 'HScript', 0));
 	}
 }
 #end

@@ -20,6 +20,12 @@ class Init extends FlxState
 
 		Highscore.load();
 
+		if(FlxG.save.data != null && FlxG.save.data.fullscreen)
+			FlxG.fullscreen = FlxG.save.data.fullscreen;
+
+		if (FlxG.save.data.weekCompleted != null)
+			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
+			
         #if (LUA_ALLOWED && MODS_ALLOWED)
 		Paths.pushGlobalMods();
 		WeekData.loadTheFirstEnabledMod();
@@ -35,7 +41,7 @@ class Init extends FlxState
 		#end
 
         #if GLOBAL_SCRIPTS
-		if(!hscript.ScriptGlobal.globalScriptActive) hscript.ScriptGlobal.addGlobalScript();
+		if(!game.scripting.HScriptGlobal.globalScriptActive) game.scripting.HScriptGlobal.addGlobalScript();
 		#end
 
 		FlxG.switchState(() -> new TitleState());

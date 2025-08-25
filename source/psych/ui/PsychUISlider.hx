@@ -1,5 +1,8 @@
 package psych.ui;
 
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
+
 class PsychUISlider extends FlxSpriteGroup
 {
 	public static final CHANGE_EVENT = "slider_change";
@@ -23,6 +26,11 @@ class PsychUISlider extends FlxSpriteGroup
 	public var max(default, set):Float = 999;
 	public var decimals(default, set):Int = 2;
 	
+	private var _isHovered:Bool = false;
+	private var _isHandleHovered:Bool = false;
+	
+	inline public static var useSystemCursor:Bool = true;
+
 	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200, mainColor:FlxColor = FlxColor.WHITE, handleColor:FlxColor = 0xFFAAAAAA)
 	{
 		super(x, y);
@@ -85,10 +93,29 @@ class PsychUISlider extends FlxSpriteGroup
 	{
 		super.update(elapsed);
 
+		var isOverBar = FlxG.mouse.overlaps(bar, camera);
+		var isOverHandle = FlxG.mouse.overlaps(handle, camera);
+		var isOverSlider = isOverBar || isOverHandle;
+		
+		if (isOverSlider && !_isHovered)
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.BUTTON;
+			_isHovered = true;
+		}
+		else if (!isOverSlider && _isHovered)
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.AUTO;
+			_isHovered = false;
+		}
+		
+		_isHandleHovered = isOverHandle;
+
 		if(FlxG.mouse.justMoved || FlxG.mouse.justPressed || forceNextUpdate)
 		{
 			forceNextUpdate = false;
-			if(FlxG.mouse.justPressed && (FlxG.mouse.overlaps(bar, camera) || FlxG.mouse.overlaps(handle, camera)))
+			if(FlxG.mouse.justPressed && isOverSlider)
 				movingHandle = true;
 			
 			if(movingHandle)
@@ -130,7 +157,15 @@ class PsychUISlider extends FlxSpriteGroup
 		if (!FlxG.mouse.pressed) movingHandle = false;
 	}
 
-	private function _updatePositions():Void
+	override public function destroy()
+	{
+		if (_isHovered && useSystemCursor)
+			Mouse.cursor = MouseCursor.AUTO;
+		
+		super.destroy();
+	}
+
+	inline private function _updatePositions():Void
 	{
 		bar.x = x;
 		bar.y = y;
@@ -155,7 +190,7 @@ class PsychUISlider extends FlxSpriteGroup
 		_updateColors();
 	}
 
-	private function _updateBarSizes():Void
+	inline private function _updateBarSizes():Void
 	{
 		leftBar.x = bar.x;
 		leftBar.y = bar.y;
@@ -171,7 +206,7 @@ class PsychUISlider extends FlxSpriteGroup
 		rightBar.x = bar.x + handlePos;
 	}
 
-	private function _updateColors():Void
+	inline private function _updateColors():Void
 	{
 		var leftAlpha:Int = (Std.int(leftColor) >> 24) & 0xFF;
 		var rightAlpha:Int = (Std.int(rightColor) >> 24) & 0xFF;
@@ -179,7 +214,7 @@ class PsychUISlider extends FlxSpriteGroup
 		rightBar.color = (rightAlpha == 0) ? mainColor : rightColor;
 	}
 
-	private function _updateHandleX():Void
+	inline private function _updateHandleX():Void
 	{
 		handleTargetX = bar.x - handle.width/2 + FlxMath.remapToRange(FlxMath.roundDecimal(value, decimals), min, max, 0, bar.width);
 		handle.y = bar.y + bar.height/2 - handle.height/2;

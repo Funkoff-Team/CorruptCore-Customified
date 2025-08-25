@@ -33,7 +33,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
         // connecting to camera
         cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
-        var zoom:Float = CoolUtil.boundTo(FlxG.camera.zoom, 0.05, 1);
+        var zoom:Float = MathUtil.boundTo(FlxG.camera.zoom, 0.05, 1);
         var width:Int = Std.int(FlxG.width / zoom);
         var height:Int = Std.int(FlxG.height / zoom);
 

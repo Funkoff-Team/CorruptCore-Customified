@@ -2224,10 +2224,10 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 						var increase:Float = 1 / snap;
 						if (FlxG.mouse.wheel > 0)
 						{
-							var fuck:Float = CoolUtil.quantize(beat, snap) - increase;
+							var fuck:Float = MathUtil.quantize(beat, snap) - increase;
 							FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
 						}else{
-							var fuck:Float = CoolUtil.quantize(beat, snap) + increase;
+							var fuck:Float = MathUtil.quantize(beat, snap) + increase;
 							FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
 						}
 					}
@@ -2280,10 +2280,10 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 					var increase:Float = 1 / snap;
 					if (FlxG.keys.pressed.UP )
 					{
-						var fuck:Float = CoolUtil.quantize(beat, snap) - increase; //(Math.floor((beat+snap) / snap) * snap);
+						var fuck:Float = MathUtil.quantize(beat, snap) - increase; //(Math.floor((beat+snap) / snap) * snap);
 						FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
 					}else{
-						var fuck:Float = CoolUtil.quantize(beat, snap) + increase; //(Math.floor((beat+snap) / snap) * snap);
+						var fuck:Float = MathUtil.quantize(beat, snap) + increase; //(Math.floor((beat+snap) / snap) * snap);
 						FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
 					}
 				}
@@ -2346,10 +2346,10 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 					var increase:Float = 1 / snap;
 					if (FlxG.keys.pressed.UP #if mobile || _virtualpad.buttonUp.pressed #end)
 					{
-						var fuck:Float = CoolUtil.quantize(beat, snap) - increase;
+						var fuck:Float = MathUtil.quantize(beat, snap) - increase;
 						feces = Conductor.beatToSeconds(fuck);
 					} else {
-						var fuck:Float = CoolUtil.quantize(beat, snap) + increase; //(Math.floor((beat+snap) / snap) * snap);
+						var fuck:Float = MathUtil.quantize(beat, snap) + increase; //(Math.floor((beat+snap) / snap) * snap);
 						feces = Conductor.beatToSeconds(fuck);
 					}
 					FlxTween.tween(FlxG.sound.music, {time:feces}, 0.1, {ease:FlxEase.circOut});

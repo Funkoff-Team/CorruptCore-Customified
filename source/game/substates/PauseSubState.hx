@@ -312,7 +312,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	override function destroy()
 	{
-		pauseMusic.destroy();
+		pauseMusic?.destroy();
 
 		super.destroy();
 	}

@@ -460,14 +460,14 @@ class PsychUIInputText extends FlxSpriteGroup
 		}
 	}
 
-	public function resetCaret()
+	inline public function resetCaret()
 	{
 		selectIndex = -1;
 		caretIndex = 0;
 		updateCaret();
 	}
 
-	public function updateCaret()
+	inline public function updateCaret()
 	{
 		if(textObj == null || !textObj.exists) return;
 
@@ -520,7 +520,7 @@ class PsychUIInputText extends FlxSpriteGroup
 		else if(text.length > 0) textObj.removeFormat(selectedFormat);
 	}
 
-	function deleteSelection()
+	inline function deleteSelection()
 	{
 		var lastText:String = text;
 		if(selectIndex > caretIndex)
@@ -633,7 +633,7 @@ class PsychUIInputText extends FlxSpriteGroup
 		return v;
 	}
 
-	public static function getAccentCharCode(accent:AccentCode)
+	inline public static function getAccentCharCode(accent:AccentCode)
 	{
 		switch(accent)
 		{

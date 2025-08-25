@@ -146,6 +146,11 @@ class Main extends Sprite
 
 		pluginsLessGo();
 
+		#if desktop
+		FlxG.mouse.visible = false;
+    	FlxG.mouse.useSystemCursor = true;
+		#end
+
 		#if !html5
 		FlxG.scaleMode = new flixel.FlxScaleMode();
 		#end

@@ -200,7 +200,7 @@ class PsychUIBox extends FlxSpriteGroup
 		super.destroy();
 	}
 
-	public function addTab(name:String)
+	inline public function addTab(name:String)
 	{
 		var createdTab:PsychUITab = new PsychUITab(name);
 		tabs.push(createdTab);
@@ -212,7 +212,7 @@ class PsychUIBox extends FlxSpriteGroup
 	}
 
 	public var tabHeight:Int = 20;
-	public function updateTabs()
+	inline public function updateTabs()
 	{
 		var wid:Int = Std.int(bg.width / tabs.length);
 		for (num => tab in tabs)
@@ -224,7 +224,7 @@ class PsychUIBox extends FlxSpriteGroup
 	}
 
 	var _originalHeight:Int = 0;
-	public function resize(width:Int, height:Int)
+	inline public function resize(width:Int, height:Int)
 	{
 		_originalHeight = height;
 		bg.setGraphicSize(width, height);

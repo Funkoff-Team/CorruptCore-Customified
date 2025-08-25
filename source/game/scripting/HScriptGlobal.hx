@@ -1,9 +1,9 @@
-package hscript;
+package game.scripting;
 
 using StringTools;
 
-class ScriptGlobal {
-	public static var globalScript:HScript;
+class HScriptGlobal {
+	public static var globalScript:FunkinHScript;
 	public static var globalScriptActive:Bool = false;
 	
 	public static function addGlobalScript() {
@@ -21,7 +21,7 @@ class ScriptGlobal {
 				{
 					#if HSCRIPT_ALLOWED
 					if (file.endsWith('Global.hx')) {
-						globalScript = new HScript(folder + file);
+						globalScript = new FunkinHScript(folder + file);
 						globalScriptActive = true;
 						break; //We only want one global script active at a time, Usually the upmost important mod that's enabled.
 					}

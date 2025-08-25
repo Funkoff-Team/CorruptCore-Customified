@@ -1,5 +1,8 @@
 package psych.ui;
 
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
+
 class PsychUINumericStepper extends PsychUIInputText
 {
 	public static final CHANGE_EVENT = "numericstepper_change";
@@ -14,6 +17,12 @@ class PsychUINumericStepper extends PsychUIInputText
 
 	public var onValueChange:Void->Void;
 	public var value(default, set):Float;
+	
+	private var _isPlusHovered:Bool = false;
+	private var _isMinusHovered:Bool = false;
+
+	inline public static var useSystemCursor:Bool = true;
+
 	public function new(x:Float = 0, y:Float = 0, step:Float = 1, defValue:Float = 0, min:Float = -999, max:Float = 999, decimals:Int = 0, ?wid:Int = 60, ?isPercent:Bool = false)
 	{
 		super(x, y, wid, '');
@@ -49,15 +58,33 @@ class PsychUINumericStepper extends PsychUIInputText
 	{
 		super.update(elapsed);
 
+		var isOverPlus = FlxG.mouse.overlaps(buttonPlus, camera);
+		var isOverMinus = FlxG.mouse.overlaps(buttonMinus, camera);
+		var isOverStepper = isOverPlus || isOverMinus;
+		
+		if (isOverStepper && (!_isPlusHovered && !_isMinusHovered))
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.BUTTON;
+		}
+		else if (!isOverStepper && (_isPlusHovered || _isMinusHovered))
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.AUTO;
+		}
+		
+		_isPlusHovered = isOverPlus;
+		_isMinusHovered = isOverMinus;
+
 		if(FlxG.mouse.justPressed)
 		{
-			if(buttonPlus != null && buttonPlus.exists && FlxG.mouse.overlaps(buttonPlus, camera))
+			if(buttonPlus != null && buttonPlus.exists && isOverPlus)
 			{
 				buttonPlus.animation.play('pressed');
 				value += step;
 				_internalOnChange();
 			}
-			else if(buttonMinus != null && buttonMinus.exists && FlxG.mouse.overlaps(buttonMinus, camera))
+			else if(buttonMinus != null && buttonMinus.exists && isOverMinus)
 			{
 				buttonMinus.animation.play('pressed');
 				value -= step;
@@ -71,6 +98,14 @@ class PsychUINumericStepper extends PsychUIInputText
 			if(buttonMinus != null && buttonMinus.exists && buttonMinus.animation.curAnim != null && buttonMinus.animation.curAnim.name != 'normal')
 				buttonMinus.animation.play('normal');
 		}
+	}
+
+	override public function destroy()
+	{
+		if ((_isPlusHovered || _isMinusHovered) && useSystemCursor)
+			Mouse.cursor = MouseCursor.AUTO;
+		
+		super.destroy();
 	}
 
 	function set_value(v:Float)
@@ -119,7 +154,7 @@ class PsychUINumericStepper extends PsychUIInputText
 		return isPercent;
 	}
 
-	function _updateValue()
+	inline function _updateValue()
 	{
 		var txt:String = text.replace('%', '');
 		if(txt.indexOf('-') > 0)
@@ -153,7 +188,7 @@ class PsychUINumericStepper extends PsychUIInputText
 		if(selectIndex > text.length) selectIndex = text.length;
 	}
 	
-	function _updateFilter()
+	inline function _updateFilter()
 	{
 		if(min < 0)
 		{
@@ -192,7 +227,7 @@ class PsychUINumericStepper extends PsychUIInputText
 	}
 
 	public var broadcastStepperEvent:Bool = true;
-	function _internalOnChange()
+	inline function _internalOnChange()
 	{
 		if(onValueChange != null) onValueChange();
 		if(broadcastStepperEvent) PsychUIEventHandler.event(CHANGE_EVENT, this);

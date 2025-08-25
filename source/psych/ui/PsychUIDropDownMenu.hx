@@ -2,6 +2,9 @@ package psych.ui;
 
 import psych.ui.PsychUIBox.UIStyleData;
 
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
+
 class PsychUIDropDownMenu extends PsychUIInputText
 {
 	public static final CLICK_EVENT = "dropdown_click";
@@ -15,6 +18,12 @@ class PsychUIDropDownMenu extends PsychUIInputText
 
 	var _curFilter:Array<String>;
 	var _itemWidth:Float = 0;
+	
+	private var _isHovered:Bool = false;
+	var _isButtonHovered:Bool = false;
+	
+	inline public static var useSystemCursor:Bool = true;
+
 	public function new(x:Float, y:Float, list:Array<String>, callback:Int->String->Void, ?width:Float = 100)
 	{
 		super(x, y);
@@ -88,9 +97,28 @@ class PsychUIDropDownMenu extends PsychUIInputText
 	{
 		var lastFocus = PsychUIInputText.focusOn;
 		super.update(elapsed);
+		
+		var isOverButton = FlxG.mouse.overlaps(button, camera);
+		var isOverField = FlxG.mouse.overlaps(behindText, camera);
+		
+		if ((isOverButton || isOverField) && !_isHovered)
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.BUTTON;
+			_isHovered = true;
+		}
+		else if (!isOverButton && !isOverField && _isHovered)
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.AUTO;
+			_isHovered = false;
+		}
+		
+		_isButtonHovered = isOverButton;
+
 		if(FlxG.mouse.justPressed)
 		{
-			if(FlxG.mouse.overlaps(button, camera))
+			if(isOverButton)
 			{
 				button.animation.play('pressed', true);
 				if(lastFocus != this)
@@ -114,7 +142,15 @@ class PsychUIDropDownMenu extends PsychUIInputText
 		}
 	}
 
-	private function showDropDownClickFix()
+	override public function destroy()
+	{
+		if (_isHovered && useSystemCursor)
+			Mouse.cursor = MouseCursor.AUTO;
+		
+		super.destroy();
+	}
+
+	inline private function showDropDownClickFix()
 	{
 		if(FlxG.mouse.justPressed)
 		{
@@ -124,7 +160,7 @@ class PsychUIDropDownMenu extends PsychUIInputText
 		}
 	}
 
-	public function showDropDown(vis:Bool = true, scroll:Int = 0, onlyAllowed:Array<String> = null)
+	inline public function showDropDown(vis:Bool = true, scroll:Int = 0, onlyAllowed:Array<String> = null)
 	{
 		if(!vis)
 		{
@@ -177,7 +213,7 @@ class PsychUIDropDownMenu extends PsychUIInputText
 	}
 
 	public var broadcastDropDownEvent:Bool = true;
-	function clickedOn(num:Int, label:String)
+	inline function clickedOn(num:Int, label:String)
 	{
 		selectedIndex = num;
 		showDropDown(false);
@@ -185,7 +221,7 @@ class PsychUIDropDownMenu extends PsychUIInputText
 		if(broadcastDropDownEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
 	}
 
-	function addOption(option:String)
+	inline function addOption(option:String)
 	{
 		@:bypassAccessor list.push(option);
 		var curID:Int = list.length - 1;
@@ -232,6 +268,11 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 
 	public var bg:FlxSprite;
 	public var text:FlxText;
+	
+	private var _isHovered:Bool = false;
+	
+	inline public static var useSystemCursor:Bool = true;
+
 	public function new(x:Float = 0, y:Float = 0, width:Float = 100)
 	{
 		super(x, y);
@@ -251,10 +292,24 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		
+		var overlapped:Bool = (FlxG.mouse.overlaps(bg, camera));
+
+		if (overlapped && !_isHovered)
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.BUTTON;
+			_isHovered = true;
+		}
+		else if (!overlapped && _isHovered)
+		{
+			if (useSystemCursor) 
+				Mouse.cursor = MouseCursor.AUTO;
+			_isHovered = false;
+		}
+
 		if(FlxG.mouse.justMoved || FlxG.mouse.justPressed || forceNextUpdate)
 		{
-			var overlapped:Bool = (FlxG.mouse.overlaps(bg, camera));
-
 			var style = overlapped ? hoverStyle : normalStyle;
 			bg.color = style.bgColor;
 			text.color = style.textColor;
@@ -267,6 +322,14 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 		
 		text.x = bg.x;
 		text.y = bg.y + bg.height/2 - text.height/2;
+	}
+
+	override public function destroy()
+	{
+		if (_isHovered && useSystemCursor)
+			Mouse.cursor = MouseCursor.AUTO;
+		
+		super.destroy();
 	}
 
 	public var label(default, set):String;
