@@ -21,7 +21,6 @@ class HScriptClassManager {
     public static final SCRIPTABLE_CLASSES:Map<String, Class<Dynamic>> = {
         var map = new Map<String, Class<Dynamic>>();
         map.set(Type.getClassName(TempClass), ScriptedTempClass);
-        map.set(Type.getClassName(MusicBeatSubstate), game.scripting.FunkinHScript.HScriptMusicBeatSubstate);
         map;
     };
 

@@ -31,9 +31,7 @@ class MusicBeatState extends FlxState
 {
 	#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
 	public var menuScriptArray:Array<FunkinRScript> = [];
-	
-	//states that don't allow scripting/overriding by hscripts!
-	static final excludeStates:Array<Dynamic> = [game.states.LoadingState, game.PlayState, game.scripting.HScriptState];
+	private var excludeStates:Array<Dynamic>;
 	#end
 
 	private var curSection:Int = 0;
@@ -54,6 +52,19 @@ class MusicBeatState extends FlxState
 	public static var timePassedOnState:Float = 0;
 
 	private var menuScriptPath:String;
+
+	// (WStaticInitOrder) Warning : maybe loop in static generation of MusicBeatState
+	private static function initExcludeStates():Array<Dynamic> {
+		return [game.states.LoadingState, game.PlayState, game.scripting.HScriptState];
+	}
+
+	public function new() {
+		super();
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
+		excludeStates = initExcludeStates();
+		#end
+	}
+
 	override function create() {
 		if(!_fnfCameraInitialized) initFNFCamera();
 

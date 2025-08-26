@@ -36,7 +36,6 @@ class FunkinRScript {
         "PlayState" => game.PlayState,
         "BGSprite" => game.objects.BGSprite,
         "FunkinRScript" => FunkinRScript,
-        "FunkinHScript" => FunkinHScript,
         "FunkinLua" => FunkinLua,
     ];
 

@@ -11,6 +11,9 @@ class FunkinHScript extends FunkinRScript
         super(path, parentInstance, skipCreate);
         scriptType = "HScript";
 
+        //(WStaticInitOrder) Warning : maybe loop in static generation of game.scripting.FunkinHScript
+        set("FunkinHScript", FunkinHScript);
+
         rule.parser = new HxParser();
         rule.getParser(HxParser).allowAll();
 
@@ -18,5 +21,3 @@ class FunkinHScript extends FunkinRScript
 		execute(scriptToRun, skipCreate);
     }
 }
-
-class HScriptMusicBeatSubstate extends MusicBeatSubstate implements rulescript.scriptedClass.RuleScriptedClass{}

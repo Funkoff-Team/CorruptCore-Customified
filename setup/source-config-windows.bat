@@ -12,15 +12,16 @@ haxelib git lime https://github.com/GreenColdTea/lime-9.0.0
 haxelib install format
 haxelib install hxp
 haxelib set openfl 9.4.1
-haxelib install hxcpp --quiet
 haxelib install hxvlc --quiet --skip-dependencies
 haxelib run lime setup flixel
 haxelib set flixel-tools 1.5.1
 haxelib set flixel-addons 3.3.2
 haxelib set hxdiscord_rpc 1.2.4
-haxelib git hscript https://github.com/CodenameCrew/hscript-improved.git codename-dev
+haxelib git hxcpp https://github.com/FunkinCrew/hxcpp
+haxelib git rulescript https://github.com/Kriptel/RuleScript.git dev
+haxelib git hscript https://github.com/HaxeFoundation/hscript.git
 haxelib git sl-windows-api https://github.com/GreenColdTea/windows-api-improved.git
-haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git 8487b0f2ea771bb4aa66675101043d5eb195f3ab
+haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git 8c65d5b797359b0b9c77bdf57823fa0484ca9379
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
 haxelib list
 echo.

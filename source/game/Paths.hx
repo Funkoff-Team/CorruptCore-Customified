@@ -260,7 +260,7 @@ class Paths
 		return foldersToCheck;
 	}
 
-	static public function getSubStateScripts(statePath:String):Array<String> {
+	static public function getSubstateScripts(statePath:String):Array<String> {
 		var foldersToCheck:Array<String> = [
 			Paths.getPreloadPath('scripts/substates/$statePath/'),
 			#if MODS_ALLOWED 
@@ -535,9 +535,11 @@ class Paths
 			if (FileSystem.exists(mods('$key')))
 				return true;
 		}
-		#end
-
+		
+		if(FileSystem.exists(getPath(key, type, library, false))) {
+		#else
 		if(OpenFlAssets.exists(getPath(key, type, library, false))) {
+		#end
 			return true;
 		}
 		return false;
