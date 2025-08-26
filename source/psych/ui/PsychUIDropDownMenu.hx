@@ -19,10 +19,7 @@ class PsychUIDropDownMenu extends PsychUIInputText
 	var _curFilter:Array<String>;
 	var _itemWidth:Float = 0;
 	
-	private var _isHovered:Bool = false;
-	var _isButtonHovered:Bool = false;
-	
-	inline public static var useSystemCursor:Bool = true;
+	private var _isButtonHovered:Bool = false;
 
 	public function new(x:Float, y:Float, list:Array<String>, callback:Int->String->Void, ?width:Float = 100)
 	{
@@ -103,13 +100,13 @@ class PsychUIDropDownMenu extends PsychUIInputText
 		
 		if ((isOverButton || isOverField) && !_isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.BUTTON;
 			_isHovered = true;
 		}
 		else if (!isOverButton && !isOverField && _isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.AUTO;
 			_isHovered = false;
 		}
@@ -144,7 +141,7 @@ class PsychUIDropDownMenu extends PsychUIInputText
 
 	override public function destroy()
 	{
-		if (_isHovered && useSystemCursor)
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
 			Mouse.cursor = MouseCursor.AUTO;
 		
 		super.destroy();
@@ -270,8 +267,6 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 	public var text:FlxText;
 	
 	private var _isHovered:Bool = false;
-	
-	inline public static var useSystemCursor:Bool = true;
 
 	public function new(x:Float = 0, y:Float = 0, width:Float = 100)
 	{
@@ -297,13 +292,13 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 
 		if (overlapped && !_isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.BUTTON;
 			_isHovered = true;
 		}
 		else if (!overlapped && _isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.AUTO;
 			_isHovered = false;
 		}
@@ -326,7 +321,7 @@ class PsychUIDropDownItem extends FlxSpriteGroup
 
 	override public function destroy()
 	{
-		if (_isHovered && useSystemCursor)
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
 			Mouse.cursor = MouseCursor.AUTO;
 		
 		super.destroy();

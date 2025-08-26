@@ -16,8 +16,6 @@ class PsychUICheckBox extends FlxSpriteGroup
 	public var onClick:Void->Void = null;
 
 	var _isHovered:Bool = false;
-	
-	inline public static var useSystemCursor:Bool = true;
 
 	public function new(x:Float, y:Float, label:String, ?textWid:Int = 100, ?callback:Void->Void)
 	{
@@ -54,13 +52,13 @@ class PsychUICheckBox extends FlxSpriteGroup
 
 		if (isOver && !_isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.BUTTON;
 			_isHovered = true;
 		}
 		else if (!isOver && _isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.AUTO;
 			_isHovered = false;
 		}
@@ -75,7 +73,7 @@ class PsychUICheckBox extends FlxSpriteGroup
 
 	override public function destroy()
 	{
-		if (_isHovered && useSystemCursor)
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
 			Mouse.cursor = MouseCursor.AUTO;
 		
 		super.destroy();

@@ -28,8 +28,6 @@ class PsychUISlider extends FlxSpriteGroup
 	
 	private var _isHovered:Bool = false;
 	private var _isHandleHovered:Bool = false;
-	
-	inline public static var useSystemCursor:Bool = true;
 
 	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200, mainColor:FlxColor = FlxColor.WHITE, handleColor:FlxColor = 0xFFAAAAAA)
 	{
@@ -99,13 +97,13 @@ class PsychUISlider extends FlxSpriteGroup
 		
 		if (isOverSlider && !_isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.BUTTON;
 			_isHovered = true;
 		}
 		else if (!isOverSlider && _isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.AUTO;
 			_isHovered = false;
 		}
@@ -159,7 +157,7 @@ class PsychUISlider extends FlxSpriteGroup
 
 	override public function destroy()
 	{
-		if (_isHovered && useSystemCursor)
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
 			Mouse.cursor = MouseCursor.AUTO;
 		
 		super.destroy();

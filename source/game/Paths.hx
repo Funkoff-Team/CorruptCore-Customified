@@ -35,6 +35,8 @@ class Paths
 {
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
+	inline public static var WAV_EXT = "wav";
+
 
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
@@ -645,38 +647,49 @@ class Paths
 		if (library != null) modLibPath = '$library/';
 		if (path != null) modLibPath += '$path';
 
-		var file:String = modsSounds(modLibPath, key);
+		var file:String = modsSounds(modLibPath, key, WAV_EXT);
 		if(FileSystem.exists(file)) {
-			if(!currentTrackedSounds.exists(file))
-			{
+			if(!currentTrackedSounds.exists(file)) {
 				currentTrackedSounds.set(file, Sound.fromFile(file));
-				//trace('precached mod sound: $file');
+			}
+			localTrackedAssets.push(file);
+			return currentTrackedSounds.get(file);
+		}
+
+		file = modsSounds(modLibPath, key);
+		if(FileSystem.exists(file)) {
+			if(!currentTrackedSounds.exists(file)) {
+				currentTrackedSounds.set(file, Sound.fromFile(file));
 			}
 			localTrackedAssets.push(file);
 			return currentTrackedSounds.get(file);
 		}
 		#end
 
-		// I hate this so god damn much
-		var gottenPath:String = '$key.$SOUND_EXT';
+		var gottenPath:String = '$key.$WAV_EXT';
 		if(path != null) gottenPath = '$path/$gottenPath';
 		gottenPath = getPath(gottenPath, SOUND, library);
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		// trace(gottenPath);
-		if(!currentTrackedSounds.exists(gottenPath))
-		{
+		if(OpenFlAssets.exists(gottenPath, SOUND)) {
+			if(!currentTrackedSounds.exists(gottenPath)) {
+				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(gottenPath));
+			}
+			localTrackedAssets.push(gottenPath);
+			return currentTrackedSounds.get(gottenPath);
+		}
+
+		gottenPath = '$key.$SOUND_EXT';
+		if(path != null) gottenPath = '$path/$gottenPath';
+		gottenPath = getPath(gottenPath, SOUND, library);
+		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
+		if(!currentTrackedSounds.exists(gottenPath)) {
 			var retKey:String = (path != null) ? '$path/$key' : key;
 			retKey = ((path == 'songs') ? 'songs:' : '') + getPath('$retKey.$SOUND_EXT', SOUND, library);
-			if(OpenFlAssets.exists(retKey, SOUND))
-			{
+			if(OpenFlAssets.exists(retKey, SOUND)) {
 				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(retKey));
-				//trace('precached vanilla sound: $retKey');
 			}
-			else if(beepOnNull)
-			{
+			else if(beepOnNull) {
 				trace('SOUND NOT FOUND: $key, PATH: $path');
-				trace(gottenPath);
-				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSoundAddExtension('flixel/sounds/beep');
 			}
 		}
@@ -725,8 +738,9 @@ class Paths
 	}
 	#end
 
-	inline static public function modsSounds(path:String, key:String) {
-		return modFolders(path + '/' + key + '.' + SOUND_EXT);
+	inline static public function modsSounds(path:String, key:String, ?ext:String = null) {
+		if(ext == null) ext = SOUND_EXT;
+		return modFolders(path + '/' + key + '.' + ext);
 	}
 
 	inline static public function modsImages(key:String) {

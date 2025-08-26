@@ -21,8 +21,6 @@ class PsychUINumericStepper extends PsychUIInputText
 	private var _isPlusHovered:Bool = false;
 	private var _isMinusHovered:Bool = false;
 
-	inline public static var useSystemCursor:Bool = true;
-
 	public function new(x:Float = 0, y:Float = 0, step:Float = 1, defValue:Float = 0, min:Float = -999, max:Float = 999, decimals:Int = 0, ?wid:Int = 60, ?isPercent:Bool = false)
 	{
 		super(x, y, wid, '');
@@ -64,12 +62,12 @@ class PsychUINumericStepper extends PsychUIInputText
 		
 		if (isOverStepper && (!_isPlusHovered && !_isMinusHovered))
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.BUTTON;
 		}
 		else if (!isOverStepper && (_isPlusHovered || _isMinusHovered))
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.AUTO;
 		}
 		
@@ -102,7 +100,7 @@ class PsychUINumericStepper extends PsychUIInputText
 
 	override public function destroy()
 	{
-		if ((_isPlusHovered || _isMinusHovered) && useSystemCursor)
+		if ((_isPlusHovered || _isMinusHovered) && flixel.FlxG.mouse.useSystemCursor)
 			Mouse.cursor = MouseCursor.AUTO;
 		
 		super.destroy();

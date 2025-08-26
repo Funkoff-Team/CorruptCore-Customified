@@ -12,8 +12,6 @@ class PsychUITab extends FlxSprite
 	public var menu:FlxSpriteGroup = new FlxSpriteGroup();
 	
 	private var _isHovered:Bool = false;
-	
-	inline public static var useSystemCursor:Bool = true;
 
 	public function new(name:String)
 	{
@@ -35,13 +33,13 @@ class PsychUITab extends FlxSprite
 		
 		if (isOver && !_isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.BUTTON;
 			_isHovered = true;
 		}
 		else if (!isOver && _isHovered)
 		{
-			if (useSystemCursor) 
+			if (flixel.FlxG.mouse.useSystemCursor) 
 				Mouse.cursor = MouseCursor.AUTO;
 			_isHovered = false;
 		}
@@ -61,7 +59,7 @@ class PsychUITab extends FlxSprite
 
 	override function destroy()
 	{
-		if (_isHovered && useSystemCursor)
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
 			Mouse.cursor = MouseCursor.AUTO;
 		
 		text = FlxDestroyUtil.destroy(text);

@@ -36,27 +36,41 @@ class ChartBackupManager
     }
     
     /**
+     * Sanitizes a filename by replacing invalid characters with underscores
+     * @param name Original filename to sanitize
+     * @return Sanitized filename safe for filesystem use
+     */
+    private function sanitizeFileName(name:String):String {
+        var invalidChars = ["/", "\\", ":", "*", "?", "\"", "<", ">", "|"];
+        for (char in invalidChars) {
+            name = name.replace(char, "_");
+        }
+        return name;
+    }
+    
+    /**
      * Creates a backup file with metadata and timestamp information
      * @param fileName Original source filename
      * @param data Stringified chart data to backup
      * @param type Backup type identifier ("auto" or "manual")
      */
-    public function createBackup(fileName:String, data:String, type:String = "auto"):Void {
+    inline public function createBackup(fileName:String, data:String, type:String = "auto"):Void {
         #if sys
         var backupDir = getBackupDir();
         
-        //Ensure backup directories exist
+        // Ensure backup directories exist
         if (!FileSystem.exists(SUtil.getPath() + 'backups/'))
             FileSystem.createDirectory(SUtil.getPath() + 'backups/');
 
         if (!FileSystem.exists(backupDir))
             FileSystem.createDirectory(backupDir);
 
-        //Generate timestamped filename
+        // Generate timestamped filename with sanitized name
         var timestamp = Date.now().toString().replace(' ', '_').replace(':', '-').replace('.', '-');
-        var backupFileName = fileName.replace('.json', '_${type}_$timestamp.$BACKUP_EXTENSION');
+        var sanitizedFileName = sanitizeFileName(fileName.replace('.json', ''));
+        var backupFileName = sanitizedFileName + '_${type}_$timestamp.$BACKUP_EXTENSION';
         
-        //Structure backup metadata
+        // Structure backup metadata
         var backupData = {
             "originalFileName": fileName,
             "data": data,
@@ -65,7 +79,7 @@ class ChartBackupManager
             "version": VERSION
         };
         
-        //Write backup file to disk
+        // Write backup file to disk
         File.saveContent(backupDir + backupFileName, Json.stringify(backupData, "\t"));
         #end
     }
@@ -74,7 +88,7 @@ class ChartBackupManager
      * Creates an automatic backup with current song data
      * @param songData Dynamic object containing song chart data
      */
-    public function createAutoBackup(songData:Dynamic):Void {
+    inline public function createAutoBackup(songData:Dynamic):Void {
         #if sys
         var json = {
             "song": songData,
@@ -83,7 +97,7 @@ class ChartBackupManager
         };
 
         var data:String = Json.stringify(json, "\t");
-        createBackup(editor._song.song + ".json", data, "auto");
+        createBackup(sanitizeFileName(editor._song.song) + ".json", data, "auto");
         #end
     }
     
@@ -94,7 +108,7 @@ class ChartBackupManager
      * - Others: Fallback prompt about limitations
      * @param songData Dynamic object containing song chart data
      */
-    public function createManualBackup(songData:Dynamic):Void {
+    inline public function createManualBackup(songData:Dynamic):Void {
         #if desktop
         var json = {
             "song": songData,
@@ -103,8 +117,9 @@ class ChartBackupManager
         };
 
         var data:String = Json.stringify(json, "\t");
+        var sanitizedSongName = sanitizeFileName(editor._song.song);
         var fileRef = new FileReference();
-        fileRef.save(data, '${editor._song.song}_backup_${Date.now().toString().replace(" ", "_").replace(":", "-")}.$BACKUP_EXTENSION');
+        fileRef.save(data, '${sanitizedSongName}_backup_${Date.now().toString().replace(" ", "_").replace(":", "-")}.$BACKUP_EXTENSION');
         #else
         #if sys
         var json = {
@@ -114,7 +129,7 @@ class ChartBackupManager
         };
 
         var data:String = Json.stringify(json, "\t");
-        createBackup(editor._song.song + ".json", data, "manual");
+        createBackup(sanitizeFileName(editor._song.song) + ".json", data, "manual");
         #else
         editor.openSubState(new Prompt('Backup creation is only available on desktop and mobile with file system access', 1, () ->
             editor.closeSubState(), null, false, "OK", null));
@@ -127,7 +142,7 @@ class ChartBackupManager
      * Desktop: Native file browser dialog
      * Others: Limitations prompt
      */
-    public function loadBackup():Void {
+    inline public function loadBackup():Void {
         #if desktop
         var fileFilter = new FileFilter('Chart Backup Files', '*.$BACKUP_EXTENSION;*.json');
         var fileRef = new FileReference();
@@ -147,7 +162,7 @@ class ChartBackupManager
     /**
      * Handles successful backup file loading
      */
-    private function onBackupLoaded(e:Event):Void {
+    inline private function onBackupLoaded(e:Event):Void {
         var fileRef:FileReference = cast e.target;
         fileRef.removeEventListener(Event.COMPLETE, onBackupLoaded);
         fileRef.removeEventListener(IOErrorEvent.IO_ERROR, onBackupError);
@@ -190,7 +205,7 @@ class ChartBackupManager
         var backupParts = backupVersion.split('.');
         var currentParts = currentVersion.split('.');
         
-        //Compare version segments numerically
+        // Compare version segments numerically
         for (i in 0...Std.int(Math.max(backupParts.length, currentParts.length))) {
             var backupPart = i < backupParts.length ? Std.parseInt(backupParts[i]) : 0;
             var currentPart = i < currentParts.length ? Std.parseInt(currentParts[i]) : 0;
@@ -206,9 +221,9 @@ class ChartBackupManager
      * Processes loaded backup data and applies to editor
      * @param backupData Parsed backup data structure
      */
-    private function loadBackupData(backupData:Dynamic):Void {
+    inline private function loadBackupData(backupData:Dynamic):Void {
         try {
-            //Handle different backup file formats
+            // Handle different backup file formats
             if (backupData.data != null && Std.isOfType(backupData.data, String)) {
                 var songData:Dynamic = Json.parse(backupData.data);
                 if (songData.song != null) {
@@ -234,7 +249,7 @@ class ChartBackupManager
     /**
      * Handles backup file loading errors
      */
-    private function onBackupError(e:IOErrorEvent):Void {
+    inline private function onBackupError(e:IOErrorEvent):Void {
         var fileRef:FileReference = cast e.target;
         fileRef.removeEventListener(Event.COMPLETE, onBackupLoaded);
         fileRef.removeEventListener(IOErrorEvent.IO_ERROR, onBackupError);
@@ -243,7 +258,11 @@ class ChartBackupManager
             editor.closeSubState(), null, false, "OK", null));
     }
     
-    private function getBackupDir():String {
+    /**
+     * Returns the directory path for backup files
+     * @return String path to backup directory
+     */
+    inline private function getBackupDir():String {
         return SUtil.getPath() + 'backups/charts/';
     }
 }

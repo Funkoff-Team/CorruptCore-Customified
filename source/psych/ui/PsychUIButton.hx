@@ -40,8 +40,6 @@ class PsychUIButton extends FlxSpriteGroup
 
 	var _isHovered:Bool = false;
 
-	inline public static var useSystemCursor:Bool = true;
-
 	public function new(x:Float = 0, y:Float = 0, label:String = '', ?onClick:Void->Void = null, ?wid:Int = 80, ?hei:Int = 20)
 	{
 		super(x, y);
@@ -88,13 +86,13 @@ class PsychUIButton extends FlxSpriteGroup
 
 			if (overlapped && !_isHovered)
 			{
-				if (useSystemCursor) 
+				if (flixel.FlxG.mouse.useSystemCursor) 
 					Mouse.cursor = MouseCursor.BUTTON;
 				_isHovered = true;
 			}
 			else if (!overlapped && _isHovered)
 			{
-				if (useSystemCursor) 
+				if (flixel.FlxG.mouse.useSystemCursor) 
 					Mouse.cursor = MouseCursor.AUTO;
 				_isHovered = false;
 			}
@@ -138,7 +136,7 @@ class PsychUIButton extends FlxSpriteGroup
 
 	override public function destroy()
 	{
-		if (_isHovered && useSystemCursor)
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
 			Mouse.cursor = MouseCursor.AUTO;
 		
 		super.destroy();
