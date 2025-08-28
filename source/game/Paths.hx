@@ -230,34 +230,20 @@ class Paths
 	}
 
 	#if SCRIPTABLE_STATES
-	static public function getStateScripts(statePath:String):Array<String> {
-		var foldersToCheck:Array<String> = [
-			Paths.getPreloadPath('scripts/states/$statePath/'),
-			#if MODS_ALLOWED 
-			Paths.mods('scripts/states/$statePath/'),
-			#end
-		];
-
-		#if MODS_ALLOWED
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) {
-			foldersToCheck.unshift(Paths.mods('${Paths.currentModDirectory}/scripts/states/$statePath/'));
-		}
+	public static function getStateScripts(state:String = ""):Array<String> {
+		var folders:Array<String> = [];
 		
-		for (mod in Paths.getGlobalMods()) {
-			foldersToCheck.unshift(Paths.mods('$mod/scripts/states/$statePath/'));
-		}
-		#end
-
-		foldersToCheck.push(Paths.getPreloadPath('scripts/states/$statePath.hx'));
+		folders.push(Paths.getPreloadPath('scripts/states/'));
+		
 		#if MODS_ALLOWED
-		foldersToCheck.push(Paths.mods('scripts/states/$statePath.hx'));
-		foldersToCheck.push(Paths.mods('${Paths.currentModDirectory}/scripts/states/$statePath.hx'));
-		for (mod in Paths.getGlobalMods()) {
-			foldersToCheck.push(Paths.mods('$mod/scripts/states/$statePath.hx'));
-		}
+		for (mod in Paths.getGlobalMods())
+			folders.push(Paths.mods('$mod/scripts/states/'));
+		
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+			folders.push(Paths.mods('${Paths.currentModDirectory}/scripts/states/'));
 		#end
-
-		return foldersToCheck;
+		
+		return folders;
 	}
 
 	static public function getSubstateScripts(statePath:String):Array<String> {
@@ -642,6 +628,18 @@ class Paths
 		return hideChars.split(path).join("").toLowerCase();
 	}
 
+	public static function getAbsolutePath(assetPath:String):String {
+		#if sys
+		var cleanPath = assetPath;
+		if (cleanPath.indexOf("assets/") == 0) {
+			cleanPath = cleanPath.substring(7);
+		}
+		return Sys.getCwd() + "assets/" + cleanPath;
+		#else
+		return assetPath;
+		#end
+	}
+
 	public static var currentTrackedSounds:Map<String, Sound> = [];
 	public static function returnSound(path:Null<String>, key:String, ?library:String, ?beepOnNull:Bool = true) {
 		#if MODS_ALLOWED
@@ -652,7 +650,7 @@ class Paths
 		var file:String = modsSounds(modLibPath, key, WAV_EXT);
 		if(FileSystem.exists(file)) {
 			if(!currentTrackedSounds.exists(file)) {
-				currentTrackedSounds.set(file, Sound.fromFile(file));
+				currentTrackedSounds.set(file, CoolUtil.loadHighBitrateWav(key, file));
 			}
 			localTrackedAssets.push(file);
 			return currentTrackedSounds.get(file);
@@ -668,35 +666,39 @@ class Paths
 		}
 		#end
 
-		var gottenPath:String = '$key.$WAV_EXT';
-		if(path != null) gottenPath = '$path/$gottenPath';
-		gottenPath = getPath(gottenPath, SOUND, library);
-		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		if(OpenFlAssets.exists(gottenPath, SOUND)) {
-			if(!currentTrackedSounds.exists(gottenPath)) {
-				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(gottenPath));
+		// checking wav files for existing
+		var wavPath:String = getPath((path != null ? '$path/' : '') + '$key.$WAV_EXT', SOUND, library);
+		if(OpenFlAssets.exists(wavPath, SOUND)) {
+			if(!currentTrackedSounds.exists(wavPath)) {
+				//for web only mp3 lel
+				#if (sys && !web)
+				var absolutePath = getAbsolutePath(wavPath);
+				if (FileSystem.exists(absolutePath))
+					currentTrackedSounds.set(wavPath, CoolUtil.loadHighBitrateWav(key, absolutePath));
+				else
+					currentTrackedSounds.set(wavPath, OpenFlAssets.getSound(wavPath));
+				#else
+				currentTrackedSounds.set(wavPath, OpenFlAssets.getSound(wavPath));
+				#end
 			}
-			localTrackedAssets.push(gottenPath);
-			return currentTrackedSounds.get(gottenPath);
+			localTrackedAssets.push(wavPath);
+			return currentTrackedSounds.get(wavPath);
 		}
 
-		gottenPath = '$key.$SOUND_EXT';
-		if(path != null) gottenPath = '$path/$gottenPath';
-		gottenPath = getPath(gottenPath, SOUND, library);
-		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		if(!currentTrackedSounds.exists(gottenPath)) {
-			var retKey:String = (path != null) ? '$path/$key' : key;
-			retKey = ((path == 'songs') ? 'songs:' : '') + getPath('$retKey.$SOUND_EXT', SOUND, library);
-			if(OpenFlAssets.exists(retKey, SOUND)) {
-				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(retKey));
+		var standardPath:String = getPath((path != null ? '$path/' : '') + '$key.$SOUND_EXT', SOUND, library);
+		if(OpenFlAssets.exists(standardPath, SOUND)) {
+			if(!currentTrackedSounds.exists(standardPath)) {
+				currentTrackedSounds.set(standardPath, OpenFlAssets.getSound(standardPath));
 			}
-			else if(beepOnNull) {
-				trace('SOUND NOT FOUND: $key, PATH: $path');
-				return FlxAssets.getSoundAddExtension('flixel/sounds/beep');
-			}
+			localTrackedAssets.push(standardPath);
+			return currentTrackedSounds.get(standardPath);
 		}
-		localTrackedAssets.push(gottenPath);
-		return currentTrackedSounds.get(gottenPath);
+
+		if(beepOnNull) {
+			trace('SOUND NOT FOUND: $key, PATH: $path');
+			return FlxAssets.getSoundAddExtension('flixel/sounds/beep');
+		}
+		return null;
 	}
 
 	#if MODS_ALLOWED

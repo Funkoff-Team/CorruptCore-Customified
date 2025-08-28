@@ -1,13 +1,18 @@
 package game.scripting;
 
 import sys.io.File;
+
+import haxe.ds.StringMap;
 import haxe.io.Path;
-import flixel.util.FlxColor;
+
 import rulescript.*;
 import rulescript.parsers.*;
 import rulescript.RuleScript;
+
 import game.scripting.HScriptClassManager.ScriptClassRef;
-import haxe.ds.StringMap;
+
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.group.FlxGroup;
 
 using StringTools;
 using Lambda;
@@ -87,7 +92,110 @@ class FunkinRScript {
             
         set("import", importPackage);
         set("importClass", importClass);
+
+        if (FlxG.state is PlayState)
+            set("game", PlayState.instance);
+        
+        set("add", addObject);
+        set("remove", removeObject);
+        set("insert", insertObject);
+        set("getObject", getObject);
+        set("getAll", getAllObjects);
     }
+
+    public function addObject(object:Dynamic, ?group:String):Bool {
+        if (parentInstance == null) return false;
+        
+        try {
+            if (group != null && Reflect.hasField(parentInstance, group)) {
+                var targetGroup = Reflect.field(parentInstance, group);
+                if (Std.isOfType(targetGroup, FlxTypedGroup) || Std.isOfType(targetGroup, FlxGroup)) {
+                    targetGroup.add(object);
+                    return true;
+                }
+            }
+            
+            if (Reflect.hasField(parentInstance, "add")) {
+                Reflect.callMethod(parentInstance, Reflect.field(parentInstance, "add"), [object]);
+                return true;
+            }
+        } catch (e:Dynamic) {
+            trace('Error adding object: ${e.message}');
+        }
+        return false;
+    }
+
+    public function removeObject(object:Dynamic, ?group:String):Bool {
+        if (parentInstance == null) return false;
+        
+        try {
+            if (group != null && Reflect.hasField(parentInstance, group)) {
+                var targetGroup = Reflect.field(parentInstance, group);
+                if (Std.isOfType(targetGroup, FlxTypedGroup) || Std.isOfType(targetGroup, FlxGroup)) {
+                    targetGroup.remove(object);
+                    return true;
+                }
+            }
+            
+            if (Reflect.hasField(parentInstance, "remove")) {
+                Reflect.callMethod(parentInstance, Reflect.field(parentInstance, "remove"), [object]);
+                return true;
+            }
+        } catch (e:Dynamic) {
+            trace('Error removing object: ${e.message}');
+        }
+        return false;
+    }
+
+    public function insertObject(position:Int, object:Dynamic, ?group:String):Bool {
+        if (parentInstance == null) return false;
+        
+        try {
+            if (group != null && Reflect.hasField(parentInstance, group)) {
+                var targetGroup = Reflect.field(parentInstance, group);
+                if (Std.isOfType(targetGroup, FlxTypedGroup)) {
+                    targetGroup.insert(position, object);
+                    return true;
+                }
+            }
+        } catch (e:Dynamic) {
+            trace('Error inserting object: ${e.message}');
+        }
+        return false;
+    }
+
+    public function getObject(index:Int, group:String):Dynamic {
+        if (parentInstance == null) return null;
+        
+        try {
+            if (Reflect.hasField(parentInstance, group)) {
+                var targetGroup = Reflect.field(parentInstance, group);
+                if (Std.isOfType(targetGroup, FlxTypedGroup)) {
+                    return targetGroup.members[index];
+                }
+            }
+        } catch (e:Dynamic) {
+            trace('Error getting object: ${e.message}');
+        }
+        return null;
+    }
+
+    public function getAllObjects(group:String):Array<Dynamic> {
+        if (parentInstance == null) return [];
+        
+        try {
+            if (Reflect.hasField(parentInstance, group)) {
+                var targetGroup = Reflect.field(parentInstance, group);
+                if (Std.isOfType(targetGroup, FlxTypedGroup)) {
+                    return targetGroup.members;
+                }
+            }
+        } catch (e:Dynamic) {
+            trace('Error getting objects: ${e.message}');
+        }
+        return [];
+    }
+
 
     public function importPackage(packageName:String):Bool {
         if (importedPackages.exists(packageName)) return true;
@@ -140,8 +248,8 @@ class FunkinRScript {
                 try {
                     Reflect.callMethod(null, cb, args != null ? args : []);
                 } catch (e) {
-                    @:privateAccess
-                    onError(haxe.Exception.caught(e));
+                    /*@:privateAccess
+                    onError(haxe.Exception.caught(e));*/
                 }
             }
         }
@@ -151,8 +259,8 @@ class FunkinRScript {
         try {
             return Reflect.callMethod(null, get(event), args != null ? args : []);
         } catch (e) {
-            @:privateAccess
-            onError(haxe.Exception.caught(e));
+            /*@:privateAccess
+            onError(haxe.Exception.caught(e));*/
             return null;
         }
     }

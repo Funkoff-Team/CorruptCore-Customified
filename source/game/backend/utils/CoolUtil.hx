@@ -6,11 +6,21 @@ import flixel.sound.FlxSound;
 import sys.io.File;
 import sys.FileSystem;
 #end
+
+import haxe.io.Bytes;
+
 #if (cpp && windows)
 import winapi.WindowsAPI;
 import winapi.WindowsAPI.MessageBoxIcon;
 import winapi.WindowsAPI.MessageBoxType;
 #end
+
+import lime.media.AudioBuffer;
+import lime.media.AudioSource;
+import lime.media.vorbis.VorbisFile;
+import lime.utils.UInt8Array;
+
+import openfl.media.Sound;
 
 using StringTools;
 
@@ -350,4 +360,81 @@ class CoolUtil
 
 		return result;
 	}
+
+	public static function loadHighBitrateWav(key:String, path:String):Sound 
+	{
+		#if (sys && !web)
+		try {
+			var tempPath = '${Paths.getPreloadPath("temp")}/$key.converted.wav';
+			
+			if (FileSystem.exists(tempPath)) {
+				trace('Using existing converted WAV file: $key');
+				return Sound.fromFile(tempPath);
+			}
+			
+			var bytes = File.getBytes(path);
+			var buffer = AudioBuffer.fromBytes(bytes);
+			
+			if (buffer.sampleRate > 44100 || buffer.bitsPerSample > 16) {
+				trace('Converting high bitrate WAV: $key');
+				
+				if (!FileSystem.exists(Paths.getPreloadPath('temp')))
+					FileSystem.createDirectory(Paths.getPreloadPath('temp'));
+				
+				if (!FileSystem.exists(tempPath)) {
+					//yea yea it will work if you have ffmpeg on your desktop
+					//if not then it wont work lel
+					var cmd = 'ffmpeg -i "$path" -ar 44100 -ac ${buffer.channels} -sample_fmt s16 "$tempPath"';
+					var result = Sys.command(cmd);
+					
+					if (result == 0 && FileSystem.exists(tempPath)) {
+						trace('Successfully converted WAV file: $key');
+						return Sound.fromFile(tempPath);
+					} else {
+						trace('FFmpeg conversion failed for $key, using original file');
+					}
+				}
+			}
+		} catch (e:Dynamic) {
+			trace('Error processing WAV file $key: $e');
+		}
+		#end
+		
+		return Sound.fromFile(path);
+	}
+
+	/*
+	* Helper function to write a WAV file
+	* Was commented due to this converter works like ass lmao
+	*/
+	/*private static function writeWavFile(path:String, data:Bytes, sampleRate:Int, channels:Int, bitsPerSample:Int):Void
+	{
+		var output = File.write(path, true);
+		
+		//calculate values for the WAV header
+		var byteRate = Std.int(sampleRate * channels * bitsPerSample / 8);
+		var blockAlign = Std.int(channels * bitsPerSample / 8);
+		var dataSize = data.length;
+		
+		//write WAV header
+		output.writeString("RIFF"); //chunk ID
+		output.writeInt32(36 + dataSize); //chunk size (file size = 8)
+		output.writeString("WAVE"); //format
+		
+		output.writeString("fmt "); //subchunk 1 ID
+		output.writeInt32(16); //subchunk 1 size (16 for PCM)
+		output.writeInt16(1); //audio format (1 = PCM)
+		output.writeInt16(channels); //num of channels
+		output.writeInt32(sampleRate); //sample rate
+		output.writeInt32(byteRate); //byte rate
+		output.writeInt16(blockAlign); //block align
+		output.writeInt16(bitsPerSample); //bits per sample
+		
+		output.writeString("data"); //subchunk 2 ID
+		output.writeInt32(dataSize); //subchunk 2 size (data size)
+		
+		//write audio data
+		output.write(data);
+		output.close();
+	}*/
 }

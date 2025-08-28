@@ -23,6 +23,7 @@ import sys.FileSystem;
 #if SCRIPTABLE_STATES
 import game.scripting.FunkinHScript;
 import game.scripting.FunkinRScript;
+import game.scripting.HScriptGlobal;
 #end
 
 import openfl.utils.Assets as OpenFlAssets;
@@ -55,7 +56,7 @@ class MusicBeatState extends FlxState
 
 	// (WStaticInitOrder) Warning : maybe loop in static generation of MusicBeatState
 	private static function initExcludeStates():Array<Dynamic> {
-		return [game.states.LoadingState, game.PlayState, game.scripting.HScriptState];
+		return [game.states.LoadingState, game.PlayState, game.scripting.HScriptState, MusicBeatState];
 	}
 
 	public function new() {
@@ -80,7 +81,6 @@ class MusicBeatState extends FlxState
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
 
-		//custom states thing
 		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
 		if (!excludeStates.contains(Type.getClass(this)))
 		{
@@ -264,7 +264,6 @@ class MusicBeatState extends FlxState
 		}
 
 		FlxTransitionableState.skipNextTransIn = false;
-
 		super.startOutro(onOutroComplete);
 	}
 

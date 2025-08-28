@@ -3920,6 +3920,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		if ((data != null) && (data.length > 0))
 		{
+			backupManager.createBackup(Paths.formatToSongPath(_song.song) + ".json", data.trim(), "save");
 			#if mobile
 			SUtil.saveContent(Paths.formatToSongPath(_song.song) + ".json", data.trim());
 			#else
@@ -3929,7 +3930,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
 			#end
-			backupManager.createBackup(Paths.formatToSongPath(_song.song) + ".json", data.trim(), "save");
 		}
 	}
 

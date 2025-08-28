@@ -1,0 +1,15 @@
+flixel.input.gamepad.id.LogitechID
+flixel.input.gamepad.id.SwitchProID
+flixel.input.keyboard.FlxKey
+flixel.math.FlxPoint
+flixel.text.FlxText.FlxTextAlign
+flixel.tweens.FlxTween.FlxTweenType
+flixel.util.FlxAxes
+flixel.util.FlxColor
+flixel.util.FlxDirection
+flixel.util.FlxDirectionFlags
+flixel.util.typeLimit.OneOfTwo
+flixel.util.typeLimit.OneOfThree
+flixel.util.typeLimit.OneOfFour
+flixel.util.typeLimit.NextState
+openfl.display.BlendMode

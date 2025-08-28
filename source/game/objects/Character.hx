@@ -392,7 +392,7 @@ class Character extends FlxSprite
 	/**
 	 * FOR GF DANCING SHIT
 	 */
-	public function dance()
+	inline public function dance()
 	{
 		if (!debugMode && !skipDance && animTimer <= 0 && !specialAnim && !voicelining)
 		{
@@ -412,7 +412,7 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	inline public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 		specialAnim = false;
 		if (!isAnimateAtlas)
@@ -429,9 +429,7 @@ class Character extends FlxSprite
 
 		var daOffset = animOffsets.get(AnimName);
 		if (hasAnimation(AnimName))
-		{
 			offset.set(daOffset[0], daOffset[1]);
-		}
 		else
 			offset.set(0, 0);
 
@@ -453,7 +451,7 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function playGhostAnim(GhostIdx = 0, AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0){
+	inline public function playGhostAnim(GhostIdx = 0, AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0){
 		if (GhostIdx < 0 || GhostIdx >= animGhosts.length) return;
 
 		var ghost = animGhosts[GhostIdx];
@@ -492,7 +490,7 @@ class Character extends FlxSprite
 			ghost.offset.set(0, 0);
 	}
 
-	function loadMappedAnims():Void
+	inline function loadMappedAnims():Void
 	{
 		try
 		{
@@ -508,22 +506,22 @@ class Character extends FlxSprite
 		catch(e:Dynamic) {}
 	}
 
-	function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
+	inline function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
 	}
 
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	inline public function addOffset(name:String, x:Float = 0, y:Float = 0)
 	{
 		animOffsets[name] = [x, y];
 	}
 
-	public function quickAnimAdd(name:String, anim:String)
+	inline public function quickAnimAdd(name:String, anim:String)
 	{
 		animation.addByPrefix(name, anim, 24, false);
 	}
 
-	public function hasAnimation(anim:String):Bool
+	inline public function hasAnimation(anim:String):Bool
 	{
 		return animOffsets.exists(anim);
 	}
@@ -547,7 +545,7 @@ class Character extends FlxSprite
 		return !isAnimateAtlas ? animation.curAnim.finished : atlas.anim.finished;
 	}
 
-	public function finishAnimation():Void
+	inline public function finishAnimation():Void
 	{
 		if(isAnimationNull()) return;
 
@@ -559,7 +557,7 @@ class Character extends FlxSprite
 
 	private var settingCharacterUp:Bool = true;
 
-	public function recalculateDanceIdle()
+	inline public function recalculateDanceIdle()
 	{
 		var lastDanceIdle:Bool = danceIdle;
 		danceIdle = (hasAnimation('danceLeft' + idleSuffix) && hasAnimation('danceRight' + idleSuffix));
@@ -616,7 +614,7 @@ class Character extends FlxSprite
 	}
 
 	#if flixel_animate
-	public function copyAtlasValues()
+	inline public function copyAtlasValues()
 	{
 		@:privateAccess
 		{
@@ -645,7 +643,7 @@ class Character extends FlxSprite
 		super.destroy();
 	}
 
-	public function destroyAtlas()
+	inline public function destroyAtlas()
 	{
 		if (atlas != null)
 			atlas = FlxDestroyUtil.destroy(atlas);

@@ -29,6 +29,7 @@ import game.scripting.LuaCallbackHandler;
 #end
 
 import game.backend.plugins.HotReloadPlugin;
+import game.backend.plugins.CMDEnablingPlugin;
 
 using StringTools;
 
@@ -415,6 +416,7 @@ class Main extends Sprite
 	private function pluginsLessGo()
 	{
 		HotReloadPlugin.init();
+		CMDEnablingPlugin.init();
 	}
 }
 
