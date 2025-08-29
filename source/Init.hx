@@ -4,6 +4,11 @@ import flixel.FlxG;
 import flixel.FlxState;
 import flixel.input.keyboard.FlxKey;
 
+import game.backend.PlayerSettings;
+import game.backend.WeekData;
+import game.backend.utils.CoolUtil;
+import game.states.StoryMenuState;
+
 class Init extends FlxState
 {
     public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
@@ -12,13 +17,13 @@ class Init extends FlxState
 
     override function create()
     {
-		PlayerSettings.init();
+		game.backend.PlayerSettings.init();
 
         FlxG.save.bind('ccengine', CoolUtil.getSavePath());
 
 		ClientPrefs.init();
 
-		Highscore.load();
+		game.backend.Highscore.load();
 
 		if(FlxG.save.data != null && FlxG.save.data.fullscreen)
 			FlxG.fullscreen = FlxG.save.data.fullscreen;
@@ -44,6 +49,6 @@ class Init extends FlxState
 		if(!game.scripting.HScriptGlobal.globalScriptActive) game.scripting.HScriptGlobal.addGlobalScript();
 		#end
 
-		FlxG.switchState(() -> new TitleState());
+		FlxG.switchState(() -> new game.states.TitleState());
     }
 }
