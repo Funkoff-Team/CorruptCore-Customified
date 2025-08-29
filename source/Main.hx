@@ -253,7 +253,7 @@ class Main extends Sprite
 			FlxTransitionableState.skipNextTransOut = true;
 			FlxTransitionableState.skipNextTransIn = true;
 			
-			FlxG.switchState(() -> new CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
+			FlxG.switchState(() -> new game.states.CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new game.states.MainMenuState())));
 		} catch (e:Dynamic) {
 			// If the crash handler fails, we log the error to console
 			trace("CRITICAL CRASH IN HANDLER:", e);

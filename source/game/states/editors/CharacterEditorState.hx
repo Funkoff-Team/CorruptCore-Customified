@@ -1464,10 +1464,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 	function saveBackup() {
 		try {
-			var backupDir = 'assets/characters/backups/';
-			if (!sys.FileSystem.exists(backupDir)) {
+			var backupDir = 'backups/characters/';
+			if (!sys.FileSystem.exists(backupDir))
 				sys.FileSystem.createDirectory(backupDir);
-			}
 
 			var json = {
 				"animations": char.animationsArray,

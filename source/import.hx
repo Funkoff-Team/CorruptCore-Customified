@@ -24,8 +24,6 @@ import flixel.addons.transition.FlxTransitionableState;
 
 import lime.app.Application;
 
-import game.shaders.flixel.FlxShader;
-
 // Android things (will be neccesary in the future)
 #if android
 import android.content.Context as AndroidContext;
@@ -41,6 +39,9 @@ import android.os.BatteryManager as AndroidBatteryManager;
 
 import psych.ui.*;
 
+import game.backend.ClientPrefs;
+import game.backend.utils.CoolUtil;
+
 #if flixel_animate
 import animate.*;
 import animate.FlxAnimate;
@@ -51,38 +52,10 @@ import animate.FlxAnimate;
 import haxe.ui.backend.flixel.UIState;
 #end
 
-import game.*;
-import game.backend.*;
-import game.backend.utils.*;
-import game.states.*;
-import game.states.options.*;
-import game.substates.*;
-import game.substates.options.*;
-import game.stages.*;
-
-import game.objects.Alphabet;
-import game.objects.AttachedSprite;
-import game.objects.CustomFadeTransition;
-import game.objects.BGSprite;
-
-import game.stages.backend.BaseStage;
-
-import game.states.backend.MusicBeatState;
-import game.substates.backend.MusicBeatSubstate;
-
-import flixel.animation.PsychAnimationController;
-
 // Windows API
 #if (cpp && windows)
 import winapi.*;
 #end
-
-// that too
-#if mobile
-import game.backend.mobile.*;
-#end
-
-import game.shaders.*;
 
 #if sys
 import sys.*;
