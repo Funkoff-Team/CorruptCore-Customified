@@ -58,7 +58,7 @@ class MathUtil
 	 * @param n
 	 * @return Int the common divisor between m and n
 	 */
-	public static function gcd(m:Int, n:Int):Int
+	inline public static function gcd(m:Int, n:Int):Int
 	{
 		m = Math.floor(Math.abs(m));
 		n = Math.floor(Math.abs(n));
@@ -70,5 +70,28 @@ class MathUtil
 			n = t % m;
 		}
 		while (true);
+	}
+
+	/**
+	 * Moves a value towards a target at a fixed rate.
+	 *
+	 * @param value   The current value.
+	 * @param target  The value we want to reach.
+	 * @param amount  The maximum step size to move this update.
+	 * @return        The new value, moved closer to the target by up to `amount`.
+	 *
+	 * Example:
+	 *   var x = 0;
+	 *   x = approach(x, 10, 2); // x = 2
+	 *   x = approach(x, 10, 2); // x = 4
+	 *   ...
+	 *   x = 10 (stops exactly at the target)
+	 */
+	inline public static function approach(value:Float, target:Float, amount:Float):Float
+	{
+		if (value < target)
+			return Math.min(value + amount, target);
+		else
+			return Math.max(value - amount, target);
 	}
 }

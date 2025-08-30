@@ -219,6 +219,7 @@ class PlayState extends MusicBeatState
 
 	public var gfSpeed:Int = 1;
 	public var health:Float = 1;
+	public var displayHealth:Float = 1;
 	public var combo:Int = 0;
 
 	private var healthBarBG:AttachedSprite;
@@ -675,8 +676,6 @@ class PlayState extends MusicBeatState
 		timeBarBG.sprTracker = timeBar;
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
-		add(strumLineNotes);
-		add(grpNoteSplashes);
 
 		if(ClientPrefs.timeBarType == 'Song Name')
 		{
@@ -732,8 +731,9 @@ class PlayState extends MusicBeatState
 		add(healthBarBG);
 		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * FlxG.height;
 
-		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
-			'health', 0, 2);
+		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT,
+			Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8),
+			this, 'displayHealth', 0, 2);
 		healthBar.scrollFactor.set();
 		// healthBar
 		healthBar.visible = !ClientPrefs.hideHud;
@@ -760,6 +760,12 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.hideHud;
 		add(scoreTxt);
+
+		//for better notes visibility
+		add(strumLineNotes);
+		add(notes);
+		add(grpNoteSplashes);
+		add(grpHoldCovers);
 
 		botplayTxt = new FlxText(400, timeBarBG.y + 55, FlxG.width - 800, "BOTPLAY", 32);
 		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -1721,9 +1727,6 @@ class PlayState extends MusicBeatState
 		FlxG.sound.list.add(inst);
 
 		notes = new FlxTypedGroup<Note>();
-		add(notes);
-
-		add(grpHoldCovers);
 
 		var noteData:Array<SwagSection>;
 
@@ -2142,6 +2145,9 @@ class PlayState extends MusicBeatState
 
 		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
 		// FlxG.watch.addQuick('VOLRight', vocals.amplitudeRight);
+
+		//for health bar smoothing
+		displayHealth = FlxMath.lerp(displayHealth, health, 0.15);
 
 		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, MathUtil.boundTo(1 - (elapsed * 9 * playbackRate), 0, 1));
 		iconP1.scale.set(mult, mult);
@@ -3789,7 +3795,8 @@ class PlayState extends MusicBeatState
 			endNote = note.isSustainNote ? note.parent.tail[note.parent.tail.length - 1] : note.tail[note.tail.length - 1];
 		}
 		
-		if (!StringTools.endsWith(endNote.animation.curAnim.name, 'end')) return;
+		//to prevent crash when its null
+		if (endNote == null || endNote.animation.curAnim == null || !StringTools.endsWith(endNote.animation.curAnim.name, 'end')) return;
 		
 		if (endNote != null) {
 			endNote.extraData ??= new Map<String, Dynamic>();
@@ -3806,7 +3813,8 @@ class PlayState extends MusicBeatState
 		var skin:String = 'holdCovers';
 		if(PlayState.SONG.holdCoverSkin != null && PlayState.SONG.holdCoverSkin.length > 0) skin = PlayState.SONG.holdCoverSkin;
 		
-		if (!StringTools.endsWith(note.animation.curAnim.name, 'end')) return;
+		//same as above
+		if (note == null || note.animation.curAnim == null || !StringTools.endsWith(note.animation.curAnim.name, 'end')) return;
 		
 		var parentNote = note.parent;
 		var noteData = parentNote != null ? parentNote.noteData : note.noteData;
