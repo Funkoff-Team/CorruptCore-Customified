@@ -21,7 +21,7 @@ haxelib git hxcpp https://github.com/FunkinCrew/hxcpp
 haxelib git rulescript https://github.com/Kriptel/RuleScript.git dev
 haxelib git hscript https://github.com/HaxeFoundation/hscript.git
 haxelib git sl-windows-api https://github.com/GreenColdTea/windows-api-improved.git
-haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git 8c65d5b797359b0b9c77bdf57823fa0484ca9379
+haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git 7e8c368b8482a9eee7ef207260e96c8dae61983c
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
 haxelib list
 echo.
