@@ -1896,7 +1896,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if (FlxG.keys.justPressed.ESCAPE #if mobile || _virtualpad.buttonB.justPressed #end) {
 			autosaveSong();
 			FlxG.sound.music.pause();
-			vocals.pause();
+			vocals?.pause();
+			opponentVocals?.pause();
 			FlxG.switchState(() -> new game.states.editors.EditorPlayState(sectionStartTime()));
 		}
 		
@@ -1906,8 +1907,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			FlxG.mouse.visible = false;
 			PlayState.SONG = _song;
 			FlxG.sound.music.stop();
-			if(vocals != null) vocals.stop();
-			if(opponentVocals != null) opponentVocals.pause();
+			vocals?.stop();
+			opponentVocals?.pause();
 
 			StageData.loadDirectory(_song);
 			LoadingState.loadAndSwitchState(new PlayState());
@@ -2185,7 +2186,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			{
 				var fuck:Float = MathUtil.quantize(beat, snap) - increase;
 				FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
-			}else{
+			} else {
 				var fuck:Float = MathUtil.quantize(beat, snap) + increase;
 				FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
 			}
