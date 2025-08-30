@@ -173,10 +173,7 @@ class Limo extends BaseStage
 	override function beatHit()
 	{
 		if(!ClientPrefs.lowQuality) {
-			grpLimoDancers.forEach(function(dancer:BackgroundDancer)
-			{
-				dancer.dance();
-			});
+			grpLimoDancers.forEach((dancer:BackgroundDancer) -> dancer.dance());
 		}
 
 		if (FlxG.random.bool(10) && fastCarCanDrive)
@@ -245,7 +242,7 @@ class Limo extends BaseStage
 
 		fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;
-		carTimer = new FlxTimer().start(2, function(tmr:FlxTimer)
+		carTimer = new FlxTimer().start(2, (_) ->
 		{
 			resetFastCar();
 			carTimer = null;
@@ -262,11 +259,6 @@ class Limo extends BaseStage
 				limoCorpse.visible = false;
 				limoCorpseTwo.visible = false;
 				limoKillingState = KILLING;
-
-				#if ACHIEVEMENTS_ALLOWED
-				var kills = Achievements.addScore("roadkill_enthusiast");
-				FlxG.log.add('Henchmen kills: $kills');
-				#end
 			}
 		}
 	}

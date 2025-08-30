@@ -219,7 +219,7 @@ class Paths
 
 	inline static function getLibraryPathForce(file:String, library:String, ?level:String)
 	{
-		if(level == null) level = library;
+		level ??= library;
 		var returnPath = '$library:assets/$level/$file';
 		return returnPath;
 	}
@@ -743,7 +743,7 @@ class Paths
 	#end
 
 	inline static public function modsSounds(path:String, key:String, ?ext:String = null) {
-		if(ext == null) ext = SOUND_EXT;
+		ext ??= SOUND_EXT;
 		return modFolders(path + '/' + key + '.' + ext);
 	}
 
