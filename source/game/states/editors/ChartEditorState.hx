@@ -498,6 +498,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	}
 
 	var sliderBg:FlxSprite;
+	var pressF1Text:FlxText;
 	var positionSlider:PsychUISlider;
 	var timeText:FlxText;
 	inline function createSongSlider() {
@@ -506,6 +507,12 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		sliderBg.scrollFactor.set();
 		sliderBg.cameras = [camUI];
 		add(sliderBg);
+
+		pressF1Text = new FlxText(sliderBg.x, sliderBg.y + 45, 0, "Press F1 to open tips", 8);
+		pressF1Text.setFormat(Paths.font("pixel-latin.ttf"), 8, FlxColor.WHITE, LEFT);
+		pressF1Text.scrollFactor.set();
+		pressF1Text.cameras = [camUI];
+		add(pressF1Text);
 
 		timeText = new FlxText(10, FlxG.height - 30, FlxG.width - 20, "00:00:00 / 00:00:00", 16);
 		timeText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER);
@@ -1831,6 +1838,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			handleKeyboardInput();
 			handleMouseInput(mouseOverUI);
 		}
+
+		strumLineNotes.visible = quant.visible = vortex;
 		
 		updateNoteSelectionAndColors(elapsed);
 		updateWaveformIfNeeded();
@@ -1892,9 +1901,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 	function handleKeyboardInput():Void
 	{
-		// Exit from editor
+		// playstate but in editor
 		if (FlxG.keys.justPressed.ESCAPE #if mobile || _virtualpad.buttonB.justPressed #end) {
-			autosaveSong();
 			FlxG.sound.music.pause();
 			vocals?.pause();
 			opponentVocals?.pause();
@@ -1903,7 +1911,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		
 		// Song play button
 		if (FlxG.keys.justPressed.ENTER #if mobile || _virtualpad.buttonA.justPressed #end) {
-			autosaveSong();
 			FlxG.mouse.visible = false;
 			PlayState.SONG = _song;
 			FlxG.sound.music.stop();
@@ -1949,7 +1956,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		var shiftThing:Int = FlxG.keys.pressed.SHIFT #if mobile || _virtualpad.buttonY.pressed #end ? 4 : 1;
 		if (FlxG.keys.justPressed.D #if mobile || _virtualpad.buttonRight.justPressed #end) changeSection(curSec + shiftThing);
 		if (FlxG.keys.justPressed.A #if mobile || _virtualpad.buttonLeft.justPressed #end)
-			if(curSec <= 0) changeSection((curSec <= 0) ? _song.notes.length-1 : curSec - shiftThing);
+			changeSection((curSec <= 0) ? _song.notes.length-1 : curSec - shiftThing);
 		
 		// Cursor control thingie
 		if (FlxG.keys.pressed.W || FlxG.keys.pressed.S #if mobile || _virtualpad.buttonUp.pressed || _virtualpad.buttonDown.pressed #end)
@@ -2376,8 +2383,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 	function updateCharacterAnimations(elapsed:Float):Void
 	{
-		opponent.holdTimer += elapsed;
-		player.holdTimer += elapsed;
+		/*opponent.holdTimer += elapsed;
+		player.holdTimer += elapsed;*/
 		
 		/*TODO: Needs to make the tab like in pe 1.0 where you can change the ui colors first
 		colorSine += elapsed;
@@ -2392,14 +2399,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		} else {
 			quant.alpha = 1;
 		}*/
-		
-		// every 30 seconds
-		backupInterval += elapsed;
-		if (backupInterval >= 30) {
-			backupInterval = 0;
-			autosaveSong();
-			FlxG.log.notice("Chart backup has been created lel");
-		}
 	}
 
 	function handlePlaybackSeeking():Void
@@ -2507,8 +2506,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				}
 			}
 		}
-
-		strumLineNotes.visible = quant.visible = vortex;
 	}
 
 	function showTips():Void
@@ -3187,13 +3184,13 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	var daEventText:AttachedFlxText;
 	function updateGrid():Void
 	{
-		curRenderedNotes.clear();
-		curRenderedSustains.clear();
-		curRenderedNoteType.clear();
-		nextRenderedNotes.clear();
-		nextRenderedSustains.clear();
-		prevRenderedNotes.clear();
-		prevRenderedSustains.clear();
+		curRenderedNotes?.clear();
+		curRenderedSustains?.clear();
+		curRenderedNoteType?.clear();
+		nextRenderedNotes?.clear();
+		nextRenderedSustains?.clear();
+		prevRenderedNotes?.clear();
+		prevRenderedSustains?.clear();
 	
 		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0) {
 			Conductor.changeBPM(_song.notes[curSec].bpm);
@@ -3921,14 +3918,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			return;
 		}
 		FlxG.resetState();
-	}
-
-	function autosaveSong():Void
-	{
-		chartEditorSave.data.autosave = Json.stringify({
-			"song": _song
-		});
-		chartEditorSave.flush();
 	}
 
 	function clearEvents() {
