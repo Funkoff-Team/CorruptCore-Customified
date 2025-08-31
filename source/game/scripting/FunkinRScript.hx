@@ -44,7 +44,7 @@ class FunkinRScript {
         "FunkinLua" => FunkinLua,
     ];
 
-    public var scriptType:String = "Rule/HScript";
+    public var scriptType:String = "N/A"; //yeah
     public var scriptName:String;
     public var active(default, null):Bool = true;
     
@@ -89,9 +89,6 @@ class FunkinRScript {
             
         if (parentInstance != null)
             set("parent", parentInstance);
-            
-        set("import", importPackage);
-        set("importClass", importClass);
 
         if (FlxG.state is PlayState)
             set("game", PlayState.instance);
@@ -196,38 +193,6 @@ class FunkinRScript {
         return [];
     }
 
-
-    public function importPackage(packageName:String):Bool {
-        if (importedPackages.exists(packageName)) return true;
-        
-        try {
-            importedPackages.set(packageName, true);
-            return true;
-        } catch (e:Dynamic) {
-            trace('Failed to import package: $packageName - ${e.message}');
-            return false;
-        }
-    }
-
-    public function importClass(className:String):Bool {
-        try {
-            var cl = Type.resolveClass(className);
-            if (cl == null) {
-                trace('Class not found: $className');
-                return false;
-            }
-            
-            var parts = className.split(".");
-            var simpleName = parts[parts.length - 1];
-            
-            set(simpleName, cl);
-            return true;
-        } catch (e:Dynamic) {
-            trace('Failed to import class: $className - ${e.message}');
-            return false;
-        }
-    }
-
     public function resolveType(typeName:String):Dynamic {
         var cl = Type.resolveClass(typeName);
         if (cl != null) return cl;
@@ -247,7 +212,7 @@ class FunkinRScript {
             for (cb in callbacks.get(event)) {
                 try {
                     Reflect.callMethod(null, cb, args != null ? args : []);
-                } catch (e) {
+                } catch (e:Dynamic) {
                     /*@:privateAccess
                     onError(haxe.Exception.caught(e));*/
                 }
@@ -258,7 +223,7 @@ class FunkinRScript {
         
         try {
             return Reflect.callMethod(null, get(event), args != null ? args : []);
-        } catch (e) {
+        } catch (e:Dynamic) {
             /*@:privateAccess
             onError(haxe.Exception.caught(e));*/
             return null;

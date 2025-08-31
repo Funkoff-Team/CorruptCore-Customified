@@ -230,22 +230,38 @@ class Paths
 	}
 
 	#if SCRIPTABLE_STATES
-	public static function getStateScripts(state:String = ""):Array<String> {
-		var folders:Array<String> = [];
-		
-		folders.push(Paths.getPreloadPath('scripts/states/'));
-		
+	static public function getStateScripts(statePath:String):Array<String> {
+		var foldersToCheck:Array<String> = [
+			Paths.getPreloadPath('scripts/states/$statePath/'),
+			#if MODS_ALLOWED 
+			Paths.mods('scripts/states/$statePath/'),
+			#end
+		];
+
 		#if MODS_ALLOWED
-		for (mod in Paths.getGlobalMods())
-			folders.push(Paths.mods('$mod/scripts/states/'));
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) {
+			foldersToCheck.unshift(Paths.mods('${Paths.currentModDirectory}/scripts/states/$statePath/'));
+		}
 		
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			folders.push(Paths.mods('${Paths.currentModDirectory}/scripts/states/'));
+		for (mod in Paths.getGlobalMods()) {
+			foldersToCheck.unshift(Paths.mods('$mod/scripts/states/$statePath/'));
+		}
 		#end
-		
-		return folders;
+
+		foldersToCheck.push(Paths.getPreloadPath('scripts/states/$statePath.hx'));
+		#if MODS_ALLOWED
+		foldersToCheck.push(Paths.mods('scripts/states/$statePath.hx'));
+		foldersToCheck.push(Paths.mods('${Paths.currentModDirectory}/scripts/states/$statePath.hx'));
+		for (mod in Paths.getGlobalMods()) {
+			foldersToCheck.push(Paths.mods('$mod/scripts/states/$statePath.hx'));
+		}
+		#end
+
+		return foldersToCheck;
 	}
 
+
+	//same as above but for substates
 	static public function getSubstateScripts(statePath:String):Array<String> {
 		var foldersToCheck:Array<String> = [
 			Paths.getPreloadPath('scripts/substates/$statePath/'),

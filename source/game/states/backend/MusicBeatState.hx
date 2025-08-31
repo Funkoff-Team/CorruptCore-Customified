@@ -54,9 +54,41 @@ class MusicBeatState extends FlxState
 
 	private var menuScriptPath:String;
 
+	/**
+	 * Function, that returns is this state softcoded or not
+	 * Kinda like in NVE but with Global Scripts
+	 */
+	public function isSoftcodedState():Bool
+	{
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES && GLOBAL_SCRIPTS)
+		if (HScriptGlobal.globalScriptActive && HScriptGlobal.globalScript != null)
+		{
+			var result = HScriptGlobal.callGlobalScript("isStateSoftcoded", [Type.getClassName(Type.getClass(this))]);
+			if (result != null && Std.isOfType(result, Bool))
+				return result;
+		}
+		#end
+		
+		return false;
+	}
+
 	// (WStaticInitOrder) Warning : maybe loop in static generation of MusicBeatState
 	private static function initExcludeStates():Array<Dynamic> {
-		return [game.states.LoadingState, game.PlayState, game.scripting.HScriptState, MusicBeatState];
+		return [
+			game.states.LoadingState, 
+			game.PlayState, 
+			game.scripting.HScriptState, 
+			MusicBeatState,
+			game.states.editors.CharacterEditorState,
+			game.states.editors.ChartEditorState,
+			game.states.editors.DialogueCharacterEditorState,
+			game.states.editors.DialogueEditorState,
+			game.states.editors.EditorPlayState,
+			game.states.editors.MasterEditorMenu,
+			game.states.editors.MenuCharacterEditorState,
+			game.states.editors.WeekEditorState,
+			game.states.CrashHandlerState
+		];
 	}
 
 	public function new() {
@@ -72,11 +104,11 @@ class MusicBeatState extends FlxState
 		var colorBlindType = ClientPrefs.colorBlindMode;
 		var intensity = ClientPrefs.colorBlindIntensity;
 		var index = ['None', 'Deutranopia', 'Protanopia', 'Tritanopia', 'Protanomaly', 'Deuteranomaly', 'Tritanomaly', 'Rod monochromacy', 'Cone monochromacy'].indexOf(colorBlindType);
-		if (index == -1) index = -1;
+		if (index <= -1) index = -1;
 		Main.updateColorblindFilter(index - 1, intensity);
 
 		if(!FlxTransitionableState.skipNextTransOut) {
-			openSubState(new CustomFadeTransition(0.7, true));
+			openSubState(new CustomFadeTransition(0.6, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
@@ -87,44 +119,54 @@ class MusicBeatState extends FlxState
 			final statePath = Type.getClassName(Type.getClass(this)).split(".");
 			final stateString = statePath[statePath.length - 1];
 
-			var menuScriptPaths = Paths.getStateScripts(stateString);
-			for (path in menuScriptPaths) {
-				#if sys
-				if (FileSystem.exists(path)) {
-					menuScriptPath = path;
-					break;
-				}
-				#else
-				if (OpenFlAssets.exists(path)) {
-					menuScriptPath = path;
-					break;
-				}
-				#end
-			}
-
 			var scriptFiles:Array<String> = [];
 			var folders:Array<String> = Paths.getStateScripts(stateString);
-			for (folder in folders) {
+			
+			for (path in folders)
+			{
 				#if sys
-				if (FileSystem.exists(folder) && FileSystem.isDirectory(folder)) {
-					for (file in FileSystem.readDirectory(folder)) {
-						if (file.endsWith('.hx')) {
-							var fullPath = haxe.io.Path.join([folder, file]);
-							scriptFiles.push(fullPath);
+				if (FileSystem.exists(path))
+				{
+					if (FileSystem.isDirectory(path))
+					{
+						for (file in FileSystem.readDirectory(path))
+						{
+							if (file.endsWith('.hx'))
+							{
+								var fullPath = haxe.io.Path.join([path, file]);
+								scriptFiles.push(fullPath);
+							}
+						}
+					}
+					else if (path.endsWith('.hx'))
+					{
+						scriptFiles.push(path);
+					}
+				}
+				#else
+				if (OpenFlAssets.exists(path))
+				{
+					if (path.endsWith('.hx'))
+					{
+						scriptFiles.push(path);
+					}
+					else
+					{
+						var prefix = path;
+						for (file in OpenFlAssets.list(AssetType.TEXT))
+						{
+							if (file.startsWith(prefix) && file.endsWith('.hx'))
+							{
+								scriptFiles.push(file);
+							}
 						}
 					}
 				}
-				#else
-				var prefix = folder.replace("_append", "");
-				for (file in OpenFlAssets.list(AssetType.TEXT)) {
-					if (file.startsWith(prefix) && file.endsWith('.hx')) {
-						scriptFiles.push(file);
-					}
-				}
 				#end
 			}
 
-			for (path in scriptFiles) {
+			for (path in scriptFiles)
+			{
 				menuScriptArray.push(new FunkinHScript(path, this));
 				if (path.contains('contents/'))
 					trace('Loaded mod state script: $path');

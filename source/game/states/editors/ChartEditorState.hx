@@ -156,7 +156,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	public static var lastSection:Int = 0;
 	private static var lastSong:String = '';
 
-	var camPos:FlxObject;
+	var followPoint:FlxPoint;
 	var strumLine:FlxSprite;
 	var quant:AttachedSprite;
 	var strumLineNotes:FlxTypedGroup<StrumNote>;
@@ -402,8 +402,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		}
 		add(strumLineNotes);
 
-		camPos = new FlxObject(0, 0, 1, 1);
-		camPos.setPosition(strumLine.x + CAM_OFFSET, strumLine.y);
+		followPoint = new FlxPoint(strumLine.x + CAM_OFFSET, strumLine.y);
+		FlxG.camera.follow(strumLine, LOCKON, 999);
 
 		dummyArrow = new FlxSprite().makeGraphic(GRID_SIZE, GRID_SIZE);
 		dummyArrow.screenCenter(X);
@@ -447,6 +447,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		addChartingUI();
 		updateHeads();
 		updateWaveform();
+
+		FlxG.camera.follow(strumLine, LOCKON, 999);
 
 		add(curRenderedSustains);
 		add(curRenderedNotes);
@@ -842,7 +844,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		tab_group_song.add(player1DropDown);
 		tab_group_song.add(stageDropDown);
 
-		FlxG.camera.follow(camPos, LOCKON, 999);
+		//FlxG.camera.follow(camPos, LOCKON, 999);
 	}
 
 	var stepperBeats:PsychUINumericStepper;
@@ -1828,8 +1830,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		final mouseOverUI = isMouseOverUI();
 		
 		updateMusicPlayback();
-	
-		updateStrumLineNotes(elapsed);
 
 		updateSongSlider();
 		
@@ -1886,7 +1886,10 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 	function updateStrumLineNotes(elapsed:Float):Void
 	{
-		camPos.y = strumLine.y;
+		followPoint.set(strumLine.x + CAM_OFFSET, strumLine.y);
+		FlxG.camera.scroll.x = followPoint.x - FlxG.width / 2;
+		FlxG.camera.scroll.y = followPoint.y - FlxG.height / 2;
+
 		strumLineUpdateY();
 		
 		for (i in 0...8) {
@@ -2630,14 +2633,19 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		prevGridBG.y = gridBG.y - prevGridBG.height;
 
 		var leHeight2:Int = Std.int(gridBG.height);
+		nextGridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * getSectionBeats(curSec + 1) * 4 * zoomList[curZoom]));
+		nextGridBG.screenCenter(X);
 		if(sectionStartTime(1) <= FlxG.sound.music.length)
 		{
-			nextGridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * getSectionBeats(curSec + 1) * 4 * zoomList[curZoom]));
-			nextGridBG.screenCenter(X);
 			leHeight2 = Std.int(gridBG.height + nextGridBG.height);
 			foundNextSec = true;
+			nextGridBG.visible = true;
 		}
-		else nextGridBG = new FlxSprite().makeGraphic(1, 1, FlxColor.TRANSPARENT);
+		else
+		{
+			nextGridBG.visible = false;
+			leHeight2 = Std.int(gridBG.height);
+		}
 		nextGridBG.y = gridBG.height;
 
 		gridLayer.add(prevGridBG);
@@ -2659,7 +2667,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		}
 
 		var topY = prevGridBG.y;
-        var totalHeight = nextGridBG.y + nextGridBG.height - topY;
+		var totalHeight = (foundNextSec ? nextGridBG.y + nextGridBG.height : gridBG.y + gridBG.height) - topY;
 
 		var gridBlackLineLeft = new FlxSprite(gridBG.x + GRID_SIZE).makeGraphic(2, Std.int(totalHeight), FlxColor.BLACK);
         gridBlackLineLeft.y = topY;
