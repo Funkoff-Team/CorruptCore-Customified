@@ -103,13 +103,13 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 		super.create();
 	}
 
-	var UI_box:PsychUIBox;
+	var mainBox:PsychUIBox;
 	function addEditorBox()
 	{
-		UI_box = new PsychUIBox(FlxG.width - 260, 10, 250, 210, ['Dialogue Line']);
-		UI_box.scrollFactor.set();
+		mainBox = new PsychUIBox(FlxG.width - 260, 10, 250, 210, ['Dialogue Line']);
+		mainBox.scrollFactor.set();
 		addDialogueLineUI();
-		add(UI_box);
+		add(mainBox);
 	}
 
 	var characterInputText:PsychUIInputText;
@@ -118,7 +118,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 	var speedStepper:PsychUINumericStepper;
 	var soundInputText:PsychUIInputText;
 	function addDialogueLineUI() {
-		var tab_group = UI_box.getTab('Dialogue Line').menu;
+		var tab_group = mainBox.getTab('Dialogue Line').menu;
 
 		characterInputText = new PsychUIInputText(10, 20, 80, DialogueCharacter.DEFAULT_CHARACTER, 8);
 		blockPressWhileTypingOn.push(characterInputText);
@@ -270,16 +270,14 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 			{
 				dialogueFile.dialogue[curSelected].text = lineInputText.text;
 
-				daText.text = lineInputText.text;
-				if(daText.text == null) daText.text = '';
+				daText.text = lineInputText.text ?? '';
 				reloadText(true);
 			}
 			else if(sender == soundInputText)
 			{
 				daText.finishText();
 				dialogueFile.dialogue[curSelected].sound = soundInputText.text;
-				daText.sound = soundInputText.text;
-				if(daText.sound == null) daText.sound = '';
+				daText.sound = soundInputText.text ?? '';
 			}
 		} else if(id == PsychUINumericStepper.CHANGE_EVENT && (sender == speedStepper)) {
 			dialogueFile.dialogue[curSelected].speed = speedStepper.value;

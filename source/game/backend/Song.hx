@@ -27,6 +27,7 @@ typedef SwagSong =
 
     var arrowSkin:String;
     var splashSkin:String;
+	var holdCoverSkin:String;
 	var stage:String;
     var validScore:Bool;
 
@@ -53,6 +54,7 @@ class Song
 	public var needsVoices:Bool = true;
 	public var arrowSkin:String;
 	public var splashSkin:String;
+	public var holdCoverSkin:String;
 	public var speed:Float = 1;
 	public var stage:String;
 	public var validScore:Bool = false;
@@ -97,7 +99,7 @@ class Song
 			}
 		}
 
-        // thank to heavens that shadowmario added format variable to the new charts
+        // thanks to heaven that shadowmario added format variable to the new charts
 		if (songJson.format != null)
 		{
 			var sectionsData:Array<SwagSection> = songJson.notes;

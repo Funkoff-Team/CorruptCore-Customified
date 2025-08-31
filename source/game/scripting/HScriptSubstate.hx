@@ -1,24 +1,49 @@
 package game.scripting;
 
-using StringTools;
-//Same as HScriptState, but for substates
 class HScriptSubstate extends MusicBeatSubstate
 {
-	public static var instance:HScriptSubstate;
-	public var data:Dynamic = null;
+	public static var substate:String = "";
 	
-	public function new(stateName:String, ?_data:Dynamic) {
-		if(_data != null) this.data = _data;
-
-		super();
-		instance = this;
-		this.useCustomStateName = true;
-		this.className = stateName;
-	}
-	
-	override function destroy()
+	public function new(_substate:String)
 	{
-		instance = null;
-		super.destroy();
+		super();
+		substate = _substate;
+		
+		// Clear existing scripts and load new ones for the specific substate
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
+		for (sc in menuScriptArray) sc.stop();
+		menuScriptArray = [];
+		
+		var scriptFiles:Array<String> = [];
+		var folders:Array<String> = Paths.getSubstateScripts(substate);
+		
+		for (folder in folders) {
+			#if sys
+			if (FileSystem.exists(folder) && FileSystem.isDirectory(folder)) {
+				for (file in FileSystem.readDirectory(folder)) {
+					if (file.endsWith('.hx')) {
+						var fullPath = haxe.io.Path.join([folder, file]);
+						scriptFiles.push(fullPath);
+					}
+				}
+			}
+			#else
+			var prefix = folder.replace("_append", "");
+			for (asset in OpenFlAssets.list(TEXT)) {
+				if (asset.startsWith(prefix) && asset.endsWith('.hx')) {
+					scriptFiles.push(asset);
+				}
+			}
+			#end
+		}
+
+		for (path in scriptFiles) {
+			menuScriptArray.push(new FunkinHScript(path, this));
+			if (path.contains('contents/'))
+				trace('Loaded mod substate script: $path');
+			else
+				trace('Loaded base game substate script: $path');
+		}
+		#end
 	}
 }

@@ -100,7 +100,7 @@ class DiscordClient
 		presence.endTimestamp = Std.int(endTimestamp / 1000);
 		updatePresence();
 
-		#if GLOBAL_SCRIPTS hscript.ScriptGlobal.callGlobalScript("onChangePresence", [presence]); #end
+		#if GLOBAL_SCRIPTS game.scripting.HScriptGlobal.callGlobalScript("onChangePresence", [presence]); #end
 
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}

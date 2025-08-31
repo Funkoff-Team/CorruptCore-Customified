@@ -4,6 +4,9 @@ package game.objects;
 // and stops camera from snapping at higher framerates
 // author - ShadowMario
 
+import openfl.filters.BitmapFilter;
+import openfl.filters.ShaderFilter;
+
 class FNFCamera extends FlxCamera
 {
 	override public function update(elapsed:Float):Void
@@ -112,5 +115,11 @@ class FNFCamera extends FlxCamera
 	#else
 	override function set_followLerp(value:Float)
 		return followLerp = value;
+	#end
+
+	#if (flixel <= "5.6.2")
+	public function setFilters(newShaders:Array<ShaderFilter>) {
+		this.filters = cast newShaders;
+	}
 	#end
 }

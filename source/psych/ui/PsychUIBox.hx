@@ -81,7 +81,7 @@ class PsychUIBox extends FlxSpriteGroup
 		_lastClick += elapsed;
 		if(!FlxG.mouse.released && _draggingBox && canMove)
 		{
-			var newPoint:FlxPoint = FlxG.mouse.getPositionInCameraView(camera);
+			var newPoint:FlxPoint = #if (flixel < "5.9.0") FlxG.mouse.getPositionInCameraView(camera) #else FlxG.mouse.getViewPosition(camera) #end;
 			setPosition(_draggingPos.x - (_draggingPoint.x - newPoint.x), _draggingPos.y - (_draggingPoint.y - newPoint.y));
 		}
 		else
@@ -119,10 +119,10 @@ class PsychUIBox extends FlxSpriteGroup
 					if(FlxG.mouse.justPressed)
 						_pressedBox = true;
 
-					if(!_draggingBox && canMove && _pressedBox && FlxG.mouse.pressed && (Math.abs(FlxG.mouse.deltaScreenX) > 1 || Math.abs(FlxG.mouse.deltaScreenY) > 1))
+					if(!_draggingBox && canMove && _pressedBox && FlxG.mouse.pressed && (#if (flixel < "5.9.0") Math.abs(FlxG.mouse.deltaScreenX) > 1 || Math.abs(FlxG.mouse.deltaScreenY) > 1 #else Math.abs(FlxG.mouse.deltaViewX) > 1 || Math.abs(FlxG.mouse.deltaViewY) > 1 #end))
 					{
 						_draggingPos = FlxPoint.weak(x, y);
-						_draggingPoint = FlxG.mouse.getPositionInCameraView(camera);
+						_draggingPoint = #if (flixel < "5.9.0") FlxG.mouse.getPositionInCameraView(camera) #else FlxG.mouse.getViewPosition(camera) #end;
 						_draggingBox = true;
 						if(broadcastBoxEvents) PsychUIEventHandler.event(DRAG_EVENT, this);
 					}
@@ -200,7 +200,7 @@ class PsychUIBox extends FlxSpriteGroup
 		super.destroy();
 	}
 
-	public function addTab(name:String)
+	inline public function addTab(name:String)
 	{
 		var createdTab:PsychUITab = new PsychUITab(name);
 		tabs.push(createdTab);
@@ -212,7 +212,7 @@ class PsychUIBox extends FlxSpriteGroup
 	}
 
 	public var tabHeight:Int = 20;
-	public function updateTabs()
+	inline public function updateTabs()
 	{
 		var wid:Int = Std.int(bg.width / tabs.length);
 		for (num => tab in tabs)
@@ -224,7 +224,7 @@ class PsychUIBox extends FlxSpriteGroup
 	}
 
 	var _originalHeight:Int = 0;
-	public function resize(width:Int, height:Int)
+	inline public function resize(width:Int, height:Int)
 	{
 		_originalHeight = height;
 		bg.setGraphicSize(width, height);

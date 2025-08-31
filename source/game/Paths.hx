@@ -35,6 +35,8 @@ class Paths
 {
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
+	inline public static var WAV_EXT = "wav";
+
 
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
@@ -217,7 +219,7 @@ class Paths
 
 	inline static function getLibraryPathForce(file:String, library:String, ?level:String)
 	{
-		if(level == null) level = library;
+		level ??= library;
 		var returnPath = '$library:assets/$level/$file';
 		return returnPath;
 	}
@@ -258,7 +260,9 @@ class Paths
 		return foldersToCheck;
 	}
 
-	static public function getSubStateScripts(statePath:String):Array<String> {
+
+	//same as above but for substates
+	static public function getSubstateScripts(statePath:String):Array<String> {
 		var foldersToCheck:Array<String> = [
 			Paths.getPreloadPath('scripts/substates/$statePath/'),
 			#if MODS_ALLOWED 
@@ -386,7 +390,59 @@ class Paths
 		return 'assets/$key';
 	}
 	#end
-	
+
+	public static function listDirectory(path:String):Array<String>
+	{
+		var result:Array<String> = [];
+		
+		#if MODS_ALLOWED
+		var modsList:Array<String> = [currentModDirectory];
+		modsList = modsList.concat(getGlobalMods());
+		
+		for (mod in modsList)
+		{
+			if (mod == null || mod.length == 0) continue;
+			
+			var modPath = mods('$mod/$path');
+			if (FileSystem.exists(modPath) && FileSystem.isDirectory(modPath))
+			{
+				for (file in FileSystem.readDirectory(modPath))
+				{
+					var fullPath = haxe.io.Path.join([modPath, file]);
+					if (!FileSystem.isDirectory(fullPath))
+						result.push(fullPath);
+				}
+			}
+		}
+		#end
+
+		var assetsPath = getPreloadPath(path);
+		if (OpenFlAssets.exists(assetsPath))
+		{
+			// some shits for web targets(for the future mb)
+			#if web
+			var prefix = assetsPath + "/";
+			for (asset in OpenFlAssets.list(ALL))
+			{
+				if (asset.startsWith(prefix) && asset != prefix)
+					result.push(asset);
+			}
+			#else
+			if (FileSystem.exists(assetsPath) && FileSystem.isDirectory(assetsPath))
+			{
+				for (file in FileSystem.readDirectory(assetsPath))
+				{
+					var fullPath = haxe.io.Path.join([assetsPath, file]);
+					if (!FileSystem.isDirectory(fullPath))
+						result.push(fullPath);
+				}
+			}
+			#end
+		}
+
+		return result;
+	}
+		
 	// completely rewritten asset loading? fuck!
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	static public function image(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxGraphic
@@ -466,15 +522,26 @@ class Paths
 		return 'assets/fonts/$key';
 	}
 
-	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
+	public static function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String = null)
 	{
 		#if MODS_ALLOWED
-		if(FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key))) {
-			return true;
-		}
-		#end
+		if(!ignoreMods)
+		{
+			for(mod in Paths.getGlobalMods())
+				if (FileSystem.exists(mods('$mod/$key')))
+					return true;
 
-		if(OpenFlAssets.exists(getPath(key, type))) {
+			if (FileSystem.exists(mods(Paths.currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
+				return true;
+			
+			if (FileSystem.exists(mods('$key')))
+				return true;
+		}
+		
+		if(FileSystem.exists(getPath(key, type, library, false))) {
+		#else
+		if(OpenFlAssets.exists(getPath(key, type, library, false))) {
+		#end
 			return true;
 		}
 		return false;
@@ -577,6 +644,18 @@ class Paths
 		return hideChars.split(path).join("").toLowerCase();
 	}
 
+	public static function getAbsolutePath(assetPath:String):String {
+		#if sys
+		var cleanPath = assetPath;
+		if (cleanPath.indexOf("assets/") == 0) {
+			cleanPath = cleanPath.substring(7);
+		}
+		return Sys.getCwd() + "assets/" + cleanPath;
+		#else
+		return assetPath;
+		#end
+	}
+
 	public static var currentTrackedSounds:Map<String, Sound> = [];
 	public static function returnSound(path:Null<String>, key:String, ?library:String, ?beepOnNull:Bool = true) {
 		#if MODS_ALLOWED
@@ -584,43 +663,58 @@ class Paths
 		if (library != null) modLibPath = '$library/';
 		if (path != null) modLibPath += '$path';
 
-		var file:String = modsSounds(modLibPath, key);
+		var file:String = modsSounds(modLibPath, key, WAV_EXT);
 		if(FileSystem.exists(file)) {
-			if(!currentTrackedSounds.exists(file))
-			{
+			if(!currentTrackedSounds.exists(file)) {
+				currentTrackedSounds.set(file, CoolUtil.loadHighBitrateWav(key, file));
+			}
+			localTrackedAssets.push(file);
+			return currentTrackedSounds.get(file);
+		}
+
+		file = modsSounds(modLibPath, key);
+		if(FileSystem.exists(file)) {
+			if(!currentTrackedSounds.exists(file)) {
 				currentTrackedSounds.set(file, Sound.fromFile(file));
-				//trace('precached mod sound: $file');
 			}
 			localTrackedAssets.push(file);
 			return currentTrackedSounds.get(file);
 		}
 		#end
 
-		// I hate this so god damn much
-		var gottenPath:String = '$key.$SOUND_EXT';
-		if(path != null) gottenPath = '$path/$gottenPath';
-		gottenPath = getPath(gottenPath, SOUND, library);
-		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		// trace(gottenPath);
-		if(!currentTrackedSounds.exists(gottenPath))
-		{
-			var retKey:String = (path != null) ? '$path/$key' : key;
-			retKey = ((path == 'songs') ? 'songs:' : '') + getPath('$retKey.$SOUND_EXT', SOUND, library);
-			if(OpenFlAssets.exists(retKey, SOUND))
-			{
-				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(retKey));
-				//trace('precached vanilla sound: $retKey');
+		// checking wav files for existing
+		var wavPath:String = getPath((path != null ? '$path/' : '') + '$key.$WAV_EXT', SOUND, library);
+		if(OpenFlAssets.exists(wavPath, SOUND)) {
+			if(!currentTrackedSounds.exists(wavPath)) {
+				//for web only mp3 lel
+				#if (sys && !web)
+				var absolutePath = getAbsolutePath(wavPath);
+				if (FileSystem.exists(absolutePath))
+					currentTrackedSounds.set(wavPath, CoolUtil.loadHighBitrateWav(key, absolutePath));
+				else
+					currentTrackedSounds.set(wavPath, OpenFlAssets.getSound(wavPath));
+				#else
+				currentTrackedSounds.set(wavPath, OpenFlAssets.getSound(wavPath));
+				#end
 			}
-			else if(beepOnNull)
-			{
-				trace('SOUND NOT FOUND: $key, PATH: $path');
-				trace(gottenPath);
-				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
-				return FlxAssets.getSoundAddExtension('flixel/sounds/beep');
-			}
+			localTrackedAssets.push(wavPath);
+			return currentTrackedSounds.get(wavPath);
 		}
-		localTrackedAssets.push(gottenPath);
-		return currentTrackedSounds.get(gottenPath);
+
+		var standardPath:String = getPath((path != null ? '$path/' : '') + '$key.$SOUND_EXT', SOUND, library);
+		if(OpenFlAssets.exists(standardPath, SOUND)) {
+			if(!currentTrackedSounds.exists(standardPath)) {
+				currentTrackedSounds.set(standardPath, OpenFlAssets.getSound(standardPath));
+			}
+			localTrackedAssets.push(standardPath);
+			return currentTrackedSounds.get(standardPath);
+		}
+
+		if(beepOnNull) {
+			trace('SOUND NOT FOUND: $key, PATH: $path');
+			return FlxAssets.getSoundAddExtension('flixel/sounds/beep');
+		}
+		return null;
 	}
 
 	#if MODS_ALLOWED
@@ -664,8 +758,9 @@ class Paths
 	}
 	#end
 
-	inline static public function modsSounds(path:String, key:String) {
-		return modFolders(path + '/' + key + '.' + SOUND_EXT);
+	inline static public function modsSounds(path:String, key:String, ?ext:String = null) {
+		ext ??= SOUND_EXT;
+		return modFolders(path + '/' + key + '.' + ext);
 	}
 
 	inline static public function modsImages(key:String) {

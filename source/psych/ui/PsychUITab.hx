@@ -2,12 +2,16 @@ package psych.ui;
 
 import flixel.util.FlxDestroyUtil;
 import flixel.math.FlxPoint;
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
 
 class PsychUITab extends FlxSprite
 {
 	public var name(default, set):String;
 	public var text:FlxText;
 	public var menu:FlxSpriteGroup = new FlxSpriteGroup();
+	
+	private var _isHovered:Bool = false;
 
 	public function new(name:String)
 	{
@@ -19,6 +23,26 @@ class PsychUITab extends FlxSprite
 		@:bypassAccessor this.name = name;
 		text = new FlxText(0, 0, 100, name);
 		text.alignment = CENTER;
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		
+		var isOver = FlxG.mouse.overlaps(this, camera);
+		
+		if (isOver && !_isHovered)
+		{
+			if (flixel.FlxG.mouse.useSystemCursor) 
+				Mouse.cursor = MouseCursor.BUTTON;
+			_isHovered = true;
+		}
+		else if (!isOver && _isHovered)
+		{
+			if (flixel.FlxG.mouse.useSystemCursor) 
+				Mouse.cursor = MouseCursor.AUTO;
+			_isHovered = false;
+		}
 	}
 
 	override function draw()
@@ -35,12 +59,15 @@ class PsychUITab extends FlxSprite
 
 	override function destroy()
 	{
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
+			Mouse.cursor = MouseCursor.AUTO;
+		
 		text = FlxDestroyUtil.destroy(text);
 		menu = FlxDestroyUtil.destroy(menu);
 		super.destroy();
 	}
 	
-	public function updateMenu(parent:PsychUIBox, elapsed:Float)
+	inline public function updateMenu(parent:PsychUIBox, elapsed:Float)
 	{
 		if(menu != null && menu.exists && menu.active)
 		{
@@ -49,7 +76,7 @@ class PsychUITab extends FlxSprite
 		}
 	}
 
-	public function drawMenu(parent:PsychUIBox)
+	inline public function drawMenu(parent:PsychUIBox)
 	{
 		if(menu != null && menu.exists && menu.visible)
 		{
@@ -59,7 +86,7 @@ class PsychUITab extends FlxSprite
 		}
 	}
 
-	public function resize(width:Int, height:Int)
+	inline public function resize(width:Int, height:Int)
 	{
 		setGraphicSize(width, height);
 		updateHitbox();
@@ -71,7 +98,6 @@ class PsychUITab extends FlxSprite
 		text.text = v;
 		return (name = v);
 	}
-
 
 	override function set_cameras(v:Array<FlxCamera>)
 	{

@@ -1,5 +1,7 @@
 package game.objects;
 
+import flixel.FlxSprite;
+
 class HealthIcon extends FlxSprite
 {
 	public var sprTracker:FlxSprite;
@@ -40,10 +42,7 @@ class HealthIcon extends FlxSprite
 			animation.play(char);
 			this.char = char;
 
-			if(char.endsWith('-pixel'))
-				antialiasing = false;
-			else
-				antialiasing = ClientPrefs.globalAntialiasing;
+			antialiasing = char.endsWith('-pixel') ? false : ClientPrefs.globalAntialiasing;
 		}
 	}
 
@@ -51,6 +50,7 @@ class HealthIcon extends FlxSprite
 	override function updateHitbox()
 	{
 		super.updateHitbox();
+
 		if(autoAdjustOffset)
 		{
 			offset.x = iconOffsets[0];
@@ -58,7 +58,6 @@ class HealthIcon extends FlxSprite
 		}
 	}
 
-	public function getCharacter():String {
+	inline public function getCharacter():String 
 		return char;
-	}
 }

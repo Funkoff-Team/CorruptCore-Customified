@@ -1,24 +1,74 @@
 package game.scripting;
 
-using StringTools;
-//Used for custom states so you don't have to build off of the base states
+#if sys
+import sys.FileSystem;
+#end
+
+import openfl.utils.Assets as OpenFlAssets;
+
 class HScriptState extends MusicBeatState
 {
-	public static var instance:HScriptState;
-	public var data:Dynamic = null;
+    public var originalClassName:String = "";
+    public var stateName:String = "";
+    
+    public function new(className:String) {
+        this.originalClassName = className;
+        
+        var parts = className.split(".");
+        this.stateName = parts[parts.length - 1];
 
-	public function new(stateName:String, ?_data:Dynamic) {
-		if(_data != null) this.data = _data;
+        super();
+    }
 
-		super();
-		instance = this;
-		this.useCustomStateName = true;
-		this.className = stateName;
-	}
+    override function create() {
+        if (stateName != null && stateName != "") {
+            var scriptFiles:Array<String> = [];
+            var folders:Array<String> = Paths.getStateScripts(stateName);
+            
+            for (path in folders) {
+                #if sys
+                if (FileSystem.exists(path)) {
+                    if (FileSystem.isDirectory(path)) {
+                        for (file in FileSystem.readDirectory(path)) {
+                            if (file.endsWith('.hx')) {
+                                var fullPath = haxe.io.Path.join([path, file]);
+                                scriptFiles.push(fullPath);
+                            }
+                        }
+                    }
+                    else if (path.endsWith('.hx')) {
+                        scriptFiles.push(path);
+                    }
+                }
+                #else
+                if (OpenFlAssets.exists(path)) {
+                    if (path.endsWith('.hx')) {
+                        scriptFiles.push(path);
+                    } else {
+                        var prefix = path;
+                        for (file in OpenFlAssets.list(AssetType.TEXT)) {
+                            if (file.startsWith(prefix) && file.endsWith('.hx')) {
+                                scriptFiles.push(file);
+                            }
+                        }
+                    }
+                }
+                #end
+            }
 
-	override function destroy()
-	{
-		instance = null;
-		super.destroy();
-	}
+            for (path in scriptFiles) {
+                try {
+                    menuScriptArray.push(new FunkinHScript(path, this));
+                    if (path.contains('contents/'))
+                        trace('Loaded mod state script: $path');
+                    else
+                        trace('Loaded base game state script: $path');
+                } catch (e:Dynamic) {
+                    trace('Error loading script $path: $e');
+                }
+            }
+        }
+
+        super.create();
+    }
 }

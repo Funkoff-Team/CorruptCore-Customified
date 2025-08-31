@@ -29,6 +29,7 @@ import game.scripting.LuaCallbackHandler;
 #end
 
 import game.backend.plugins.HotReloadPlugin;
+import game.backend.plugins.CMDEnablingPlugin;
 
 using StringTools;
 
@@ -146,6 +147,11 @@ class Main extends Sprite
 
 		pluginsLessGo();
 
+		#if desktop
+		FlxG.mouse.visible = false;
+    	FlxG.mouse.useSystemCursor = true;
+		#end
+
 		#if !html5
 		FlxG.scaleMode = new flixel.FlxScaleMode();
 		#end
@@ -247,7 +253,7 @@ class Main extends Sprite
 			FlxTransitionableState.skipNextTransOut = true;
 			FlxTransitionableState.skipNextTransIn = true;
 			
-			FlxG.switchState(() -> new CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new MainMenuState())));
+			FlxG.switchState(() -> new game.states.CrashHandlerState(crashReport, () -> FlxG.switchState(() -> new game.states.MainMenuState())));
 		} catch (e:Dynamic) {
 			// If the crash handler fails, we log the error to console
 			trace("CRITICAL CRASH IN HANDLER:", e);
@@ -410,6 +416,7 @@ class Main extends Sprite
 	private function pluginsLessGo()
 	{
 		HotReloadPlugin.init();
+		CMDEnablingPlugin.init();
 	}
 }
 

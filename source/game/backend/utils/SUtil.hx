@@ -23,7 +23,7 @@ using StringTools;
 
 /**
  * A storage class for mobile.
- * @author Karim Akra and Lily Ross (mcagabe19)
+ * @author JustX/GreenColdTea
  */
 class SUtil
 {
@@ -32,7 +32,7 @@ class SUtil
 	public static final rootDir:String = LimeSystem.applicationStorageDirectory;
 
 	#if android
-	private static var aDir:String = null; // android dir
+	private static var aDir:String; // android dir
 	#end
 
 	public static function getPath():String
@@ -54,7 +54,7 @@ class SUtil
 		if (!FileSystem.exists(rootDir + 'storagetype.txt'))
 			File.saveContent(rootDir + 'storagetype.txt', Generic.returnPath());
 		var curStorageType:String = File.getContent(rootDir + 'storagetype.txt');
-		daPath = force ? Generic.returnPath() : Generic.returnPath();
+		daPath = Generic.returnPath();
 		daPath = Path.addTrailingSlash(daPath);
 		#else
 		daPath = Sys.getCwd();

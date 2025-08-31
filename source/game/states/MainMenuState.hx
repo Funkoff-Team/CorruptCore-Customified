@@ -27,7 +27,7 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var ccEngineVersion:String = '0.6.3'; //This is also used for Discord RPC
+	public static var ccEngineVersion:String = '0.6.3';
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
@@ -59,7 +59,6 @@ class MainMenuState extends MusicBeatState
 		WeekData.loadTheFirstEnabledMod();
 
 		#if DISCORD_ALLOWED
-		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
@@ -72,94 +71,93 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
-		var yScroll:Float = Math.max(0.25 - (0.05 * (optionShit.length - 4)), 0.1);
-		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
-		bg.scrollFactor.set(0, yScroll);
-		bg.setGraphicSize(Std.int(bg.width * 1.175));
-		bg.updateHitbox();
-		bg.screenCenter();
-		bg.antialiasing = ClientPrefs.globalAntialiasing;
-		add(bg);
-
-		camFollow = new FlxObject(0, 0, 1, 1);
-		camFollowPos = new FlxObject(0, 0, 1, 1);
-		add(camFollow);
-		add(camFollowPos);
-
-		magenta = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
-		magenta.scrollFactor.set(0, yScroll);
-		magenta.setGraphicSize(Std.int(magenta.width * 1.175));
-		magenta.updateHitbox();
-		magenta.screenCenter();
-		magenta.visible = false;
-		magenta.antialiasing = ClientPrefs.globalAntialiasing;
-		magenta.color = 0xFFfd719b;
-		add(magenta);
-		
-		// magenta.scrollFactor.set();
-
-		menuItems = new FlxTypedGroup<FlxSprite>();
-		add(menuItems);
-
-		var scale:Float = 1;
-		/*if(optionShit.length > 6) {
-			scale = 6 / optionShit.length;
-		}*/
-
-		for (i in 0...optionShit.length)
+		if (!isSoftcodedState())
 		{
-			var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
-			var menuItem:FlxSprite = new FlxSprite(0, (i * 140)  + offset);
-			menuItem.scale.x = scale;
-			menuItem.scale.y = scale;
-			menuItem.frames = Paths.getSparrowAtlas('mainmenu/menu_' + optionShit[i]);
-			menuItem.animation.addByPrefix('idle', optionShit[i] + " basic", 24);
-			menuItem.animation.addByPrefix('selected', optionShit[i] + " white", 24);
-			menuItem.animation.play('idle');
-			menuItem.ID = i;
-			menuItem.screenCenter(X);
-			menuItems.add(menuItem);
-			var scr:Float = (optionShit.length - 4) * 0.135;
-			if(optionShit.length < 6) scr = 0;
-			menuItem.scrollFactor.set(0, scr);
-			menuItem.antialiasing = ClientPrefs.globalAntialiasing;
-			//menuItem.setGraphicSize(Std.int(menuItem.width * 0.58));
-			menuItem.updateHitbox();
+			var yScroll:Float = Math.max(0.25 - (0.05 * (optionShit.length - 4)), 0.1);
+			var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
+			bg.scrollFactor.set(0, yScroll);
+			bg.setGraphicSize(Std.int(bg.width * 1.175));
+			bg.updateHitbox();
+			bg.screenCenter();
+			bg.antialiasing = ClientPrefs.globalAntialiasing;
+			add(bg);
+
+			camFollow = new FlxObject(0, 0, 1, 1);
+			camFollowPos = new FlxObject(0, 0, 1, 1);
+			add(camFollow);
+			add(camFollowPos);
+
+			magenta = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
+			magenta.scrollFactor.set(0, yScroll);
+			magenta.setGraphicSize(Std.int(magenta.width * 1.175));
+			magenta.updateHitbox();
+			magenta.screenCenter();
+			magenta.visible = false;
+			magenta.antialiasing = ClientPrefs.globalAntialiasing;
+			magenta.color = 0xFFfd719b;
+			add(magenta);
+			
+			menuItems = new FlxTypedGroup<FlxSprite>();
+			add(menuItems);
+
+			var scale:Float = 1;
+			for (i in 0...optionShit.length)
+			{
+				var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
+				var menuItem:FlxSprite = new FlxSprite(0, (i * 140)  + offset);
+				menuItem.scale.x = scale;
+				menuItem.scale.y = scale;
+				menuItem.frames = Paths.getSparrowAtlas('mainmenu/menu_' + optionShit[i]);
+				menuItem.animation.addByPrefix('idle', optionShit[i] + " basic", 24);
+				menuItem.animation.addByPrefix('selected', optionShit[i] + " white", 24);
+				menuItem.animation.play('idle');
+				menuItem.ID = i;
+				menuItem.screenCenter(X);
+				menuItems.add(menuItem);
+				var scr:Float = (optionShit.length - 4) * 0.135;
+				if(optionShit.length < 6) scr = 0;
+				menuItem.scrollFactor.set(0, scr);
+				menuItem.antialiasing = ClientPrefs.globalAntialiasing;
+				menuItem.updateHitbox();
+			}
+
+			var versionShit:FlxText = new FlxText(12, FlxG.height - 44, 0, "Psych Engine v" + '0.6.3', 12);
+			versionShit.scrollFactor.set();
+			versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			add(versionShit);
+			var versionShit:FlxText = new FlxText(12, FlxG.height - 24, 0, "CorruptCore Engine v" + Application.current.meta.get('version'), 12);
+			versionShit.scrollFactor.set();
+			versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			add(versionShit);
+
+			changeItem();
+
+			#if ACHIEVEMENTS_ALLOWED
+			Achievements.loadAchievements();
+			var leDate = Date.now();
+			if (leDate.getDay() == 5 && leDate.getHours() >= 18) {
+				var achieveID:Int = Achievements.getAchievementIndex('friday_night_play');
+				if(!Achievements.isAchievementUnlocked(Achievements.achievementsStuff[achieveID][2])) {
+					Achievements.achievementsMap.set(Achievements.achievementsStuff[achieveID][2], true);
+					giveAchievement();
+					ClientPrefs.saveSettings();
+				}
+			}
+			#end
+
+			FlxG.camera.follow(camFollow, null, 0.6);
 		}
-
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 44, 0, "Psych Engine v" + '0.6.3', 12);
-		versionShit.scrollFactor.set();
-		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(versionShit);
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 24, 0, "CorruptCore Engine v" + Application.current.meta.get('version'), 12);
-		versionShit.scrollFactor.set();
-		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(versionShit);
-
-		// NG.core.calls.event.logEvent('swag').send();
-
-		changeItem();
-
-		#if ACHIEVEMENTS_ALLOWED
-		Achievements.loadAchievements();
-		var leDate = Date.now();
-		if (leDate.getDay() == 5 && leDate.getHours() >= 18) {
-			var achieveID:Int = Achievements.getAchievementIndex('friday_night_play');
-			if(!Achievements.isAchievementUnlocked(Achievements.achievementsStuff[achieveID][2])) { //It's a friday night. WEEEEEEEEEEEEEEEEEE
-				Achievements.achievementsMap.set(Achievements.achievementsStuff[achieveID][2], true);
-				giveAchievement();
-				ClientPrefs.saveSettings();
+		else
+		{
+			if(FlxG.sound.music == null) {
+				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 			}
 		}
-		#end
 
 		super.create();
-
-		FlxG.camera.follow(camFollow, null, 0.6);
 	}
 
 	#if ACHIEVEMENTS_ALLOWED
-	// Unlocks "Freaky on a Friday Night" achievement
 	function giveAchievement() {
 		add(new AchievementObject('friday_night_play', camAchievement));
 		FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
@@ -178,7 +176,7 @@ class MainMenuState extends MusicBeatState
 				FreeplayState.vocals.volume += 0.5 * elapsed;
 		}
 
-		if (!selectedSomethin)
+		if (!isSoftcodedState() && !selectedSomethin)
 		{
 			if (controls.UI_UP_P)
 				changeItem(-1);

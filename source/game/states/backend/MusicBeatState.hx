@@ -3,8 +3,8 @@ package game.states.backend;
 import game.objects.FNFCamera;
 import game.backend.Conductor.BPMChangeEvent;
 import game.scripting.FunkinLua;
+
 import flixel.FlxG;
-import flixel.addons.ui.FlxUIState;
 import flixel.math.FlxRect;
 import flixel.util.FlxTimer;
 import flixel.addons.transition.FlxTransitionableState;
@@ -21,11 +21,20 @@ import flixel.FlxBasic;
 import sys.FileSystem;
 #end
 #if SCRIPTABLE_STATES
-import hscript.HScript;
+import game.scripting.FunkinHScript;
+import game.scripting.FunkinRScript;
+import game.scripting.HScriptGlobal;
 #end
 
-class MusicBeatState extends FlxUIState
+import openfl.utils.Assets as OpenFlAssets;
+
+class MusicBeatState extends FlxState
 {
+	#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
+	public var menuScriptArray:Array<FunkinRScript> = [];
+	private var excludeStates:Array<Dynamic>;
+	#end
+
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
@@ -43,9 +52,51 @@ class MusicBeatState extends FlxUIState
 
 	public static var timePassedOnState:Float = 0;
 
-	//hscript
-	public var className:String = "";
-	public var useCustomStateName:Bool = false;
+	private var menuScriptPath:String;
+
+	/**
+	 * Function, that returns is this state softcoded or not
+	 * Kinda like in NVE but with Global Scripts
+	 */
+	public function isSoftcodedState():Bool
+	{
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES && GLOBAL_SCRIPTS)
+		if (HScriptGlobal.globalScriptActive && HScriptGlobal.globalScript != null)
+		{
+			var result = HScriptGlobal.callGlobalScript("isStateSoftcoded", [Type.getClassName(Type.getClass(this))]);
+			if (result != null && Std.isOfType(result, Bool))
+				return result;
+		}
+		#end
+		
+		return false;
+	}
+
+	// (WStaticInitOrder) Warning : maybe loop in static generation of MusicBeatState
+	private static function initExcludeStates():Array<Dynamic> {
+		return [
+			game.states.LoadingState, 
+			game.PlayState, 
+			game.scripting.HScriptState, 
+			MusicBeatState,
+			game.states.editors.CharacterEditorState,
+			game.states.editors.ChartEditorState,
+			game.states.editors.DialogueCharacterEditorState,
+			game.states.editors.DialogueEditorState,
+			game.states.editors.EditorPlayState,
+			game.states.editors.MasterEditorMenu,
+			game.states.editors.MenuCharacterEditorState,
+			game.states.editors.WeekEditorState,
+			game.states.CrashHandlerState
+		];
+	}
+
+	public function new() {
+		super();
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
+		excludeStates = initExcludeStates();
+		#end
+	}
 
 	override function create() {
 		if(!_fnfCameraInitialized) initFNFCamera();
@@ -53,16 +104,77 @@ class MusicBeatState extends FlxUIState
 		var colorBlindType = ClientPrefs.colorBlindMode;
 		var intensity = ClientPrefs.colorBlindIntensity;
 		var index = ['None', 'Deutranopia', 'Protanopia', 'Tritanopia', 'Protanomaly', 'Deuteranomaly', 'Tritanomaly', 'Rod monochromacy', 'Cone monochromacy'].indexOf(colorBlindType);
-		if (index == -1) index = -1;
+		if (index <= -1) index = -1;
 		Main.updateColorblindFilter(index - 1, intensity);
 
 		if(!FlxTransitionableState.skipNextTransOut) {
-			openSubState(new CustomFadeTransition(0.7, true));
+			openSubState(new CustomFadeTransition(0.6, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
 
-		runStateFiles((useCustomStateName ? className : Type.getClassName(Type.getClass(this))));
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
+		if (!excludeStates.contains(Type.getClass(this)))
+		{
+			final statePath = Type.getClassName(Type.getClass(this)).split(".");
+			final stateString = statePath[statePath.length - 1];
+
+			var scriptFiles:Array<String> = [];
+			var folders:Array<String> = Paths.getStateScripts(stateString);
+			
+			for (path in folders)
+			{
+				#if sys
+				if (FileSystem.exists(path))
+				{
+					if (FileSystem.isDirectory(path))
+					{
+						for (file in FileSystem.readDirectory(path))
+						{
+							if (file.endsWith('.hx'))
+							{
+								var fullPath = haxe.io.Path.join([path, file]);
+								scriptFiles.push(fullPath);
+							}
+						}
+					}
+					else if (path.endsWith('.hx'))
+					{
+						scriptFiles.push(path);
+					}
+				}
+				#else
+				if (OpenFlAssets.exists(path))
+				{
+					if (path.endsWith('.hx'))
+					{
+						scriptFiles.push(path);
+					}
+					else
+					{
+						var prefix = path;
+						for (file in OpenFlAssets.list(AssetType.TEXT))
+						{
+							if (file.startsWith(prefix) && file.endsWith('.hx'))
+							{
+								scriptFiles.push(file);
+							}
+						}
+					}
+				}
+				#end
+			}
+
+			for (path in scriptFiles)
+			{
+				menuScriptArray.push(new FunkinHScript(path, this));
+				if (path.contains('contents/'))
+					trace('Loaded mod state script: $path');
+				else
+					trace('Loaded base game state script: $path');
+			}
+		}
+		#end
 
 		super.create();
 
@@ -85,7 +197,6 @@ class MusicBeatState extends FlxUIState
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
 		quickCallMenuScript("onUpdate", [elapsed]);
 
 		var oldStep:Int = curStep;
@@ -110,9 +221,17 @@ class MusicBeatState extends FlxUIState
 
 		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
 
-		stagesFunc(function(stage:BaseStage) {
-			stage.update(elapsed);
-		});
+		quickSetOnMenuScripts('curBpm', Conductor.bpm);
+		quickSetOnMenuScripts('crochet', Conductor.crochet);
+		quickSetOnMenuScripts('stepCrochet', Conductor.stepCrochet);
+
+		quickSetOnMenuScripts('curStep', curStep);
+		quickSetOnMenuScripts('curBeat', curBeat);
+
+		quickSetOnMenuScripts('curDecStep', curDecStep);
+		quickSetOnMenuScripts('curDecBeat', curDecBeat);
+
+		stagesFunc((stage:BaseStage) -> stage.update(elapsed));
 
 		super.update(elapsed);
 
@@ -178,7 +297,6 @@ class MusicBeatState extends FlxUIState
 		if (FlxTransitionableState.skipNextTransIn)
 		{
 			transitionAction();
-			return;
 		}
 		else
 		{
@@ -188,7 +306,6 @@ class MusicBeatState extends FlxUIState
 		}
 
 		FlxTransitionableState.skipNextTransIn = false;
-
 		super.startOutro(onOutroComplete);
 	}
 
@@ -205,8 +322,7 @@ class MusicBeatState extends FlxUIState
 			stage.stepHit();
 		});
 
-		if (curStep % 4 == 0)
-			beatHit();
+		if (curStep % 4 == 0) beatHit();
 
 		quickCallMenuScript("onStepHit", []);
 	}
@@ -219,6 +335,7 @@ class MusicBeatState extends FlxUIState
 			stage.beatHit();
 		});
 		//trace('Beat: ' + curBeat);
+
 		quickCallMenuScript("onBeatHit", []);
 	}
 
@@ -229,6 +346,7 @@ class MusicBeatState extends FlxUIState
 			stage.curSection = curSection;
 			stage.sectionHit();
 		});
+
 		quickCallMenuScript("onSectionHit", []);
 	}
 
@@ -246,10 +364,6 @@ class MusicBeatState extends FlxUIState
 		return val == null ? 4 : val;
 	}
 
-	/*
-	* HScript things
-	*/
-	#if SCRIPTABLE_STATES
 	override public function openSubState(subState:FlxSubState) 
 	{
 		if(quickCallMenuScript("onOpenSubState", [subState]) != FunkinLua.Function_Stop) super.openSubState(subState);
@@ -285,74 +399,33 @@ class MusicBeatState extends FlxUIState
 		
 		super.destroy();
 	}
-	#end
-	
-	#if SCRIPTABLE_STATES
-	public var menuScriptArray:Array<HScript> = [];
-	public var scriptsAllowed:Bool = true;
-	#end
-	public function runStateFiles(statePath:String) {
-		#if SCRIPTABLE_STATES
-		if(!scriptsAllowed) return;
 
-		var filesPushed = [];
-		
-		var scriptPaths = Paths.getStateScripts(statePath);
-		
-		for (folder in scriptPaths)
+	public function quickSetOnMenuScripts(variable:String, arg:Dynamic)
+	{
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
+		for (script in menuScriptArray)
 		{
-			if(FileSystem.exists(folder) && FileSystem.isDirectory(folder))
-			{
-				for (file in FileSystem.readDirectory(folder))
-				{
-					#if HSCRIPT_ALLOWED
-					if (file.endsWith('.hx') && !filesPushed.contains(file)) {
-						var fullPath = folder + file;
-						menuScriptArray.push(new HScript(fullPath));
-						filesPushed.push(file);
-					}
-					#else
-					break;
-					#end
-				}
-			}
-			else if (FileSystem.exists(folder + '.hx'))
-			{
-				var fullPath = folder + '.hx';
-				if(!filesPushed.contains(fullPath)) {
-					menuScriptArray.push(new HScript(fullPath));
-					filesPushed.push(fullPath);
-				}
-			}
-		}
-		#end
-	}
-	public function setOnMenuScript(variable:String, arg:Dynamic) {
-		#if SCRIPTABLE_STATES
-		if(!scriptsAllowed) return;
-		for (script in menuScriptArray) {
 			script.set(variable, arg);
 		}
 		#end
 	}
-	
-	public function quickCallMenuScript(event:String, args:Array<Dynamic>):Dynamic {
-		var returnVal = FunkinLua.Function_Continue;
-		#if SCRIPTABLE_STATES
-		if(!scriptsAllowed) return returnVal;
-		for (sc in menuScriptArray) {
-			var myValue = sc.call(event, args);
-			if(myValue == FunkinLua.Function_StopLua) break;
-			if(myValue != null && myValue != FunkinLua.Function_Continue) returnVal = myValue;
+
+	public function quickCallMenuScript(func:String, ?args:Dynamic):Dynamic
+	{
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
+		var returnThing:Dynamic = FunkinLua.Function_Continue;
+		for (script in menuScriptArray)
+		{
+			var scriptThing = script.call(func, args);
+			if (scriptThing == FunkinLua.Function_Stop) returnThing = scriptThing;
 		}
+		return returnThing;
 		#end
-		return returnVal;
 	}
-	
+
 	public function callOnMenuScript(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal = FunkinLua.Function_Continue;
-		#if SCRIPTABLE_STATES
-		if(!scriptsAllowed) return returnVal;
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
 		if(exclusions == null) exclusions = [];
 		if(excludeValues == null) excludeValues = [];
 

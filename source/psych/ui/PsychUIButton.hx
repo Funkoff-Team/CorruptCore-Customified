@@ -1,6 +1,12 @@
 package psych.ui;
 
+import flixel.math.FlxPoint;
+import flixel.util.FlxDestroyUtil;
+
 import psych.ui.PsychUIBox.UIStyleData;
+
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
 
 class PsychUIButton extends FlxSpriteGroup
 {
@@ -10,6 +16,8 @@ class PsychUIButton extends FlxSpriteGroup
 	public var label(default, set):String;
 	public var bg:FlxSprite;
 	public var text:FlxText;
+
+	public var labelOffsets:Array<FlxPoint> = [];
 
 	public var onChangeState:String->Void;
 	public var onClick:Void->Void;
@@ -29,6 +37,8 @@ class PsychUIButton extends FlxSpriteGroup
 		textColor: FlxColor.BLACK,
 		bgAlpha: 1
 	};
+
+	var _isHovered:Bool = false;
 
 	public function new(x:Float = 0, y:Float = 0, label:String = '', ?onClick:Void->Void = null, ?wid:Int = 80, ?hei:Int = 20)
 	{
@@ -74,6 +84,19 @@ class PsychUIButton extends FlxSpriteGroup
 		{
 			var overlapped:Bool = (FlxG.mouse.overlaps(bg, camera));
 
+			if (overlapped && !_isHovered)
+			{
+				if (flixel.FlxG.mouse.useSystemCursor) 
+					Mouse.cursor = MouseCursor.BUTTON;
+				_isHovered = true;
+			}
+			else if (!overlapped && _isHovered)
+			{
+				if (flixel.FlxG.mouse.useSystemCursor) 
+					Mouse.cursor = MouseCursor.AUTO;
+				_isHovered = false;
+			}
+
 			forceCheckNext = false;
 
 			if(!isClicked)
@@ -96,7 +119,7 @@ class PsychUIButton extends FlxSpriteGroup
 		}
 	}
 
-	public function resize(width:Int, height:Int)
+	inline public function resize(width:Int, height:Int)
 	{
 		bg.setGraphicSize(width, height);
 		bg.updateHitbox();
@@ -109,5 +132,17 @@ class PsychUIButton extends FlxSpriteGroup
 	{
 		if(text != null && text.exists) text.text = v;
 		return (label = v);
+	}
+
+	override public function destroy()
+	{
+		if (_isHovered && flixel.FlxG.mouse.useSystemCursor)
+			Mouse.cursor = MouseCursor.AUTO;
+		
+		super.destroy();
+		for (point in labelOffsets) {
+			FlxDestroyUtil.put(point);
+		}
+		labelOffsets = null;
 	}
 }
