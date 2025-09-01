@@ -13,7 +13,7 @@ import llua.State;
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
-	private static final _defaultID:String = "863222024192262205";
+	private static final _defaultID:String = "1412032196260401303";
 	public static var clientID(default, set):String = _defaultID;
 	private static var presence:DiscordRichPresence = DiscordRichPresence.create();
 
@@ -128,7 +128,11 @@ class DiscordClient
 	#if LUA_ALLOWED
 	public static function addLuaCallbacks(lua:State) {
 		Lua_helper.add_callback(lua, "changePresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
+			#if DISCORD_ALLOWED
 			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
+			#else
+			game.scripting.FunkinLua.luaTrace('changePresence: This platform doesn\'t support Discord RPC!', false, false, FlxColor.RED);
+			#end
 		});
 	}
 	#end

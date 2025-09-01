@@ -27,7 +27,6 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var ccEngineVersion:String = '0.6.3';
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;

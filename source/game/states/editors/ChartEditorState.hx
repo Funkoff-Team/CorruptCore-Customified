@@ -609,6 +609,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				opponentVocals?.pause();
 			}
 			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function() {
+				_song.song = UI_songTitle.text;
 				var songName = _song.song.toLowerCase();
 				loadJson(songName);
 			}, null, ignoreWarnings, "OK", "CANCEL"));
@@ -1957,7 +1958,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			resetSection(FlxG.keys.pressed.SHIFT #if mobile || _virtualpad.buttonY.pressed #end);
 		
 		// Section navigating
-		var shiftThing:Int = FlxG.keys.pressed.SHIFT #if mobile || _virtualpad.buttonY.pressed #end ? 4 : 1;
+		var shiftThing:Int = (FlxG.keys.pressed.SHIFT #if mobile || _virtualpad.buttonY.pressed #end) ? 4 : 1;
 		if (FlxG.keys.justPressed.D #if mobile || _virtualpad.buttonRight.justPressed #end) changeSection(curSec + shiftThing);
 		if (FlxG.keys.justPressed.A #if mobile || _virtualpad.buttonLeft.justPressed #end)
 			changeSection((curSec <= 0) ? _song.notes.length-1 : curSec - shiftThing);
@@ -2387,9 +2388,6 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 	function updateCharacterAnimations(elapsed:Float):Void
 	{
-		/*opponent.holdTimer += elapsed;
-		player.holdTimer += elapsed;*/
-		
 		/*TODO: Needs to make the tab like in pe 1.0 where you can change the ui colors first
 		colorSine += elapsed;
 		var bgColorValue = 0.7 + Math.sin(colorSine * 0.5) * 0.3;
@@ -4024,7 +4022,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 		_file = null;
-		FlxG.log.notice("Successfully saved LEVEL DATA.");
+		FlxG.log.notice("Successfully saved CHART DATA.");
 	}
 
 	/**
