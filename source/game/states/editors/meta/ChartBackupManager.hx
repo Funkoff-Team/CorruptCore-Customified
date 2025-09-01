@@ -148,7 +148,7 @@ class ChartBackupManager
         var fileRef = new FileReference();
         fileRef.addEventListener(Event.SELECT, function onFileSelected(e:Event) {
             fileRef.removeEventListener(Event.SELECT, onFileSelected);
-            fileRef.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onBackupLoaded);
+            fileRef.addEventListener(Event.COMPLETE, onBackupLoaded);
             fileRef.addEventListener(IOErrorEvent.IO_ERROR, onBackupError);
             fileRef.load();
         });
