@@ -589,11 +589,12 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		check_voices.checked = _song.needsVoices;
 		check_voices.onClick = () -> _song.needsVoices = check_voices.checked;
 
-		var saveButton:PsychUIButton = new PsychUIButton(185, 8, "Save", () -> saveLevel());
+		var saveButton:PsychUIButton = new PsychUIButton(185, 8, "Save", () -> saveChart());
 
 		var reloadSong:PsychUIButton = new PsychUIButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
 			currentSongName = Paths.formatToSongPath(UI_songTitle.text);
+			_song.song = UI_songTitle.text;
 			updateJsonData();
 			loadSong();
 			updateWaveform();
@@ -680,8 +681,8 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		stepperBPM.value = Conductor.bpm;
 		stepperBPM.name = 'song_bpm';
 		stepperBPM.onValueChange = () -> {
+			_song.bpm = stepperBPM.value;
 			updateGrid();
-			updateNoteUI();
 		}
 
 		var stepperSpeed:PsychUINumericStepper = new PsychUINumericStepper(10, stepperBPM.y + 35, 0.1, 1, 0.1, 10, 1);
@@ -3933,7 +3934,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		updateGrid();
 	}
 
-	private function saveLevel()
+	private function saveChart()
 	{
 		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
 		
@@ -3949,12 +3950,12 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		if ((data != null) && (data.length > 0))
 		{
-			backupManager.createBackup(Paths.formatToSongPath(_song.song) + ".json", data.trim(), "save");
+			//backupManager.createBackup(Paths.formatToSongPath(_song.song) + ".json", data.trim(), "save");
 			#if mobile
 			SUtil.saveContent(Paths.formatToSongPath(_song.song) + ".json", data.trim());
 			#else
 			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
+			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
@@ -4009,7 +4010,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			SUtil.saveContent("events.json", data.trim());
 			#else
 			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
+			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), "events.json");
