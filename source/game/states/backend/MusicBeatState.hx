@@ -426,8 +426,8 @@ class MusicBeatState extends FlxState
 	public function callOnMenuScript(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal = FunkinLua.Function_Continue;
 		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
-		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [];
+		exclusions ??= [];
+		excludeValues ??= [];
 
 		for (sc in menuScriptArray) {
 			if(exclusions.contains(sc.scriptName))

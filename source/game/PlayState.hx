@@ -1982,8 +1982,7 @@ class PlayState extends MusicBeatState
 			#end
 
         	FlxG.sound.music?.pause();
-        	vocals?.pause();
-			opponentVocals?.pause();
+			FlxG.sound.list.forEach((sound:FlxSound) -> if (sound != FlxG.sound.music) sound.pause());
 
         	FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = false);
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished) twn.active = false);
@@ -2006,6 +2005,8 @@ class PlayState extends MusicBeatState
 			#if VIDEOS_ALLOWED
 			video?.bitmap?.resume();
 			#end
+
+			FlxG.sound.list.forEach((sound:FlxSound) -> if (sound != FlxG.sound.music) sound.resume());
 
 			FlxTimer.globalManager.forEach(function(tmr:FlxTimer) if(!tmr.finished) tmr.active = true);
 			FlxTween.globalManager.forEach(function(twn:FlxTween) if(!twn.finished) twn.active = true);
@@ -2450,9 +2451,10 @@ class PlayState extends MusicBeatState
 			FlxG.switchState(() -> new GitarooPause());
 		}
 		else {*/
+
 		FlxG.sound.music?.pause();
-		vocals?.pause();
-		opponentVocals?.pause();
+		FlxG.sound.list.forEach((sound:FlxSound) -> if (sound != FlxG.sound.music) sound.pause());
+
 		openSubState(new PauseSubState());
 		//}
 
@@ -2488,6 +2490,8 @@ class PlayState extends MusicBeatState
 				paused = true;
 
 				canResync = false;
+
+				FlxG.sound.list.forEach((sound:FlxSound) -> if (sound != FlxG.sound.music) sound.stop());
 
 				vocals?.stop();
 				opponentVocals?.stop();
@@ -2849,11 +2853,10 @@ class PlayState extends MusicBeatState
 		var finishCallback:Void->Void = endSong; //In case you want to change it in a specific song.
 
 		updateTime = false;
+
 		FlxG.sound.music.volume = 0;
-		vocals.volume = 0;
-		vocals?.pause();
-		opponentVocals.volume = 0;
-		opponentVocals?.pause();
+		FlxG.sound.list.forEach((sound:FlxSound) -> if (sound != FlxG.sound.music) sound.volume = 0);
+
 		if(ClientPrefs.noteOffset <= 0 || ignoreNoteOffset) {
 			endCallback();
 		} else {
@@ -3796,7 +3799,8 @@ class PlayState extends MusicBeatState
 		}
 		
 		//to prevent crash when its null
-		if (endNote == null || endNote.animation.curAnim == null || !StringTools.endsWith(endNote.animation.curAnim.name, 'end')) return;
+		if (endNote == null || !endNote.active || endNote.animation == null || endNote.animation.curAnim == null 
+			|| !StringTools.endsWith(endNote.animation.curAnim.name, 'end')) return;
 		
 		if (endNote != null) {
 			endNote.extraData ??= new Map<String, Dynamic>();
@@ -3814,7 +3818,8 @@ class PlayState extends MusicBeatState
 		if(PlayState.SONG.holdCoverSkin != null && PlayState.SONG.holdCoverSkin.length > 0) skin = PlayState.SONG.holdCoverSkin;
 		
 		//same as above
-		if (note == null || note.animation.curAnim == null || !StringTools.endsWith(note.animation.curAnim.name, 'end')) return;
+		if (note == null || !note.active || note.animation == null || note.animation.curAnim == null 
+			|| !StringTools.endsWith(note.animation.curAnim.name, 'end')) return;
 		
 		var parentNote = note.parent;
 		var noteData = parentNote != null ? parentNote.noteData : note.noteData;
