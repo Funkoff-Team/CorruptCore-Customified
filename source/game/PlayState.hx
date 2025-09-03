@@ -2855,7 +2855,10 @@ class PlayState extends MusicBeatState
 		updateTime = false;
 
 		FlxG.sound.music.volume = 0;
-		FlxG.sound.list.forEach((sound:FlxSound) -> if (sound != FlxG.sound.music) sound.volume = 0);
+		FlxG.sound.list.forEach((sound:FlxSound) -> {
+			if (sound != null && sound != FlxG.sound.music && sound.playing)
+				sound.volume = 0;
+		});
 
 		if(ClientPrefs.noteOffset <= 0 || ignoreNoteOffset) {
 			endCallback();

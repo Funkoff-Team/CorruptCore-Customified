@@ -719,7 +719,7 @@ class Paths
 
 	#if MODS_ALLOWED
 	inline static public function mods(key:String = '') {
-		return 'contents/' + key;
+		return 'contents/$key';
 	}
 
 	#if SCRIPTABLE_STATES
@@ -728,15 +728,15 @@ class Paths
 	#end
 
 	inline static public function modsFont(key:String) {
-		return modFolders('fonts/' + key);
+		return modFolders('fonts/$key');
 	}
 
 	inline static public function modsJson(key:String) {
-		return modFolders('data/' + key + '.json');
+		return modFolders('data/$key.json');
 	}
 
 	inline static public function modsVideo(key:String) {
-		return modFolders('videos/' + key + '.' + VIDEO_EXT);
+		return modFolders('videos/$key.$VIDEO_EXT');
 	}
 
 	#if NDLL_ALLOWED
@@ -760,35 +760,35 @@ class Paths
 
 	inline static public function modsSounds(path:String, key:String, ?ext:String = null) {
 		ext ??= SOUND_EXT;
-		return modFolders(path + '/' + key + '.' + ext);
+		return modFolders('$path/$key.$ext');
 	}
 
 	inline static public function modsImages(key:String) {
-		return modFolders('images/' + key + '.png');
+		return modFolders('images/$key.png');
 	}
 
 	inline static public function modsImagesJson(key:String) {
-		return modFolders('images/' + key + '.json');
+		return modFolders('images/$key.json');
 	}
 
 	inline static public function modsXml(key:String) {
-		return modFolders('images/' + key + '.xml');
+		return modFolders('images/$key.xml');
 	}
 
 	inline static public function modsTxt(key:String) {
-		return modFolders('images/' + key + '.txt');
+		return modFolders('images/$key.txt');
 	}
-
-	/* Goes unused for now
 
 	inline static public function modsShaderFragment(key:String, ?library:String)
 	{
-		return modFolders('shaders/'+key+'.frag');
+		return modFolders('shaders/$key.frag');
 	}
 	inline static public function modsShaderVertex(key:String, ?library:String)
 	{
-		return modFolders('shaders/'+key+'.vert');
+		return modFolders('shaders/$key.vert');
 	}
+
+	/* Goes unused for now
 	inline static public function modsAchievements(key:String) {
 		return modFolders('achievements/' + key + '.json');
 	}*/
