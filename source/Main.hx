@@ -61,11 +61,18 @@ class Main extends Sprite
 	public static function main():Void
 	{
 		Lib.current.addChild(new Main());
+
 		#if cpp
         cpp.NativeGc.enable(true);
+		cpp.NativeGc.run(true);
+		cpp.vm.Gc.enable(true);
         cpp.vm.Gc.run(true);
         #elseif hl
         hl.Gc.enable(true);
+		#elseif java
+		java.vm.Gc.run(true);
+		#elseif neko
+		neko.vm.Gc.run(true);
         #end
 	}
 
@@ -128,10 +135,8 @@ class Main extends Sprite
         }
 	    #end
 
-        #if (cpp && windows)
 		lime.Native.fixScaling();
 		lime.Native.disableWinReport();
-		#end
 
 		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(LuaCallbackHandler.call)); #end
 

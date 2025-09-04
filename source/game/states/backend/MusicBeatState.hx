@@ -412,15 +412,15 @@ class MusicBeatState extends FlxState
 
 	public function quickCallMenuScript(func:String, ?args:Dynamic):Dynamic
 	{
-		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
 		var returnThing:Dynamic = FunkinLua.Function_Continue;
+		#if (HSCRIPT_ALLOWED && SCRIPTABLE_STATES)
 		for (script in menuScriptArray)
 		{
 			var scriptThing = script.call(func, args);
 			if (scriptThing == FunkinLua.Function_Stop) returnThing = scriptThing;
 		}
-		return returnThing;
 		#end
+		return returnThing;
 	}
 
 	public function callOnMenuScript(event:String, args:Array<Dynamic>, ignoreStops = true, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {

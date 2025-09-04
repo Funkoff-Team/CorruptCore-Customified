@@ -70,7 +70,7 @@ class CoolUtil
 	
 	public static function getDifficultyFilePath(num:Null<Int> = null)
 	{
-		if(num == null) num = PlayState.storyDifficulty;
+		num ??= PlayState.storyDifficulty;
 
 		var fileSuffix:String = difficulties[num];
 		if(fileSuffix != defaultDifficulty)
@@ -292,7 +292,7 @@ class CoolUtil
 
 	inline public static function setDarkMode(title:String, enable:Bool) {
 		#if windows
-		if(title == null) title = lime.app.Application.current.window.title;
+		title ??= lime.app.Application.current.window.title;
 		lime.Native.setDarkMode(title, enable);
 		#end
 	}

@@ -2606,10 +2606,13 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	var lastSecBeats:Float = 0;
 	var lastSecBeatsNext:Float = 0;
 	function reloadGridLayer() {
-		gridLayer.clear();
+		//gridLayer.clear();
 		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * getSectionBeats() * 4 * zoomList[curZoom]));
-    	gridBG.screenCenter(X);
+    	gridBG?.screenCenter(X); //? due to hl
 
+		#if hl
+		if (gridBG != null)
+		#end
 		waveformSprite.x = gridBG.x + GRID_SIZE / 2;
 
 		if(chartEditorSave.data.chart_waveformInst || chartEditorSave.data.chart_waveformVoices || chartEditorSave.data.chart_waveformOppVoices)
@@ -3187,17 +3190,30 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		}
 	}
 
+	function clearGroup<T:flixel.FlxBasic>(group:FlxTypedGroup<T>) {
+		if (group == null) return;
+		
+		for (i in 0...group.length) {
+			var obj = group.members[i];
+			if (obj != null) {
+				obj.destroy();
+				group.remove(obj, true);
+			}
+		}
+		group.clear();
+	}
+
 	var daNoteType:AttachedFlxText;
 	var daEventText:AttachedFlxText;
 	function updateGrid():Void
 	{
-		curRenderedNotes?.clear();
-		curRenderedSustains?.clear();
-		curRenderedNoteType?.clear();
-		nextRenderedNotes?.clear();
-		nextRenderedSustains?.clear();
-		prevRenderedNotes?.clear();
-		prevRenderedSustains?.clear();
+		clearGroup(curRenderedNotes);
+		clearGroup(curRenderedSustains);
+		clearGroup(curRenderedNoteType);
+		clearGroup(nextRenderedNotes);
+		clearGroup(nextRenderedSustains);
+		clearGroup(prevRenderedNotes);
+		clearGroup(prevRenderedSustains);
 	
 		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0) {
 			Conductor.changeBPM(_song.notes[curSec].bpm);
@@ -3704,7 +3720,10 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 	}
 
 	function saveToUndo() {
-        if (undos.length >= maxUndoSteps) undos.shift();
+        if (undos.length >= maxUndoSteps) {
+			var removed = undos.shift();
+			removed = null;
+		}
         undos.push(Json.parse(Json.stringify(_song)));
         redos = [];
     }
@@ -4056,6 +4075,14 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
 		return val ?? 4;
 	}
+
+	override function destroy() {
+		autoBackupTimer?.cancel();
+		autoBackupTimer?.destroy();
+
+		super.destroy();
+	}
+
 }
 
 class AttachedFlxText extends FlxText

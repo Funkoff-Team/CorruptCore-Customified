@@ -216,7 +216,7 @@ class Character extends FlxSprite
 		healthIcon = json.healthicon;
 		singDuration = json.sing_duration;
 		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
-		flipX = !!json.flip_x;
+		flipX = !!json.flip_x; //bruhhh
 		if (json.no_antialiasing)
 		{
 			antialiasing = false;
