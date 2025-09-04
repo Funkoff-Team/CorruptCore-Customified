@@ -5,6 +5,7 @@ import flixel.FlxG;
 import rulescript.*;
 import rulescript.parsers.HxParser;
 import rulescript.scriptedClass.*;
+import rulescript.types.ScriptedTypeUtil;
 
 import hscript.Expr;
 import hscript.Parser;
@@ -27,7 +28,7 @@ class HScriptClassManager {
     public static var classes:Map<String, ScriptClassRef> = new Map();
 
     public static function init():Void {
-        RuleScript.resolveScript = __resolveScript;
+        ScriptedTypeUtil.resolveScript = __resolveScript;
         RuleScriptedClassUtil.buildBridge = __buildRuleScript;
         reloadScriptedClasses();
     }

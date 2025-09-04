@@ -9,6 +9,8 @@ import rulescript.*;
 import rulescript.parsers.*;
 import rulescript.RuleScript;
 
+import rulescript.interps.RuleScriptInterp;
+
 import game.scripting.HScriptClassManager.ScriptClassRef;
 
 import flixel.group.FlxGroup.FlxTypedGroup;

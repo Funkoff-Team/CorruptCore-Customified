@@ -1923,7 +1923,7 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			opponentVocals?.pause();
 
 			StageData.loadDirectory(_song);
-			LoadingState.loadAndSwitchState(new PlayState());
+			LoadingState.loadAndSwitchState(() -> new PlayState());
 		}
 		
 		// Note sustains change
