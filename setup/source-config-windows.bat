@@ -23,7 +23,7 @@ haxelib git flxsoundfilters https://github.com/TheZoroForce240/FlxSoundFilters.g
 haxelib git rulescript https://github.com/Kriptel/RuleScript.git dev
 haxelib git hscript https://github.com/HaxeFoundation/hscript.git
 haxelib git sl-windows-api https://github.com/GreenColdTea/windows-api-improved.git
-haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git 7e8c368b8482a9eee7ef207260e96c8dae61983c
+haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git 40ea31d4b598a01411c8c96f52702e090478ba1f
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
 haxelib list
 echo.

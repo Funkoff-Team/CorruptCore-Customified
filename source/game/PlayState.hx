@@ -1080,8 +1080,10 @@ class PlayState extends MusicBeatState
 		#if FLX_PITCH
 		if(generatedMusic)
 		{
-			if(vocals != null) vocals.pitch = value;
-			if(opponentVocals != null) opponentVocals.pitch = value;
+			FlxG.sound.list.forEach((sound:FlxSound) -> {
+				if (sound != null && sound != FlxG.sound.music && sound.playing)
+					sound.pitch = value;
+			});
 			FlxG.sound.music.pitch = value;
 
 			var ratio:Float = playbackRate / value; //funny word huh
@@ -1712,12 +1714,15 @@ class PlayState extends MusicBeatState
 		}
 		catch(e:Dynamic) {}
 
-		#if FLX_PITCH
-		vocals.pitch = playbackRate;
-		opponentVocals.pitch = playbackRate;
-		#end
 		FlxG.sound.list.add(vocals);
 		FlxG.sound.list.add(opponentVocals);
+
+		#if FLX_PITCH
+		FlxG.sound.list.forEach((sound:FlxSound) -> {
+			if (sound != null && sound != FlxG.sound.music && sound.playing)
+				sound.pitch = playbackRate;
+		});
+		#end
 
 		inst = new FlxSound();
 		try {
@@ -2493,8 +2498,6 @@ class PlayState extends MusicBeatState
 
 				FlxG.sound.list.forEach((sound:FlxSound) -> if (sound != FlxG.sound.music) sound.stop());
 
-				vocals?.stop();
-				opponentVocals?.stop();
 				FlxG.sound.music?.stop();
 
 				persistentUpdate = false;
@@ -3466,8 +3469,10 @@ class PlayState extends MusicBeatState
 		
 		if(instakillOnMiss)
 		{
-			vocals.volume = 0;
-			opponentVocals.volume = 0;
+			FlxG.sound.list.forEach((sound:FlxSound) -> {
+				if (sound != null && sound != FlxG.sound.music && sound.playing)
+					sound.volume = 0;
+			});
 			doDeathCheck(true);
 		}
 
