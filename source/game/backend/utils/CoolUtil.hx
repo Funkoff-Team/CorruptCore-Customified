@@ -297,7 +297,7 @@ class CoolUtil
 		#end
 	}
 
-	inline public static function showPopUp(message:String, title:String #if (windows && cpp), ?icon:MessageBoxIcon, ?type:MessageBoxType #end, showScrollableMSG:Bool = false):Void
+	inline public static function showPopUp(message:String, title:String #if (windows && cpp), ?icon:MessageBoxIcon, ?type:MessageBoxType #else ?lol1:Dynamic, ?lol2:Dynamic #end, showScrollableMSG:Bool = false):Void
 	{
 		#if android
 		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);
