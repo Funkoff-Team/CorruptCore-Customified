@@ -53,11 +53,16 @@ class FunkinRScript {
         "BGSprite" => game.objects.BGSprite,
         "FunkinRScript" => FunkinRScript,
         "FunkinLua" => FunkinLua,
+
+        'StringMap' => haxe.ds.StringMap,
+		'IntMap' => haxe.ds.IntMap,
+		'ObjectMap' => haxe.ds.ObjectMap,
     ];
 
     static final ABSTRACT_IMPORTS:Array<String> = [
         "flixel.util.FlxColor",
         "flixel.input.keyboard.FlxKey",
+        "haxe.ds.Map",
         #if flxgif
         "flxgif.FlxGifAsset",
         #end

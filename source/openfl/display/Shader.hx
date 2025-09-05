@@ -140,6 +140,9 @@ class Shader
 	**/
 	public var data(get, set):ShaderData;
 
+	public var fragPath:String;
+    public var vertPath:String;
+
 	/**
 		Get or set the fragment source used when compiling with GLSL.
 
@@ -333,8 +336,34 @@ class Shader
 			final shaderType = (type == gl.VERTEX_SHADER) ? "vertex" : "fragment";
 			final status = (compileStatus == 0) ? "Error" : "Warning";
 			
-			var message = '$status compiling $shaderType shader:';
+			var fileName = "N/A";
+			
+			if (type == gl.VERTEX_SHADER && vertPath != null && vertPath != "") {
+				var pathParts = vertPath.split("/");
+				fileName = pathParts[pathParts.length - 1];
+			} 
+			else if (type == gl.FRAGMENT_SHADER && fragPath != null && fragPath != "") {
+				var pathParts = fragPath.split("/");
+				fileName = pathParts[pathParts.length - 1];
+			} else {
+				var lineRegex = ~/#line \d+ "([^"]+)"/;
+				if (lineRegex.match(source)) {
+					var fullPath = lineRegex.matched(1);
+					var pathParts = fullPath.split("/");
+					fileName = pathParts[pathParts.length - 1];
+				} else {
+					var commentRegex = ~/\/\/.*[\/\\]([^\/\\]+\.(vert|frag))/;
+					if (commentRegex.match(source)) {
+						fileName = commentRegex.matched(1);
+					}
+				}
+			}
+			
+			var message = '$status compiling $shaderType shader "${fileName}":';
 			message += "\n" + shaderInfoLog;
+			
+			if (fileName == "N/A")
+				message += "\nNote: Could not determine shader file name from source code.";
 			
 			var lines = source.split('\n');
 			var numberedSource = [];
@@ -356,9 +385,9 @@ class Shader
 				
 				var userMessage = 'SHADER COMPILATION FAILED\n';
 				userMessage += '=========================\n\n';
+				userMessage += 'Shader file: $fileName\n';
 				userMessage += 'Shader type: $shaderType\n\n';
 				
-
 				userMessage += 'ERROR LOG:\n';
 				userMessage += '==========\n';
 				userMessage += shaderInfoLog + '\n\n';
