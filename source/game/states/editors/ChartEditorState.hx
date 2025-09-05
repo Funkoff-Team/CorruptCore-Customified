@@ -1835,10 +1835,12 @@ class ChartEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
 		updateSongSlider();
 		
-		if (!blockInput)
-		{
+		if (!blockInput) {
+			ClientPrefs.toggleVolumeKeys();
 			handleKeyboardInput();
 			handleMouseInput(mouseOverUI);
+		} else {
+			ClientPrefs.toggleVolumeKeys(false);
 		}
 
 		strumLineNotes.visible = quant.visible = vortex;

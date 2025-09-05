@@ -47,6 +47,14 @@ import animate.*;
 import animate.FlxAnimate;
 #end
 
+#if flxgif
+import flxgif.*;
+#end
+
+#if flxsoundfilters
+import flixel.sound.filters.*;
+#end
+
 //mb lol
 #if haxeui_flixel
 import haxe.ui.backend.flixel.UIState;

@@ -297,14 +297,17 @@ class CoolUtil
 		#end
 	}
 
-	inline public static function showPopUp(message:String, title:String #if (windows && cpp), ?icon:MessageBoxIcon, ?type:MessageBoxType #end):Void
+	inline public static function showPopUp(message:String, title:String #if (windows && cpp), ?icon:MessageBoxIcon, ?type:MessageBoxType #end, showScrollableMSG:Bool = false):Void
 	{
 		#if android
 		AndroidTools.showAlertDialog(title, message, {name: "OK", func: null}, null);
 		#elseif linux
 		Sys.command("zenity", ["--info", "--title=" + title, "--text=" + message]);
 		#elseif (windows && cpp)
-		WindowsAPI.showMessageBox(message, title, icon, type);
+		if (showScrollableMSG)
+			WindowsAPI.showScrollableMessage(message, title);
+		else
+			WindowsAPI.showMessageBox(message, title, icon, type);
 		#else
 		lime.app.Application.current.window.alert(message, title);
 		#end

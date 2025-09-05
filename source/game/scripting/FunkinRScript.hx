@@ -34,6 +34,15 @@ class FunkinRScript {
         "FunkinVideoSprite" => game.objects.FunkinVideoSprite,
         #end
 
+        #if flxsoundfilters
+        "FlxFilteredSound" => FlxFilteredSound,
+        #end
+
+        #if flxgif
+        "FlxGifSprite" => FlxGifSprite,
+        "FlxGifBackdrop" => FlxGifBackdrop,
+        #end
+
         "Paths" => game.Paths,
         "Character" => game.objects.Character,
         "CoolUtil" => game.backend.utils.CoolUtil,
@@ -44,6 +53,15 @@ class FunkinRScript {
         "BGSprite" => game.objects.BGSprite,
         "FunkinRScript" => FunkinRScript,
         "FunkinLua" => FunkinLua,
+    ];
+
+    static final ABSTRACT_IMPORTS:Array<String> = [
+        "flixel.util.FlxColor",
+        "flixel.input.keyboard.FlxKey",
+        #if flxgif
+        "flxgif.FlxGifAsset",
+        #end
+        "openfl.display.BlendMode"
     ];
 
     public var scriptType:String = "N/A"; //yeah
@@ -88,6 +106,9 @@ class FunkinRScript {
     function presetVariables() {
         for (key => value in PRESET_VARS)
             set(key, value);
+
+        for (get in ABSTRACT_IMPORTS)
+            rulescript.types.Abstracts.resolveAbstract(get);
             
         if (parentInstance != null)
             set("parent", parentInstance);
@@ -215,8 +236,8 @@ class FunkinRScript {
                 try {
                     Reflect.callMethod(null, cb, args != null ? args : []);
                 } catch (e:Dynamic) {
-                    /*@:privateAccess
-                    onError(haxe.Exception.caught(e));*/
+                    @:privateAccess
+                    onError(haxe.Exception.caught(e));
                 }
             }
         }
@@ -226,8 +247,8 @@ class FunkinRScript {
         try {
             return Reflect.callMethod(null, get(event), args != null ? args : []);
         } catch (e:Dynamic) {
-            /*@:privateAccess
-            onError(haxe.Exception.caught(e));*/
+            @:privateAccess
+            onError(haxe.Exception.caught(e));
             return null;
         }
     }
