@@ -105,6 +105,8 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
         run: haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}"
+             cd tools/hxcpp
+             haxe compile.hxml
       - name: Publish Artifact
         uses: actions/upload-artifact@main
         with:
